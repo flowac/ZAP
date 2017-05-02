@@ -12,3 +12,6 @@ main.o:
 
 clean:
 	rm $(PRG) *.o
+
+c: clean
+
