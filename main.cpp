@@ -13,15 +13,15 @@ int main()
     {
         uint64_t key = 0xFFFF0000FFFF0000 + i;
         uint32_t len = 4;
-        uint64_t *payload = (uint64_t *)malloc(sizeof(uint64_t) * len);
-        if (payload == NULL) break;
+        pack *packs = (pack *)malloc(sizeof(pack) * len);
+        if (packs == NULL) break;
 //        printf("%p\t", payload);
-        payload[0]=0x1FFF;
+/*        payload[0]=0x1FFF;
         payload[1]=0x2FFF;
         payload[2]=0x3FFF;
         payload[3]=0x4FFF;
-
-        if (!insertBlock(newBlock(key, len, payload), ch)) break;
+*/
+        if (!insertBlock(newBlock(key, len, packs), ch)) break;
     }
     printBlock(ch->head[0]);
     printBlock(ch->head[size - 1]);

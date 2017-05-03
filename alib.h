@@ -9,23 +9,37 @@ typedef unsigned short    uint16_t;
 typedef unsigned int      uint32_t;
 typedef unsigned long int uint64_t;*/
 
-#define LOGLVL 0
-#define MAXLEN 8*1024*1024//8MB
+#define LOG      0
+#define MAX_ZIP  255//size of each
+#define MAX_PACK 255//number of
 
-#define LMIN   1
-#define LMAX   2
+namespace pt = boost::posix_time;
+
+typedef struct
+{
+    char info[4];//first 4 characters of name
+    uint16_t crc;//checksum
+    uint8_t len;//length of data in bytes
+    uint8_t pad;
+    uint8_t *zip;//compressed data
+}pack;
 
 typedef struct
 {
     uint32_t time;//epoch seconds
-    uint32_t size;//size of payload
+    uint16_t crc;//checksum
+    uint8_t  nPack;//number of payloads, 255 per block max
+    uint8_t  pad;
+    uint32_t trans;//number of transactions
+    uint32_t n;//block number
     uint64_t key;//gen next
-    uint64_t *payload;//variable size
+    pack *packs;//variable size
 }block;
 
 typedef struct
 {
-    uint32_t size;
+    uint32_t time;//time of last update
+    uint32_t size;//4 billion should be more than enough
     block **head;//expandable
 }chain;
 
@@ -34,45 +48,57 @@ typedef struct
     char *url;
     char *name;
     char *desc;
-    uint64_t *data;
-}p7z;
+}meta;
+
+inline time_t sNow()
+{
+    time_t rawT;
+    time(&rawT);
+    return rawT;
+//    return pt::second_clock::universal_time();
+}
+
+//! Only gets the milliseconds part of the current time
+inline uint16_t msNow()
+{
+return 0;
+//    return pt::microsec_clock::universal_time().total_milliseconds();
+}
 
 void printTime(time_t time)
 {
-    if (LOGLVL < LMIN) return;
-    namespace pt = boost::posix_time;
     pt::ptime tout = pt::from_time_t(time);
     std::cout << tout << std::endl;
 }
 
 void printBlock(block *target)
 {
-    uint32_t size = target->size;
+    uint32_t nPack = target->nPack;
 
     printTime((time_t) target->time);
     printf("[%u] > 0x%lX [%u]\n",
-           target->time, target->key, target->size);
+           target->time, target->key, nPack);
 
-    if (LOGLVL < LMAX) return;
-    for (uint32_t i = 0; i < size; i++)
+    if (!LOG) return;
+    for (uint32_t i = 0; i < nPack; i++)
     {
-        printf("%lX\t", target->payload[i]);
+//        printf("%lX\t", target->packs[i]);
     }
     printf("\n");
 }
 
-block *newBlock(uint64_t key, uint32_t size, uint64_t *payload)
+block *newBlock(uint64_t key, uint32_t nPack, pack *packs)
 {
     block *bx = (block *)malloc(sizeof(block));
 
-    time_t rawT;
-    time(&rawT);
-    printTime(rawT);
-
-    bx->time = (uint32_t)rawT;
+    bx->time = (uint32_t)sNow();
     bx->key = key;
-    bx->size = size < MAXLEN ? size : MAXLEN;
-    bx->payload = payload;//! Don't free the payload pointer
+    bx->nPack = nPack < MAX_PACK ? nPack : MAX_PACK;
+    bx->packs = packs;//! Don't free the payload pointer
+
+    if (!LOG) return bx;
+
+    printTime(sNow());
     return bx;
 }
 
@@ -93,13 +119,14 @@ bool insertBlock(block *bx, chain *ch)
     ch->head = (block **)tmp;
     ch->head[ch->size] = bx;//! Don't free block pointer
     ch->size++;
+    ch->time = (uint32_t)sNow();
     return 1;
 }
 
 uint32_t deleteBlock(block *target)
 {
-    free(target->payload);
-    return target->size * 8;
+    free(target->packs);
+    return target->nPack * sizeof(pack);
 }
 
 uint32_t deleteChain(chain *target)
