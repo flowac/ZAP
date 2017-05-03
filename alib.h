@@ -1,54 +1,16 @@
+#ifndef _ALIB_H
+#define _ALIB_H
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <time.h>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-/*typedef unsigned char     uint8_t;
-typedef unsigned short    uint16_t;
-typedef unsigned int      uint32_t;
-typedef unsigned long int uint64_t;*/
-
-#define LOG      0
-#define MAX_ZIP  255//size of each
-#define MAX_PACK 255//number of
+#include "atype.h"
 
 namespace pt = boost::posix_time;
-
-typedef struct
-{
-    char info[4];//first 4 characters of name
-    uint16_t crc;//checksum
-    uint8_t len;//length of data in bytes
-    uint8_t pad;
-    uint8_t *zip;//compressed data
-}pack;
-
-typedef struct
-{
-    uint32_t time;//epoch seconds
-    uint16_t crc;//checksum
-    uint8_t  nPack;//number of payloads, 255 per block max
-    uint8_t  pad;
-    uint32_t trans;//number of transactions
-    uint32_t n;//block number
-    uint64_t key;//gen next
-    pack *packs;//variable size
-}block;
-
-typedef struct
-{
-    uint32_t time;//time of last update
-    uint32_t size;//4 billion should be more than enough
-    block **head;//expandable
-}chain;
-
-typedef struct
-{
-    char *url;
-    char *name;
-    char *desc;
-}meta;
 
 inline time_t sNow()
 {
@@ -87,18 +49,69 @@ void printBlock(block *target)
     printf("\n");
 }
 
-block *newBlock(uint64_t key, uint32_t nPack, pack *packs)
+pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
+{
+    uint32_t ndn = strlen(dn) + 1;
+    uint32_t nxt = strlen(xt) + 1;
+    uint32_t ntr = strlen(tr) + 1;
+    
+    if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8) return NULL;
+    
+    pack *px = (pack *)malloc(sizeof(pack));
+    px->xl = xl;
+    strncpy(px->info, dn, sizeof(px->info) / sizeof(char) - 1);
+    
+    px->dn = (char *)malloc(sizeof(char) * ndn);
+    strcpy(px->dn, dn);
+    
+    px->xt = (char *)malloc(sizeof(char) * nxt);
+    strcpy(px->xt, xt);
+    
+    px->tr = (char *)malloc(sizeof(char) * ntr);
+    strcpy(px->tr, tr);
+    
+    return px;
+}
+
+tran *newTran()
+{
+    return NULL;
+}
+
+block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 {
     block *bx = (block *)malloc(sizeof(block));
 
     bx->time = (uint32_t)sNow();
     bx->key = key;
-    bx->nPack = nPack < MAX_PACK ? nPack : MAX_PACK;
-    bx->packs = packs;//! Don't free the payload pointer
+    if (nPack < MAX_U16)
+    {
+        bx->nPack = nPack;
+        bx->packs = packs;
+    }
+    else
+    {
+        uint32_t i;
+        bx->nPack = MAX_U16;
+        for (i = MAX_U16; i < nPack; i++)
+        {
+            free(packs[i]);
+        }
+        if (NULL == realloc(packs, sizeof(pack *) * MAX_U16))
+        {
+            for (i = 0; i < MAX_U16; i++)
+            {
+                free(packs[i]);
+            }
+            free(packs);
+            free(bx);
+            return NULL;
+        }
+        bx->packs = packs;
+    }
+    bx->nTran = 0;
 
-    if (!LOG) return bx;
-
-    printTime(sNow());
+    if (LOG) printTime(sNow());
     return bx;
 }
 
@@ -123,23 +136,75 @@ bool insertBlock(block *bx, chain *ch)
     return 1;
 }
 
+uint32_t deletePack(pack *target)
+{
+    uint32_t bytesFreed = 0;
+    
+    if (target->dn != NULL)
+    {
+        bytesFreed += sizeof(target->dn) / sizeof(char);
+        free(target->dn);
+    }
+    
+    if (target->xt != NULL)
+    {
+        bytesFreed += sizeof(target->xt) / sizeof(char);
+        free(target->xt);
+    }
+    
+    if (target->tr != NULL)
+    {
+        bytesFreed += sizeof(target->tr) / sizeof(char);
+        free(target->tr);
+    }
+    
+    return bytesFreed;
+}
+
 uint32_t deleteBlock(block *target)
 {
-    free(target->packs);
-    return target->nPack * sizeof(pack);
+    uint32_t i, bytesFreed = 0;
+    if (target->packs != NULL && target->nPack > 0)
+    {
+        for (i = 0; i < target->nPack; i++)
+        {
+            bytesFreed += deletePack(target->packs[i]);
+            free(target->packs[i]);
+        }
+        free(target->packs);
+    }
+
+    if (target->trans != NULL && target->nTran > 0)
+    {
+        for (i = 0; i < target->nTran; i++)
+        {
+            if (target->trans[i] != NULL)
+            {
+                bytesFreed += sizeof(tran);
+                free(target->trans[i]);
+            }
+        }
+//        bytesFreed += target->nTran * sizeof(tran);
+        free(target->trans);
+    }
+
+    return bytesFreed + sizeof(pack **) + sizeof(tran *);
 }
 
 uint32_t deleteChain(chain *target)
 {
-    uint32_t bytes = 0;
+    uint32_t bytesFreed = 0;
     for (uint32_t i = 0; i < target->size; i++)
     {
-        bytes += deleteBlock(target->head[i]);
+        bytesFreed += deleteBlock(target->head[i]);
         free(target->head[i]);
-        bytes += sizeof(block);
+        bytesFreed += sizeof(block);
     }
     free(target->head);
-    return bytes;
+    return bytesFreed + sizeof(block **);
 
     //! And then free the chain pointer from the caller
 }
+
+#endif//_ALIB_H
+

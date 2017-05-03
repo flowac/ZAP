@@ -7,14 +7,18 @@ int main()
     printf(" >time: %ld\n",raw);*/
 
     chain *ch = newChain();
-    uint32_t size = 10000;
+    uint32_t size = 10;
 
     for (uint32_t i = 0; i < size; i++)
     {
         uint64_t key = 0xFFFF0000FFFF0000 + i;
         uint32_t len = 4;
-        pack *packs = (pack *)malloc(sizeof(pack) * len);
+        pack **packs = (pack **)malloc(sizeof(pack *) * len);
         if (packs == NULL) break;
+        for (uint32_t j = 0; j < len; j++)
+        {
+            packs[j] = (pack *)malloc(sizeof(pack));
+        }
 //        printf("%p\t", payload);
 /*        payload[0]=0x1FFF;
         payload[1]=0x2FFF;
