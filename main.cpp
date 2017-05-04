@@ -7,7 +7,7 @@ int main()
     printf(" >time: %ld\n",raw);*/
 
     chain *ch = newChain();
-    uint32_t size = 10;
+    uint32_t size = 1000;
 
     for (uint32_t i = 0; i < size; i++)
     {
@@ -17,19 +17,17 @@ int main()
         if (packs == NULL) break;
         for (uint32_t j = 0; j < len; j++)
         {
-            packs[j] = (pack *)malloc(sizeof(pack));
+            packs[j] = newPack("dn:testtesttesttesttesttesttesttest",
+                               4*1024*1024,
+                               "xt:testtesttesttesttesttesttesttest",
+                               "tr:testtesttesttesttesttesttesttest");
         }
-//        printf("%p\t", payload);
-/*        payload[0]=0x1FFF;
-        payload[1]=0x2FFF;
-        payload[2]=0x3FFF;
-        payload[3]=0x4FFF;
-*/
+        
         if (!insertBlock(newBlock(key, len, packs), ch)) break;
     }
     printBlock(ch->head[0]);
     printBlock(ch->head[size - 1]);
-//getchar();
+    
     printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
 
     free(ch);

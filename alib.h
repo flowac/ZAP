@@ -14,20 +14,13 @@ namespace pt = boost::posix_time;
 
 inline time_t sNow()
 {
-    time_t rawT;
-    time(&rawT);
-    return rawT;
+    time_t raw;
+    time(&raw);
+    return raw;
 //    return pt::second_clock::universal_time();
 }
 
-//! Only gets the milliseconds part of the current time
-inline uint16_t msNow()
-{
-return 0;
-//    return pt::microsec_clock::universal_time().total_milliseconds();
-}
-
-void printTime(time_t time)
+inline void printTime(time_t time)
 {
     pt::ptime tout = pt::from_time_t(time);
     std::cout << tout << std::endl;
@@ -81,6 +74,7 @@ tran *newTran()
 block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 {
     block *bx = (block *)malloc(sizeof(block));
+    if (bx == NULL) return NULL;
 
     bx->time = (uint32_t)sNow();
     bx->key = key;
@@ -91,25 +85,15 @@ block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
     }
     else
     {
-        uint32_t i;
         bx->nPack = MAX_U16;
-        for (i = MAX_U16; i < nPack; i++)
+        for (uint32_t i = MAX_U16; i < nPack; i++)
         {
             free(packs[i]);
         }
-        if (NULL == realloc(packs, sizeof(pack *) * MAX_U16))
-        {
-            for (i = 0; i < MAX_U16; i++)
-            {
-                free(packs[i]);
-            }
-            free(packs);
-            free(bx);
-            return NULL;
-        }
-        bx->packs = packs;
+        bx->packs = (pack **)realloc(packs, sizeof(pack *) * MAX_U16);
     }
     bx->nTran = 0;
+    bx->trans = NULL;
 
     if (LOG) printTime(sNow());
     return bx;
@@ -118,6 +102,8 @@ block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 chain *newChain(void)
 {
     chain *ch = (chain *)malloc(sizeof(chain));
+    if (ch == NULL) return NULL;
+    
     ch->size = 0;
     ch->head = NULL;
     return ch;
@@ -126,35 +112,34 @@ chain *newChain(void)
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch)
 {
-    void *tmp = realloc(ch->head, sizeof(block *) * (ch->size + 1));
-    if (tmp == NULL) return 0;
-
-    ch->head = (block **)tmp;
+    ch->head = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
+    if (ch->head == NULL)  return 0;
+    
     ch->head[ch->size] = bx;//! Don't free block pointer
     ch->size++;
     ch->time = (uint32_t)sNow();
-    return 1;
+    return true;
 }
 
 uint32_t deletePack(pack *target)
 {
-    uint32_t bytesFreed = 0;
+    uint32_t bytesFreed = sizeof(pack);
     
     if (target->dn != NULL)
     {
-        bytesFreed += sizeof(target->dn) / sizeof(char);
+        bytesFreed += strlen(target->dn) + 1;
         free(target->dn);
     }
     
     if (target->xt != NULL)
     {
-        bytesFreed += sizeof(target->xt) / sizeof(char);
+        bytesFreed += strlen(target->xt) + 1;
         free(target->xt);
     }
     
     if (target->tr != NULL)
     {
-        bytesFreed += sizeof(target->tr) / sizeof(char);
+        bytesFreed += strlen(target->tr) + 1;
         free(target->tr);
     }
     
@@ -163,12 +148,12 @@ uint32_t deletePack(pack *target)
 
 uint32_t deleteBlock(block *target)
 {
-    uint32_t i, bytesFreed = 0;
+    uint32_t i, bytesFreed = sizeof(block);
     if (target->packs != NULL && target->nPack > 0)
     {
         for (i = 0; i < target->nPack; i++)
         {
-            bytesFreed += deletePack(target->packs[i]);
+            bytesFreed += deletePack(target->packs[i]) + sizeof(pack *);
             free(target->packs[i]);
         }
         free(target->packs);
@@ -180,15 +165,14 @@ uint32_t deleteBlock(block *target)
         {
             if (target->trans[i] != NULL)
             {
-                bytesFreed += sizeof(tran);
+                bytesFreed += sizeof(tran *);
                 free(target->trans[i]);
             }
         }
-//        bytesFreed += target->nTran * sizeof(tran);
         free(target->trans);
     }
 
-    return bytesFreed + sizeof(pack **) + sizeof(tran *);
+    return bytesFreed;
 }
 
 uint32_t deleteChain(chain *target)
@@ -196,14 +180,12 @@ uint32_t deleteChain(chain *target)
     uint32_t bytesFreed = 0;
     for (uint32_t i = 0; i < target->size; i++)
     {
-        bytesFreed += deleteBlock(target->head[i]);
+        bytesFreed += deleteBlock(target->head[i]) + sizeof(block *);
         free(target->head[i]);
-        bytesFreed += sizeof(block);
     }
+    
     free(target->head);
-    return bytesFreed + sizeof(block **);
-
-    //! And then free the chain pointer from the caller
+    return bytesFreed;
 }
 
 #endif//_ALIB_H
