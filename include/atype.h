@@ -1,7 +1,8 @@
 #ifndef _ATYPE_H
 #define _ATYPE_H
 
-#include <boost/cstdint.hpp>
+//#include <boost/cstdint.hpp>
+#include <stdint.h>
 
 #define LOG     0
 #define MAX_U8  255//max size of unsigned 8 bit int

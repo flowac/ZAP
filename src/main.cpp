@@ -1,4 +1,8 @@
 #include "alib.h"
+#include "atype.h"
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 int main()
 {
