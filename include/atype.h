@@ -22,13 +22,19 @@ enum Link
     MLEN//number of total parameters, must be last
 };
 
-/*
- * 
+/* This struct will hold the information on the parameters of
+ * the magnet link
+ * PARAMETERS:
+ * info - 
+ * dn - (display name) i.e. file name
+ * xl - (exact length) size of file in bytez
+ * xt - (exact topic) URN with the hash of the file
+ * tr - tracker url, google "tracker url" for more info
  */
 typede4f struct
 {
     char info[6];//first 5 characters of name, null terminated
-    char *dn; /* display name, display this to the user */
+    char *dn; // display name
     uint64_t xl; // exact length
     char *xt; // exact topic
     char *tr; // address tracker
