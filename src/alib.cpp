@@ -143,22 +143,17 @@ uint32_t deletePack(pack *target)
 uint32_t deleteBlock(block *target)
 {
     uint32_t i, bytesFreed = sizeof(block);
-    if (target->packs != NULL && target->nPack > 0)
-    {
-        for (i = 0; i < target->nPack; i++)
-        {
+    if (target->packs != NULL && target->nPack > 0) {
+        for (i = 0; i < target->nPack; i++) {
             bytesFreed += deletePack(target->packs[i]) + sizeof(pack *);
             free(target->packs[i]);
         }
         free(target->packs);
     }
 
-    if (target->trans != NULL && target->nTran > 0)
-    {
-        for (i = 0; i < target->nTran; i++)
-        {
-            if (target->trans[i] != NULL)
-            {
+    if (target->trans != NULL && target->nTran > 0) {
+        for (i = 0; i < target->nTran; i++) {
+            if (target->trans[i] != NULL) {
                 bytesFreed += sizeof(tran *);
                 free(target->trans[i]);
             }
@@ -172,8 +167,7 @@ uint32_t deleteBlock(block *target)
 uint32_t deleteChain(chain *target)
 {
     uint32_t bytesFreed = 0;
-    for (uint32_t i = 0; i < target->size; i++)
-    {
+    for (uint32_t i = 0; i < target->size; i++) {
         bytesFreed += deleteBlock(target->head[i]) + sizeof(block *);
         free(target->head[i]);
     }
