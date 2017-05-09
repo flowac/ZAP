@@ -1,14 +1,10 @@
-#ifndef _ALIB_H
-#define _ALIB_H
-
+#include "alib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
-
+#include <string.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
-
-#include "atype.h"
 
 namespace pt = boost::posix_time;
 
@@ -17,9 +13,8 @@ inline time_t sNow()
     time_t raw;
     time(&raw);
     return raw;
-//    return pt::second_clock::universal_time();
+    return pt::second_clock::universal_time();
 }
-
 inline void printTime(time_t time)
 {
     pt::ptime tout = pt::from_time_t(time);
@@ -187,6 +182,4 @@ uint32_t deleteChain(chain *target)
     free(target->head);
     return bytesFreed;
 }
-
-#endif//_ALIB_H
 
