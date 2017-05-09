@@ -22,14 +22,18 @@ enum Link
     MLEN//number of total parameters, must be last
 };
 
-typedef struct
+/*
+ * 
+ */
+typede4f struct
 {
     char info[6];//first 5 characters of name, null terminated
-    char *dn;//magnet link parameters
-    uint64_t xl;
-    char *xt;
-    char *tr;
+    char *dn; /* display name, display this to the user */
+    uint64_t xl; // exact length
+    char *xt; // exact topic
+    char *tr; // address tracker
 }pack;
+
 
 typedef struct
 {
