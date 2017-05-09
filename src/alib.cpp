@@ -15,6 +15,7 @@ inline time_t sNow()
     return raw;
     return pt::second_clock::universal_time();
 }
+
 inline void printTime(time_t time)
 {
     pt::ptime tout = pt::from_time_t(time);
@@ -30,8 +31,7 @@ void printBlock(block *target)
            target->time, target->key, nPack);
 
     if (!LOG) return;
-    for (uint32_t i = 0; i < nPack; i++)
-    {
+    for (uint32_t i = 0; i < nPack; i++) {
 //        printf("%lX\t", target->packs[i]);
     }
     printf("\n");
@@ -43,7 +43,8 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     uint32_t nxt = strlen(xt) + 1;
     uint32_t ntr = strlen(tr) + 1;
     
-    if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8) return NULL;
+    if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8) 
+	return NULL;
     
     pack *px = (pack *)malloc(sizeof(pack));
     px->xl = xl;
@@ -69,20 +70,17 @@ tran *newTran()
 block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 {
     block *bx = (block *)malloc(sizeof(block));
-    if (bx == NULL) return NULL;
+    if (bx == NULL) 
+	return NULL;
 
     bx->time = (uint32_t)sNow();
     bx->key = key;
-    if (nPack < MAX_U16)
-    {
+    if (nPack < MAX_U16) {
         bx->nPack = nPack;
         bx->packs = packs;
-    }
-    else
-    {
+    } else {
         bx->nPack = MAX_U16;
-        for (uint32_t i = MAX_U16; i < nPack; i++)
-        {
+        for (uint32_t i = MAX_U16; i < nPack; i++) {
             free(packs[i]);
         }
         bx->packs = (pack **)realloc(packs, sizeof(pack *) * MAX_U16);
@@ -90,14 +88,17 @@ block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
     bx->nTran = 0;
     bx->trans = NULL;
 
-    if (LOG) printTime(sNow());
+    if (LOG) 
+	printTime(sNow());
+
     return bx;
 }
 
 chain *newChain(void)
 {
     chain *ch = (chain *)malloc(sizeof(chain));
-    if (ch == NULL) return NULL;
+    if (!ch) 
+	return NULL;
     
     ch->size = 0;
     ch->head = NULL;
@@ -108,7 +109,8 @@ chain *newChain(void)
 bool insertBlock(block *bx, chain *ch)
 {
     ch->head = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
-    if (ch->head == NULL)  return 0;
+    if (!ch->head)
+	return 0;
     
     ch->head[ch->size] = bx;//! Don't free block pointer
     ch->size++;
@@ -120,20 +122,17 @@ uint32_t deletePack(pack *target)
 {
     uint32_t bytesFreed = sizeof(pack);
     
-    if (target->dn != NULL)
-    {
+    if (target->dn != NULL) {
         bytesFreed += strlen(target->dn) + 1;
         free(target->dn);
     }
     
-    if (target->xt != NULL)
-    {
+    if (target->xt != NULL) {
         bytesFreed += strlen(target->xt) + 1;
         free(target->xt);
     }
     
-    if (target->tr != NULL)
-    {
+    if (target->tr != NULL) {
         bytesFreed += strlen(target->tr) + 1;
         free(target->tr);
     }
