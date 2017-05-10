@@ -13,7 +13,6 @@ inline time_t sNow()
     time_t raw;
     time(&raw);
     return raw;
-    return pt::second_clock::universal_time();
 }
 
 inline void printTime(time_t time)
