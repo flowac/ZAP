@@ -31,7 +31,7 @@ enum Link
  * xt - (exact topic) URN with the hash of the file
  * tr - tracker url, google "tracker url" for more info
  */
-typede4f struct
+typedef struct
 {
     char info[6];//first 5 characters of name, null terminated
     char *dn; // display name
