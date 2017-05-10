@@ -67,6 +67,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     if (!px->xt)
 	goto cleanup;
     strcpy(px->tr, tr);
+    goto end;
     
  cleanup:
     deletePack(px);
