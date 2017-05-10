@@ -55,7 +55,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     
     px->dn = (char *)malloc(sizeof(char) * ndn);
     if (!px->dn)
-	goto cleanup
+	goto cleanup;
     strcpy(px->dn, dn);
     
     px->xt = (char *)malloc(sizeof(char) * nxt);
