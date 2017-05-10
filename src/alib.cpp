@@ -26,7 +26,7 @@ void printBlock(block *target)
     uint32_t nPack = target->nPack;
 
     printTime((time_t) target->time);
-    printf("[%u] > 0x%lX [%u]\n",
+    printf("[%u] > 0x%llX [%u]\n",
            target->time, target->key, nPack);
 
     if (!LOG) return;
