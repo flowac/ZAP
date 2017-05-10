@@ -47,18 +47,31 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
 	return NULL;
     
     pack *px = (pack *)malloc(sizeof(pack));
+    if (!px)
+	goto end; // maloc failed
+
     px->xl = xl;
     strncpy(px->info, dn, sizeof(px->info) / sizeof(char) - 1);
     
     px->dn = (char *)malloc(sizeof(char) * ndn);
+    if (!px->dn)
+	goto cleanup
     strcpy(px->dn, dn);
     
     px->xt = (char *)malloc(sizeof(char) * nxt);
+    if (!px->xt)
+	goto cleanup;
     strcpy(px->xt, xt);
     
     px->tr = (char *)malloc(sizeof(char) * ntr);
+    if (!px->xt)
+	goto cleanup;
     strcpy(px->tr, tr);
     
+ cleanup:
+    deletePack(px);
+    free(px);
+ end:
     return px;
 }
 

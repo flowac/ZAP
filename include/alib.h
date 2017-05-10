@@ -13,8 +13,28 @@ inline time_t sNow();
 
 inline void printTime(time_t time);
 
+/* This function will print the relative information of a block
+ * DESCRIPTION:
+ * it will print the:
+ *	time (when the block was created)
+ *	key (whatever that mean @alien)
+ *	number of payloads
+ *
+ */
 void printBlock(block *target);
 
+/* Create a new pack (magnet link info)
+ * DESCRIPTION:
+ * it will allocate a pack struct, and all of its parameters
+ * INPUT:
+ * char * dn - display name
+ * uint64_t xl - exact length (size in bytez)
+ * char * xt - exact topic (URN with hash of file)
+ * char * tr - tracker url
+ * RETURN:
+ * NULL - something went wrong :( (malloc failed)
+ * ptr to new pack struct
+ */
 pack *newPack(char *dn, uint64_t xl, char *xt, char *tr);
 
 tran *newTran();

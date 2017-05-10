@@ -40,7 +40,6 @@ typede4f struct
     char *tr; // address tracker
 }pack;
 
-
 typedef struct
 {
     uint32_t time;
