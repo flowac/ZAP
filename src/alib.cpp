@@ -26,7 +26,7 @@ void printBlock(block *target)
     uint32_t nPack = target->nPack;
 
     printTime((time_t) target->time);
-    printf("[%u] > 0x%llX [%u]\n",
+    printf("[%u] > 0x%lX [%u]\n",
            target->time, target->key, nPack);
 
     if (!LOG) return;
@@ -43,11 +43,11 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     uint32_t ntr = strlen(tr) + 1;
     
     if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8) 
-	return NULL;
+        return NULL;
     
     pack *px = (pack *)malloc(sizeof(pack));
     if (!px)
-	goto end; // maloc failed
+        return NULL; // maloc failed
 
     px->xl = xl;
     strncpy(px->info, dn, sizeof(px->info) / sizeof(char) - 1);
@@ -66,13 +66,11 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     if (!px->xt)
 	goto cleanup;
     strcpy(px->tr, tr);
-    goto end;
+    return px;
     
  cleanup:
     deletePack(px);
     free(px);
- end:
-    return px;
 }
 
 tran *newTran()
@@ -121,14 +119,13 @@ chain *newChain(void)
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch)
 {
-    block **tmp = NULL;
-    tmp = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
+    block **tmp = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
 
     // if realloc was successfull assign to head
-    if (tmp)
+    if (tmp != NULL)
         ch->head = tmp;
     else
-	return 0;
+        return 0;
     
     ch->head[ch->size] = bx;//! Don't free block pointer
     ch->size++;
