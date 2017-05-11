@@ -14,8 +14,8 @@ INCLUDE = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # compile flags and libraries
-FLAGS = -Wall -I$(IDIR)
-LIBS = -L/usr/include/boost/ 
+FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl
+LIBS = -L/usr/include/boost/ -lssl -lcrypto
 
 # executable
 PRG = test
