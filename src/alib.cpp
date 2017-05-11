@@ -121,8 +121,13 @@ chain *newChain(void)
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch)
 {
-    ch->head = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
-    if (!ch->head)
+    block **tmp = NULL;
+    tmp = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
+
+    // if realloc was successfull assign to head
+    if (tmp)
+        ch->head = tmp;
+    else
 	return 0;
     
     ch->head[ch->size] = bx;//! Don't free block pointer
