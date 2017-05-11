@@ -9,8 +9,8 @@
 unsigned char *create_sha1sum(char *dst)
 {
     SHA_CTX ctx; // sha1 struct (look at sha.h)
-    unsigned char *sha1sum = NULL; // sha1sum dest
-    unsigned char buffer[file_input_buff_size]; // buffer for file i/o
+    unsigned char *sha1sum = NULL, // sha1sum dest
+	buffer[file_input_buff_size]; // buffer for file i/o
     FILE *p_dst = NULL; // fd to dst
     size_t read_size = 0;
     
