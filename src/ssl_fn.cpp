@@ -10,8 +10,9 @@ unsigned char *create_sha1sum(char *dst)
 {
     SHA_CTX ctx; // sha1 struct (look at sha.h)
     unsigned char *sha1sum = NULL; // sha1sum dest
-    char buffer[file_input_buff_size]; // buffer for file i/o
+    unsigned char buffer[file_input_buff_size]; // buffer for file i/o
     FILE *p_dst = NULL; // fd to dst
+    size_t read_size = 0;
     
     p_dst = fopen(dst, "r");
     if (!p_dst) {
@@ -25,13 +26,15 @@ unsigned char *create_sha1sum(char *dst)
 	goto end; // ssl calls return 0 on fail
 
     // read file in
-    while (fgets(buffer, file_input_buff_size, p_dst)) {
+    do {
+	read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
 	// update teh sha1sum with what we read
 	if(!SHA1_Update(&ctx,
 			(void*)buffer,
-			strlen(buffer))) // u like this syntax @ flowing? u mad bro?
+			read_size)) // u like this syntax @ flowing? u mad bro?
 	    goto end;
-    }
+    } while (read_size == file_input_buff_size); // fread returns less than that size on failure
+
     // create hash
     sha1sum = (unsigned char*)malloc(sizeof(char) * SHA_DIGEST_LENGTH);
     if (!sha1sum)
@@ -39,5 +42,7 @@ unsigned char *create_sha1sum(char *dst)
     SHA1_Final(sha1sum, &ctx);
 
  end:
+    if(p_dst)
+	fclose(p_dst);
     return sha1sum;
 }
