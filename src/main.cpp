@@ -16,6 +16,7 @@ void sha1_test()
 	    printf("%02x",tmp[i]);
 	}
 	printf("\n");
+	free(tmp);
     }
 }
 
