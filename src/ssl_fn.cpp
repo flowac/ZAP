@@ -39,5 +39,7 @@ unsigned char *create_sha1sum(char *dst)
     SHA1_Final(sha1sum, &ctx);
 
  end:
+    if(p_dst)
+	fclose(p_dst);
     return sha1sum;
 }
