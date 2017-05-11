@@ -1,14 +1,30 @@
 #include "alib.h"
 #include "atype.h"
+#include "ssl_fn.h"
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+void sha1_test()
+{
+    unsigned char *tmp = NULL;
+    int tmp_ln = 0;
+    tmp = create_sha1sum("/home/gator/Downloads/Torrent/tmp.txt");
+    if(tmp != NULL) {
+	for (int i = 0; i < 20; i++) {
+	    printf("%02x",tmp[i]);
+	}
+	printf("\n");
+    }
+}
 
 int main()
 {
     /*time_t raw;
     time(&raw);
     printf(" >time: %ld\n",raw);*/
+    sha1_test();
 
     chain *ch = newChain();
     uint32_t size = 1000;
