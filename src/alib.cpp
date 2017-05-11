@@ -71,6 +71,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
  cleanup:
     deletePack(px);
     free(px);
+    return NULL;
 }
 
 tran *newTran()
