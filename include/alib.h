@@ -9,6 +9,10 @@
 
 //namespace pt = boost::posix_time;
 
+/* Get current time
+ * DESCRIPTION:
+ * Get the current time in seconds since Epoch
+ */
 inline time_t sNow();
 
 inline void printTime(time_t time);
@@ -19,7 +23,6 @@ inline void printTime(time_t time);
  *	time (when the block was created)
  *	key (whatever that mean @alien)
  *	number of payloads
- *
  */
 void printBlock(block *target);
 
@@ -39,6 +42,10 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr);
 
 tran *newTran();
 
+/* Create a new block
+ * DESCRIPTION:
+ * 
+ */
 block *newBlock(uint64_t key, uint32_t nPack, pack **packs);
 
 chain *newChain(void);
