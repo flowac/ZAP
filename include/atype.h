@@ -62,6 +62,12 @@ typedef struct
     tran **trans;
 }block;
 
+/* The blockchain structure
+ * PARAMETERS:
+ * uint32_t time - time of the last update
+ * uint32_t size - number of blocks
+ * block **head - dynamic array of blocks
+ */
 typedef struct
 {
     uint32_t time;//time of last update
