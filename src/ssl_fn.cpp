@@ -16,23 +16,21 @@ unsigned char *create_sha1sum(char *dst)
     
     p_dst = fopen(dst, "r");
     if (!p_dst) {
-	/* we gonna have a log fn? */
-	perror("fopen");
-	goto end;
+        /* we gonna have a log fn? */
+        perror("fopen");
+        goto end;
     }
 
     // wtf spartan naming and camel case? nice libssl
     if (!SHA1_Init(&ctx))// init the struct
-	goto end; // ssl calls return 0 on fail
+        goto end; // ssl calls return 0 on fail
 
     // read file in
     do {
-	read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
-	// update teh sha1sum with what we read
-	if(!SHA1_Update(&ctx,
-			(void*)buffer,
-			read_size)) // u like this syntax @ flowing? u mad bro?
-	    goto end;
+        read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
+        // update teh sha1sum with what we read
+        if(!SHA1_Update(&ctx, (void*)buffer, read_size))
+            goto end;
     } while (read_size == file_input_buff_size); // fread returns less than that size on failure
 
     // create hash

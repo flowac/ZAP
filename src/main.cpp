@@ -12,11 +12,11 @@ void sha1_test()
     int tmp_ln = 0;
     tmp = create_sha1sum("/home/gator/Downloads/Torrent/tmp.txt");
     if(tmp != NULL) {
-	for (int i = 0; i < 20; i++) {
-	    printf("%02x",tmp[i]);
-	}
-	printf("\n");
-	free(tmp);
+        for (int i = 0; i < 20; i++) {
+            printf("%02x",tmp[i]);
+        }
+        printf("\n");
+        free(tmp);
     }
 }
 
