@@ -1,6 +1,6 @@
 # default rule and rule shortcuts
-all: torrent 
-c: clean
+all: torrent extern
+c: clean cleanExtern
 
 CC  = g++
 # directory structure
@@ -24,10 +24,17 @@ PRG = test
 torrent: $(OBJ)
 	$(CC) $(OBJ) -o $(PRG) $(LIBS) $(FLAGS)
 
+# compile 7zip
+extern:
+	$(MAKE) -C extern/CPP/7zip/Bundles/LzmaCon -f makefile.gcc all
+
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
 	$(CC) -c -o $@ $< $(FLAGS)
 
 clean:
 	rm -f $(PRG) $(ODIR)/*.o
+
+cleanExtern:
+	$(MAKE) -C extern/CPP/7zip/Bundles/LzmaCon -f makefile.gcc clean
 
