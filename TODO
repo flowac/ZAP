@@ -1,12 +1,13 @@
 Top priority:
-Clean up some dude's inconsistence curly braces
-Fix memeory leak and random printouts when hard coded path in main is invalid
+*** Clean up some dude's inconsistence curly braces
+*   Fix memeory leak and random printouts when hard coded path in main is invalid
 
 Also top priority but delayed by some other top priority issues that has a higher priority:
-Copy pasta some bit torrent source code (check license)
-Test magnet link structure
-Test RAM usage
-Implement save to disk
-Implement LZMA compression using LZMA library from 7z or xz (check license)
-Play American Truck Simulator
+**  Add AGPL v3 headers to everything including external libraries when possible
+*   Implement save to disk
+**  Implement LZMA compression using LZMA library from 7z (compile to .so using -fPIC -shared)
+**  Copy pasta some bit torrent source code (check license)
+*   Test magnet link structure
+*   Test RAM usage
+**  Play American Truck Simulator
 
