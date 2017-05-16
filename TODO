@@ -1,5 +1,4 @@
 Top priority:
-*** Clean up some dude's inconsistence curly braces
 *   Fix memeory leak and random printouts when hard coded path in main is invalid
 
 Also top priority but delayed by some other top priority issues that has a higher priority:
@@ -9,5 +8,6 @@ Also top priority but delayed by some other top priority issues that has a highe
 **  Copy pasta some bit torrent source code (check license)
 *   Test magnet link structure
 *   Test RAM usage
-**  Play American Truck Simulator
 
+** fix makefile for the 7z stuff
+* rethink my life

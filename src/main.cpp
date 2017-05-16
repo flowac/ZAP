@@ -1,15 +1,19 @@
 #include "alib.h"
 #include "atype.h"
 #include "ssl_fn.h"
+#include "log.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+/* Test if ssl_fn.c create_sha1sum is working correctly
+ * 
+ */
 void sha1_test()
 {
     unsigned char *tmp = NULL;
-    int tmp_ln = 0;
     tmp = create_sha1sum("/home/gator/Downloads/Torrent/tmp.txt");
     if(tmp != NULL) {
         for (int i = 0; i < 20; i++) {
@@ -20,13 +24,16 @@ void sha1_test()
     }
 }
 
-int main()
+/* Test if log.c log_msg is working correctly
+ *
+ */
+void log_test()
 {
-    /*time_t raw;
-    time(&raw);
-    printf(" >time: %ld\n",raw);*/
-    sha1_test();
+    log_msg("i love %s\n", "allan");
+}
 
+void chain_test()
+{
     chain *ch = newChain();
     uint32_t size = 1000;
 
@@ -54,5 +61,13 @@ int main()
     free(ch);
 
     std::cout.imbue(std::locale());
+}
+
+int main()
+{
+    sha1_test();
+    log_test();
+    chain_test();
+
     return 0;
 }
