@@ -4,6 +4,6 @@
 #ifndef _LOG_H
 #define _LOG_H
 
-int log_msg(char *msg, ...);
+int og_msg(char const *msg, ...);
 
 #endif // _LOG_H
