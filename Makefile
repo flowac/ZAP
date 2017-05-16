@@ -26,7 +26,7 @@ torrent: $(OBJ)
 
 # compile 7zip
 extern:
-	$(MAKE) -C extern/CPP/7zip/Bundles/LzmaCon -f makefile.gcc all
+	$(MAKE) -C extern/7z -f makefile.gcc all
 
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
@@ -36,5 +36,6 @@ clean:
 	rm -f $(PRG) $(ODIR)/*.o
 
 cleanExtern:
-	$(MAKE) -C extern/CPP/7zip/Bundles/LzmaCon -f makefile.gcc clean
+	$(MAKE) -C extern/7z -f makefile.gcc clean
+	rm -f 7z
 
