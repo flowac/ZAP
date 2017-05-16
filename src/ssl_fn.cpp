@@ -1,10 +1,14 @@
 /* YO @Flowing-water we gotta start plopping GPL all up in here */
    
 #include "ssl_fn.h"
+#include "log.h"
+#include "time_fn.h"
+
 #include <openssl/sha.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 unsigned char *create_sha1sum(char *dst)
 {
@@ -17,7 +21,7 @@ unsigned char *create_sha1sum(char *dst)
     p_dst = fopen(dst, "r");
     if (!p_dst) {
         /* we gonna have a log fn? */
-        perror("fopen");
+        log_msg("%s %s\n", get_loc_time(), strerror(errno));
         goto end;
     }
 
