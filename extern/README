@@ -1,0 +1,7 @@
+7z source file structure changed completely.
+Currently would only compile under linux
+
+! DO NOT CHANGE STRUCTURE !
+
+If not compiling, check if you are using the right Defs.h
+The Windows one is called DefsW.h
