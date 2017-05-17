@@ -15,7 +15,6 @@ LIB2 = -loleaut32 -luuid
 LDFLAGS = -s
 
 FILE_IO =FileIO
-FILE_IO_2 =Windows/$(FILE_IO)
 
 MT_FILES = \
   LzFindMt.o \
@@ -27,8 +26,6 @@ RM = rm -f
 CFLAGS = -c -D_7ZIP_ST
 
 FILE_IO =C_FileIO
-FILE_IO_2 =C_FileIO
-
 
 endif
 
@@ -116,8 +113,8 @@ MethodProps.o: MethodProps.cpp
 StreamUtils.o: StreamUtils.cpp
 	$(CXX) $(CFLAGS) StreamUtils.cpp
 
-$(FILE_IO).o: $(FILE_IO_2).cpp
-	$(CXX) $(CFLAGS) $(FILE_IO_2).cpp
+$(FILE_IO).o: $(FILE_IO).cpp
+	$(CXX) $(CFLAGS) $(FILE_IO).cpp
 
 
 CommandLineParser.o: CommandLineParser.cpp
