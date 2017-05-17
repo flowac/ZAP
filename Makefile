@@ -1,6 +1,6 @@
 # default rule and rule shortcuts
 all: torrent extern
-c: clean cleanExtern
+c: clean cleanExtern clearLog
 
 .PHONY: extern cleanExtern
 CC  = g++
@@ -40,3 +40,5 @@ cleanExtern:
 	$(MAKE) -C extern/7z clean
 	rm -f lib/7z.so
 
+clearLog:
+	rm -f log

@@ -1,5 +1,6 @@
 // LzmaAlone.cpp
 
+#include "LzmaAlone.h"
 #include "StdAfx.h"
 
 #include <stdio.h>

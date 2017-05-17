@@ -3,6 +3,8 @@
 #include "ssl_fn.h"
 #include "log.h"
 
+#include "../extern/7z/LzmaAlone.h"
+
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
