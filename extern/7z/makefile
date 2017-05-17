@@ -1,4 +1,4 @@
-PROG = 7z.so
+PROG = lib7z.so
 CXX = g++ -O2 -fpic
 # -Wall -Werror -Wno-delete-non-virtual-dtor
 CXX_C = gcc -O2 -Wall -Werror -fpic
@@ -189,4 +189,4 @@ Lzma86Enc.o: C/Lzma86Enc.c
 	$(CXX_C) $(CFLAGS) C/Lzma86Enc.c
 
 clean:
-	-$(RM) $(PROG) $(OBJS)
+	-$(RM) ../../lib/$(PROG) $(OBJS)

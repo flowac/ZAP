@@ -1,6 +1,7 @@
 # default rule and rule shortcuts
-all: torrent extern
-c: clean cleanExtern clearLog
+all: extern torrent
+ca: c cleanExtern
+c: clean clearLog
 
 .PHONY: extern cleanExtern
 CC  = g++
@@ -16,7 +17,7 @@ OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # compile flags and libraries
 FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl
-LIBS = -L/usr/include/boost/ -lssl -lcrypto
+LIBS = -L/usr/include/boost/ -L./lib -lssl -lcrypto -l7z
 
 # executable
 PRG = test
@@ -38,7 +39,6 @@ clean:
 
 cleanExtern:
 	$(MAKE) -C extern/7z clean
-	rm -f lib/7z.so
 
 clearLog:
 	rm -f log

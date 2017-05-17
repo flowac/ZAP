@@ -324,7 +324,7 @@ static void AddProp(CObjectVector<CProperty> &props2, const char *name, const wc
   prop.Value = val;
 }
 
-static int main2(int numArgs, const char *args[])
+int main2(int numArgs, const char *args[])
 {
   NT_CHECK
 

@@ -31,7 +31,7 @@ void sha1_test()
  */
 void log_test()
 {
-    log_msg("i love %s\n", "allan");
+    log_msg("fewf %s\n", "wfean");
 }
 
 void chain_test()
@@ -46,10 +46,10 @@ void chain_test()
         if (packs == NULL)
             break;
         for (uint32_t j = 0; j < len; j++) {
-            packs[j] = newPack("dn:testtesttesttesttesttesttesttest",
+            packs[j] = newPack((char *)"dn:testtesttesttesttesttesttesttest",
                                4*1024*1024,
-                               "xt:testtesttesttesttesttesttesttest",
-                               "tr:testtesttesttesttesttesttesttest");
+                               (char *)"xt:testtesttesttesttesttesttesttest",
+                               (char *)"tr:testtesttesttesttesttesttesttest");
         }
         
         if (!insertBlock(newBlock(key, len, packs), ch))
@@ -67,9 +67,12 @@ void chain_test()
 
 int main()
 {
-    sha1_test();
+/*    sha1_test();
     log_test();
     chain_test();
-
+*/
+char *args[] = {(char *"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
+main2(4, (const char **)args);
     return 0;
 }
+
