@@ -2,6 +2,7 @@
 all: torrent extern
 c: clean cleanExtern
 
+.PHONY: extern cleanExtern
 CC  = g++
 # directory structure
 IDIR = ./include
@@ -26,7 +27,7 @@ torrent: $(OBJ)
 
 # compile 7zip
 extern:
-	$(MAKE) -C extern/7z -f makefile.gcc all
+	$(MAKE) -C extern/7z all
 
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
@@ -36,6 +37,6 @@ clean:
 	rm -f $(PRG) $(ODIR)/*.o
 
 cleanExtern:
-	$(MAKE) -C extern/7z -f makefile.gcc clean
+	$(MAKE) -C extern/7z clean
 	rm -f 7z
 
