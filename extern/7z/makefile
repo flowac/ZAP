@@ -1,7 +1,7 @@
-PROG = 7z
-CXX = g++ -O2
+PROG = 7z.so
+CXX = g++ -O2 -fpic
 # -Wall -Werror -Wno-delete-non-virtual-dtor
-CXX_C = gcc -O2 -Wall -Werror
+CXX_C = gcc -O2 -Wall -Werror -fpic
 
 ifdef SystemDrive
 IS_MINGW = 1
@@ -75,7 +75,7 @@ OBJS = \
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CXX) -o ../../$(PROG) $(LDFLAGS) $(OBJS) $(LIB2)
+	$(CXX) -shared -o ../../lib/$(PROG) $(LDFLAGS) $(OBJS) $(LIB2) 
 
 LzmaAlone.o: LzmaAlone.cpp
 	$(CXX) $(CFLAGS) LzmaAlone.cpp

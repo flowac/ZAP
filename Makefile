@@ -38,5 +38,5 @@ clean:
 
 cleanExtern:
 	$(MAKE) -C extern/7z clean
-	rm -f 7z
+	rm -f lib/7z.so
 
