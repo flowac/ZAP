@@ -7,6 +7,7 @@ If any user contributed code that is not in the form of an external library and 
 
 You need: BOOST and libssl to compile
 
-LD_LIBRARY_PATH - for ubuntu
+LD_LIBRARY_PATH - for ubuntu < no longer needed, 7z is now statically linked
 
 @Flowingwater what happened to kf2 dude ?
+#soon
