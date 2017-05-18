@@ -68,6 +68,10 @@ OBJS = \
   LzmaEnc.o \
   Lzma86Dec.o \
   Lzma86Enc.o \
+  Lzma2Enc.o \
+  Lzma2Dec.o \
+  Lzma2Encoder.o \
+  Lzma2Decoder.o \
 
 
 all: $(PROG)
@@ -75,6 +79,12 @@ all: $(PROG)
 $(PROG): $(OBJS)
 #	$(CXX) -c -o ../../obj/$(PROG).o $(LDFLAGS) $(OBJS) $(LIB2)
 	$(AR) ../../lib/$(PROG).a $(OBJS)
+
+Lzma2Encoder.o: Lzma2Encoder.cpp
+	$(CXX) $(CFLAGS) Lzma2Encoder.cpp
+
+Lzma2Decoder.o: Lzma2Decoder.cpp
+	$(CXX) $(CFLAGS) Lzma2Decoder.cpp
 
 LzmaAlone.o: LzmaAlone.cpp
 	$(CXX) $(CFLAGS) LzmaAlone.cpp
@@ -190,5 +200,10 @@ Lzma86Dec.o: C/Lzma86Dec.c
 Lzma86Enc.o: C/Lzma86Enc.c
 	$(CXX_C) $(CFLAGS) C/Lzma86Enc.c
 
+Lzma2Enc.o: C/Lzma2Enc.c
+	$(CXX_C) $(CFLAGS) C/Lzma2Enc.c
+
+Lzma2Dec.o: C/Lzma2Dec.c
+	$(CXX_C) $(CFLAGS) C/Lzma2Dec.c
 clean:
 	-$(RM) $(OBJS)
