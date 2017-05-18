@@ -7,6 +7,7 @@ c: clean clearLog
 CC  = g++
 # directory structure
 IDIR = ./include
+LDIR = ./lib
 ODIR = ./obj
 SDIR = ./src
 
@@ -17,14 +18,16 @@ OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # compile flags and libraries
 FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl
-LIBS = -L/usr/include/boost/ -L./lib -lssl -lcrypto -l7z
+LIBS = -L/usr/include/boost/ -lssl -lcrypto
+# statically linked libraries
+SLIB = $(LDIR)/lib7z.a
 
 # executable
 PRG = test
 
 # create executable
 torrent: $(OBJ)
-	$(CC) $(OBJ) -o $(PRG) $(LIBS) $(FLAGS)
+	$(CC) $(OBJ) $(SLIB) -o $(PRG) $(LIBS) $(FLAGS)
 
 # compile 7zip
 extern:
@@ -39,6 +42,7 @@ clean:
 
 cleanExtern:
 	$(MAKE) -C extern/7z clean
+	rm -f $(LDIR)/*.a
 
 clearLog:
 	rm -f log

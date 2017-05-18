@@ -782,7 +782,7 @@ int main2(int numArgs, const char *args[])
   return 0;
 }
 
-int MY_CDECL main(int numArgs, const char *args[])
+/*int MY_CDECL main(int numArgs, const char *args[])
 {
   NConsoleClose::CCtrlHandlerSetter ctrlHandlerSetter;
 
@@ -797,4 +797,4 @@ int MY_CDECL main(int numArgs, const char *args[])
     PrintError("Unknown Error");
     return 1;
   }
-}
+}*/

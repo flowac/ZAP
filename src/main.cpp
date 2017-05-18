@@ -11,7 +11,7 @@
 #include <string.h>
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
- * 
+ *
  */
 void sha1_test()
 {
@@ -51,13 +51,13 @@ void chain_test()
                                (char *)"xt:testtesttesttesttesttesttesttest",
                                (char *)"tr:testtesttesttesttesttesttesttest");
         }
-        
+
         if (!insertBlock(newBlock(key, len, packs), ch))
             break;
     }
     printBlock(ch->head[0]);
     printBlock(ch->head[size - 1]);
-    
+
     printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
 
     free(ch);
