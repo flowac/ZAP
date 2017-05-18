@@ -324,7 +324,7 @@ static void AddProp(CObjectVector<CProperty> &props2, const char *name, const wc
   prop.Value = val;
 }
 
-int main2(int numArgs, const char *args[])
+static int main2(int numArgs, const char *args[])
 {
   NT_CHECK
 
@@ -782,7 +782,7 @@ int main2(int numArgs, const char *args[])
   return 0;
 }
 
-/*int MY_CDECL main(int numArgs, const char *args[])
+int wrap7z(int numArgs, const char *args[])
 {
   NConsoleClose::CCtrlHandlerSetter ctrlHandlerSetter;
 
@@ -797,4 +797,5 @@ int main2(int numArgs, const char *args[])
     PrintError("Unknown Error");
     return 1;
   }
-}*/
+  return 0;
+}

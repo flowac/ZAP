@@ -1,3 +1,3 @@
 // LzmaAlone.h
 
-int main2(int numArgs, const char *args[]);
+int wrap7z(int numArgs, const char *args[]);

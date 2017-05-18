@@ -72,7 +72,7 @@ int main()
     chain_test();
 */
     char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
-main2(4, (const char **)args);
+    wrap7z(4, (const char **)args);
     return 0;
 }
 
