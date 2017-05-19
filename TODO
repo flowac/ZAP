@@ -1,13 +1,8 @@
-Top priority:
-*   Fix memeory leak and random printouts when hard coded path in main is invalid
+More * = more priority
 
-Also top priority but delayed by some other top priority issues that has a higher priority:
-**  Add AGPL v3 headers to everything including external libraries when possible
-*   Implement save to disk
-**  Implement LZMA compression using LZMA library from 7z (compile to .so using -fPIC -shared)
+*** Implement save to disk
 **  Copy pasta some bit torrent source code (check license)
 *   Test magnet link structure
 *   Test RAM usage
-
-** fix makefile for the 7z stuff
-* rethink my life
+    Create a simple search engine (or just copy pasta some google's open source code)
+    Add AGPL v3 headers to everything including external libraries when possible
