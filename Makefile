@@ -7,6 +7,7 @@ c: clean clearLog
 CC  = g++
 # directory structure
 IDIR = ./include
+IDIR_EXTERN = ./extern/7z
 LDIR = ./lib
 ODIR = ./obj
 SDIR = ./src
@@ -14,10 +15,11 @@ SDIR = ./src
 # objects, src and user libs
 SOURCES = $(wildcard $(SDIR)/*.cpp)
 INCLUDE = $(wildcard $(IDIR)/*.h)
+INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # compile flags and libraries
-FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl
+FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl -I$(IDIR_EXTERN)
 LIBS = -L/usr/include/boost/ -lssl -lcrypto
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
@@ -34,7 +36,7 @@ extern:
 	$(MAKE) -C extern/7z all
 
 # compile src files into objects
-$(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
+$(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE) $(INCLUDE_EXTERN)
 	$(CC) -c -o $@ $< $(FLAGS)
 
 clean:
