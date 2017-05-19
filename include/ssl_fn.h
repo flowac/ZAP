@@ -13,6 +13,6 @@
  * RETURN:
  * NULL - failure
  */
-unsigned char *create_sha1sum(char *dst);
+unsigned char *create_sha1sum(const char *dst);
 
 #endif //_SS_FN_H

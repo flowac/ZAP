@@ -58,7 +58,7 @@ void chain_test()
     printBlock(ch->head[0]);
     printBlock(ch->head[size - 1]);
 
-    printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
+    printf("Free'd %d bytes\n", deleteChain(ch) + sizeof(chain));
 
     free(ch);
 
