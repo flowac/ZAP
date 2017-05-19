@@ -1,10 +1,13 @@
+# executable
+PRG = test
+
 # default rule and rule shortcuts
 all: extern torrent
-ca: c cleanExtern
-c: clean clearLog
+clean: c
+c: c3
 
 .PHONY: extern cleanExtern
-CC  = g++
+CC = g++
 # directory structure
 IDIR = ./include
 LDIR = ./lib
@@ -22,9 +25,6 @@ LIBS = -L/usr/include/boost/ -lssl -lcrypto
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 
-# executable
-PRG = test
-
 # create executable
 torrent: $(OBJ)
 	$(CC) $(OBJ) $(SLIB) -o $(PRG) $(LIBS) $(FLAGS)
@@ -37,12 +37,12 @@ extern:
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
 	$(CC) -c -o $@ $< $(FLAGS)
 
-clean:
+c1:
 	rm -f $(PRG) $(ODIR)/*.o
 
-cleanExtern:
+c2: c1
 	$(MAKE) -C extern/7z clean
 	rm -f $(LDIR)/*.a
 
-clearLog:
+c3: c2
 	rm -f log

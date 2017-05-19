@@ -16,7 +16,7 @@
 void sha1_test()
 {
     unsigned char *tmp = NULL;
-    tmp = create_sha1sum("/home/gator/Downloads/Torrent/tmp.txt");
+    tmp = create_sha1sum((char *)"/home/gator/Downloads/Torrent/tmp.txt");
     if(tmp != NULL) {
         for (int i = 0; i < 20; i++) {
             printf("%02x",tmp[i]);
