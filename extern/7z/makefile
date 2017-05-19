@@ -1,8 +1,8 @@
 PROG = lib7z
 AR = ar rcs
 CXX = g++ -O2
-# -Wall -Werror -Wno-delete-non-virtual-dtor
 CXX_C = gcc -O2 -Wall -Werror
+CFLAGS = -c -DDEBUG
 
 ifdef SystemDrive
 IS_MINGW = 1
@@ -11,22 +11,19 @@ endif
 ifdef IS_MINGW
 
 RM = del
-CFLAGS = -c
 LIB2 = -loleaut32 -luuid
 LDFLAGS = -s
 
-FILE_IO =FileIO
+FILE_IO = FileIO
 
-MT_FILES = \
-  LzFindMt.o \
-  Threads.o \
+MT_FILES = LzFindMt.o Threads.o
 
 else
 
 RM = rm -f
-CFLAGS = -c -D_7ZIP_ST
+CFLAGS += -D_7ZIP_ST
 
-FILE_IO =C_FileIO
+FILE_IO = C_FileIO
 
 endif
 

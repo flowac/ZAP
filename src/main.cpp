@@ -67,12 +67,13 @@ void chain_test()
 
 int main()
 {
-/*    sha1_test();
-    log_test();
+    sha1_test();
+//    log_test();
     chain_test();
-*/
+
+    //arguments to compress: (ignore)      mode         input name    output name      # of threads
     char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
-    wrap7z(4, (const char **)args);
+    wrap7z(5, (const char **)args);
     return 0;
 }
 

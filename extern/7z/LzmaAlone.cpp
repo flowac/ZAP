@@ -176,7 +176,9 @@ static void PrintError_int(const char *s, int code)
 
 static void Print(const char *s)
 {
+#ifdef DEBUG
   fputs(s, stdout);
+#endif
 }
 
 static void Print_UInt64(UInt64 v)
@@ -203,7 +205,7 @@ static void Print_Size(const char *s, UInt64 v)
 
 static void PrintTitle()
 {
-  Print(kCopyrightString);
+//  Print(kCopyrightString);
 }
 
 static void PrintHelp()
@@ -342,8 +344,12 @@ static int main2(int numArgs, const char *args[])
 
   UStringVector commandStrings;
   for (int i = 1; i < numArgs; i++)
+  {
+    Print(args[i]); Print("  ");
     commandStrings.Add(MultiByteToUnicodeString(args[i]));
-  
+  }
+  Print("\n");
+
   CParser parser;
   try
   {
