@@ -65,14 +65,23 @@ void chain_test()
     std::cout.imbue(std::locale());
 }
 
+void compression_test()
+{
+    //compress_lzma2("/home/gator/Downloads/Tc/t2",
+     //              "/home/gator/Downloads/Tc/t2.7z")
+}
+
 int main()
 {
 /*    sha1_test();
     log_test();
     chain_test();
 */
+    compression_test();
+    /*
     char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
     wrap7z(4, (const char **)args);
+    */
     return 0;
 }
 

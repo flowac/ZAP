@@ -4,6 +4,9 @@
 #ifndef _LOG_H
 #define _LOG_H
 
+#include <fstream>
+#include "C/7zTypes.h"
+
 /* This function will append to the log file
  * INPUT:
  * char *msg - message to be printed, can be formatted with %s etc
@@ -12,5 +15,15 @@
  * 1 - success
  */
 int log_msg(char const *msg, ...);
+
+/* This function will return the size of the file specified
+ * by f_stream
+ * INPUT:
+ * std::ofstream f_stream - a filstream to the file
+ * RETURN:
+ * Size of file on success
+ * 0 on failure
+ */
+UInt64 get_file_size(std::ofstream f_stream);
 
 #endif // _LOG_H
