@@ -7,6 +7,7 @@
 #define LOG     0
 #define MAX_U8  255//max size of unsigned 8 bit int
 #define MAX_U16 65535
+#define MAX_U32 4294967295
 
 /*typedef unsigned char     uint8_t;
 typedef unsigned short    uint16_t;

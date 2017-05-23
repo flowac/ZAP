@@ -1,10 +1,10 @@
 #include "alib.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include "../extern/7z/LzmaAlone.h"
 
 namespace pt = boost::posix_time;
 
@@ -41,6 +41,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     uint32_t ndn = strlen(dn) + 1;
     uint32_t nxt = strlen(xt) + 1;
     uint32_t ntr = strlen(tr) + 1;
+    uint8_t i;
     
     if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8) 
         return NULL;
@@ -50,7 +51,8 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
         return NULL; // maloc failed
 
     px->xl = xl;
-    strncpy(px->info, dn, sizeof(px->info) / sizeof(char) - 1);
+    for (i = 0; i < 6; i++) {px->info[i] = 0;}//prevent valgrind errors
+    strncpy(px->info, dn, 5);
     
     px->dn = (char *)malloc(sizeof(char) * ndn);
     if (!px->dn)
@@ -63,7 +65,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     strcpy(px->xt, xt);
     
     px->tr = (char *)malloc(sizeof(char) * ntr);
-    if (!px->xt)
+    if (!px->tr)
 	goto cleanup;
     strcpy(px->tr, tr);
     return px;
@@ -86,7 +88,10 @@ block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 	return NULL;
 
     bx->time = (uint32_t)sNow();
+    bx->crc = 0;
+    bx->n = 0;
     bx->key = key;
+    
     if (nPack < MAX_U16) {
         bx->nPack = nPack;
         bx->packs = packs;
@@ -192,3 +197,91 @@ uint32_t deleteChain(chain *target)
     return bytesFreed;
 }
 
+void packToText(pack *pk, FILE *fp, char *buf, int len)
+{
+    //3 tabs
+    snprintf(buf, len, "\t\t{\
+\n\t\t\tinfo: %s,\
+\n\t\t\tdn  : %s,\
+\n\t\t\txl  : %ld,\
+\n\t\t\txt  : %s,\
+\n\t\t\ttr  : %s,\
+\n\t\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+
+    fputs(buf, fp);
+}
+
+void tranToText(tran *tx, FILE *fp, char *buf, int len)
+{
+    //3 tabs
+    snprintf(buf, len, "\t\t{\
+\n\t\t\ttime: %d,\
+\n\t\t\tid  : %d,\
+\n\t\t\tsrc : %ld,\
+\n\t\t\tdest: %ld,\
+\n\t\t\tsum : %ld,\
+\n\t\t\tkey : %ld,\
+\n\t\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
+
+    fputs(buf, fp);
+}
+
+void blockToText(block *bx, FILE *fp, char *buf, int len)
+{
+    //2 tabs
+    uint32_t i;
+    snprintf(buf, len, "\t{\
+\n\t\ttime: %d,\
+\n\t\tcrc : %d,\
+\n\t\tpack: %d,\
+\n\t\ttran: %d,\
+\n\t\t#   : %d,\
+\n\t\tkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
+
+    fputs(buf, fp);
+    for (i = 0; i < bx->nPack; i++) {packToText(bx->packs[i], fp, buf, len);}
+    for (i = 0; i < bx->nTran; i++) {tranToText(bx->trans[i], fp, buf, len);}
+    fputs("\t},\n", fp);
+}
+
+bool chainToText(chain *ch, FILE *fp)
+{
+    //1 tab
+    uint32_t i;
+    int len = 10000;
+    char *buf = (char *)malloc(sizeof(char) * (len + 1));
+    if (buf == NULL || fp == NULL)
+        return 0;
+    
+    snprintf(buf, len, "{\n\ttime: %d,\n\tsize: %d,\n", ch->time, ch->size);
+    
+    fputs(buf, fp);
+    for (i = 0; i < ch->size; i++) {blockToText(ch->head[i], fp, buf, len);}
+    fputs("},\n", fp);
+    
+    free(buf);
+    return 1;
+}
+
+//! TODO AC
+//! redirect the file stream or something, instead of writing to a file then telling 7z to open it
+//  return 1 for success, 0 for failure
+bool chainCompactor(chain *ch, char *outFile)
+{
+    char tmp[] = "temp.file\0";
+    FILE *fp = fopen(tmp, "w");
+    
+    if (!chainToText(ch, fp))
+    {
+        printf("\n! Conversion to text failed\n");
+        fclose(fp);
+        return 0;
+    }
+    fclose(fp);
+    
+    //args to compress: (ignore),        mode,       input,  output,   # of threads, terminator
+    char *args[] = {(char *)"7z", (char *)"e", (char *)tmp, outFile, (char *)"-mt8", NULL};
+    wrap7z(5, (const char **)args);
+
+    return 1;
+}

@@ -16,7 +16,7 @@
 void sha1_test()
 {
     unsigned char *tmp = NULL;
-    tmp = create_sha1sum((char *)"/home/gator/Downloads/Torrent/tmp.txt");
+    tmp = create_sha1sum((char *)"sha1.txt");
     if(tmp != NULL) {
         for (int i = 0; i < 20; i++) {
             printf("%02x",tmp[i]);
@@ -65,15 +65,64 @@ void chain_test()
     std::cout.imbue(std::locale());
 }
 
-int main()
+void zip_test()
 {
-    sha1_test();
-//    log_test();
-    chain_test();
-
     //arguments to compress: (ignore)      mode         input name    output name      # of threads
     char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
     wrap7z(5, (const char **)args);
+}
+
+chain *chain_gen(uint64_t size)
+{
+    uint64_t i;
+    uint16_t j, k, nPack;
+    const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
+    
+    uint64_t key;
+    chain *ch = newChain();
+    char *dn = (char *)malloc(sizeof(char) * 121);
+    
+    for (i = 0; i < size && i < MAX_U32; i++) {
+        nPack  = rand() % 50 + 50;
+        pack **packs = (pack **)malloc(sizeof(pack *) * nPack);
+        
+        for (j = 0; j < nPack; j++) {
+            k = rand() % 90 + 30;
+            dn[k] = 0;
+            for (k--; k > 0; k--) {
+                dn[k] = charset[rand()%62];
+            }
+            dn[0] = '0';
+            
+            packs[j] = newPack(dn, (rand()%50+1)*1024*1024, dn, dn);
+        }
+        
+        key = rand() % MAX_U16 * MAX_U16 * MAX_U32;
+        if (!insertBlock(newBlock(key, nPack, packs), ch))
+            break;
+    }
+    free(dn);
+    return ch;
+}
+
+int main()
+{
+//    sha1_test();
+//    log_test();
+//    chain_test();
+//    zip_test();
+    printf("\nGenerating\n");
+    chain *ch = chain_gen(1000);
+    
+    printf("Compressing\n");
+    uint32_t dur = (uint32_t)sNow();
+    chainCompactor(ch, (char *)"t3.7z");
+    dur = (uint32_t)sNow() - dur;
+    printf("Took %u seconds\n", dur);
+    
+    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
+    free(ch);
+    
     return 0;
 }
 

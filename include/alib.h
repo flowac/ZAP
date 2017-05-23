@@ -6,6 +6,7 @@
 
 #include "atype.h"
 #include <time.h>
+#include <stdio.h>
 
 //namespace pt = boost::posix_time;
 
@@ -58,6 +59,10 @@ uint32_t deletePack(pack *target);
 uint32_t deleteBlock(block *target);
 
 uint32_t deleteChain(chain *target);
+
+bool chainToText(chain *ch, FILE *fp);
+
+bool chainCompactor(chain *ch, char *outFile);
 
 #endif//_ALIB_H
 
