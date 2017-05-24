@@ -19,7 +19,8 @@
  * size_t *data_len - the size of the read data, this will
  * also indicate when we have reached the end of the file
  * OUTPUT:
- * 1 - more data
+ * 2 - more data
+ * 1 - last chunk of data
  * 0 - end of file
  * -1 failure
  */
@@ -29,8 +30,10 @@ static int read_data(FILE *fd, unsigned char *data, size_t *data_len)
                       buffer_cread_size, fd);
 
     if (*data_len == buffer_cread_size)
+        return 2;
+    else if (*data_len > 0)
         return 1;
-    else
+    else 
         return 0;
 }
 
@@ -54,9 +57,34 @@ static int write_data(FILE *fd, unsigned char *data, size_t data_len)
         return 0;
 }
 
+static int open_io_files(const char *in_path, const char*out_path,
+                         FILE *fd[])
+{
+    fd[0] = fopen(in_path, "r");
+    if (fd[0] == NULL)  {
+        log_msg("Error opening input file for compression: %s\n",
+                strerror(errno));
+        goto cleanup;
+    }
+    fd[1] = fopen(out_path, "w");
+    if (fd[0] == NULL)  {
+        log_msg("Error opening output file for compression: %s\n",
+                strerror(errno));
+        goto cleanup;
+    }
+    return 1;
+
+ cleanup:
+    if (fd[0] != NULL)
+        fclose(fd[0]);
+    if (fd[1] != NULL)
+        fclose(fd[1]);
+    return 0;
+}
+
 int compress_file(const char *in_path, const char *out_path)
 {
-    FILE *fd[2]; // input and output fd
+    FILE *fd[2];
     unsigned char input[buffer_cread_size]; // i/o buffers
     unsigned char output[buffer_cread_size];
     int rt = 1; // return value
@@ -64,35 +92,22 @@ int compress_file(const char *in_path, const char *out_path)
     size_t input_len = buffer_cread_size; // buffer sizes
     size_t output_len = buffer_cread_size;
 
-    fd[0] = fopen(in_path, "r");
-    if (fd[0] == NULL)  {
-        log_msg("Error opening input file for compression: %s\n",
-                strerror(errno));
-        rt = 0;
-        goto cleanup;
-    }
-    fd[1] = fopen(out_path, "w");
-    if (fd[0] == NULL)  {
-        log_msg("Error opening input file for compression: %s\n",
-                strerror(errno));
-        rt = 0;
-        goto cleanup;
-    }
-
-    read_data(fd[0], input, &input_len);
-    do {
+    if (!open_io_files(in_path, out_path, fd)) // input and output fd
+        return 0;
+    /* read the file */
+    while(read_data(fd[0], input, &input_len)) {
         /* this is not accurate at the end,
          * a good approximate though */
         printf("%d bytes compressesd\n",
                count * buffer_cread_size);
         count++;
+        /* compress data and write to output */
         compress_data(input, input_len,
                       output, &output_len);
         write_data(fd[1], output, output_len);
-    } while(read_data(fd[0], input, &input_len));
+    }
 
 
- cleanup:
     if (fd[0] != NULL)
         fclose(fd[0]);
     if (fd[1] != NULL)
