@@ -3,6 +3,6 @@
 
 #include <string>
 
-int compress_lzma2(std::string in_path, std::string out_path);
+int compress_lzma2(const char *in_path, const char *out_path);
 
 #endif // _LZMA2_WRAPPER_H

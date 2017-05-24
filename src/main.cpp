@@ -2,6 +2,7 @@
 #include "atype.h"
 #include "ssl_fn.h"
 #include "log.h"
+#include "lzma2_wrapper.h"
 
 #include "../extern/7z/LzmaAlone.h"
 
@@ -67,8 +68,8 @@ void chain_test()
 
 void compression_test()
 {
-    //compress_lzma2("/home/gator/Downloads/Tc/t2",
-     //              "/home/gator/Downloads/Tc/t2.7z")
+    compress_lzma2("/home/gator/Downloads/Tc/t2",
+                   "/home/gator/Downloads/Tc/t2.7z");
 }
 
 int main()

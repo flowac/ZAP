@@ -68,6 +68,7 @@ OBJS = \
   LzmaEnc.o \
   Lzma86Dec.o \
   Lzma86Enc.o \
+  LzmaLib.o \
   Lzma2Enc.o \
   Lzma2Dec.o \
   Lzma2Encoder.o \
@@ -199,6 +200,9 @@ Lzma86Dec.o: C/Lzma86Dec.c
 
 Lzma86Enc.o: C/Lzma86Enc.c
 	$(CXX_C) $(CFLAGS) C/Lzma86Enc.c
+
+LzmaLib.o: C/LzmaLib.c
+	$(CXX_C) $(CFLAGS) C/LzmaLib.c
 
 Lzma2Enc.o: C/Lzma2Enc.c
 	$(CXX_C) $(CFLAGS) C/Lzma2Enc.c
