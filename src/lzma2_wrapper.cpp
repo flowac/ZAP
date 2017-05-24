@@ -84,16 +84,17 @@ static int open_io_files(const char *in_path, const char*out_path,
 
 int compress_file(const char *in_path, const char *out_path)
 {
-    FILE *fd[2];
-    unsigned char input[buffer_cread_size]; // i/o buffers
+    FILE *fd[2]; /* i/o file descriptors */
+    unsigned char input[buffer_cread_size]; /* i/o buffers */
     unsigned char output[buffer_cread_size];
-    int rt = 1; // return value
     int count = 1;
-    size_t input_len = buffer_cread_size; // buffer sizes
+    size_t input_len = buffer_cread_size; /* buffer sizes */
     size_t output_len = buffer_cread_size;
 
-    if (!open_io_files(in_path, out_path, fd)) // input and output fd
+    /* open i/o files, return fail if this failes */
+    if (!open_io_files(in_path, out_path, fd))
         return 0;
+
     /* read the file */
     while(read_data(fd[0], input, &input_len)) {
         /* this is not accurate at the end,
@@ -112,7 +113,7 @@ int compress_file(const char *in_path, const char *out_path)
         fclose(fd[0]);
     if (fd[1] != NULL)
         fclose(fd[1]);
-    return rt;
+    return 1;
 }
 
 int compress_data(unsigned char *input, size_t input_len,
