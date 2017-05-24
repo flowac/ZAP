@@ -68,8 +68,8 @@ void chain_test()
 
 void compression_test()
 {
-    compress_lzma2("/home/gator/Downloads/Tc/t2",
-                   "/home/gator/Downloads/Tc/t2.7z");
+    compress_file("/home/gator/Downloads/Tc/t2",
+                  "/home/gator/Downloads/Tc/t2.7z");
 }
 
 int main()
