@@ -11,6 +11,24 @@
 #include "Lzma2Encoder.h"
 #include "C/LzmaLib.h"
 
+/* function implementation for struct ISzAlloc 
+ * see examples in LzmaUtil.c and C/alloc.c
+ */
+static void *SzAlloc(void *p, size_t size)
+{
+    p = p;
+    return MyAlloc(size); // just a malloc call...
+}
+/* function implementation for struct ISzAlloc 
+ * see examples in LzmaUtil.c and C/alloc.c
+ */
+static void SzFree(void *p, void *address)
+{
+    p = p;
+    MyFree(address); // just a free call ... 
+}
+static ISzAlloc g_Alloc {szAlloc, szFree};
+
 /* Read raw data from a filedescriptor
  * INPUT:
  * FILE *fd - file descriptor
@@ -120,7 +138,6 @@ int compress_data(unsigned char *input, size_t input_len,
                   unsigned char *output, size_t *output_len)
 {
     size_t props_size = LZMA_PROPS_SIZE;
-    //*output_len = 2 * input_len / 3 + 128;
     /* &output[LZMA_PROPS_SIZE] specifies where to store the data
      * &output_len stores the size of the output data
      * input specifies the input data
@@ -128,7 +145,7 @@ int compress_data(unsigned char *input, size_t input_len,
      * &output[0] specifies where to store prop info
      * &props_size specifies the size of the prop info
      */
-    LzmaCompress(&output[LZMA_PROPS_SIZE], output_len,
+    int rt = LzmaCompress(&output[LZMA_PROPS_SIZE], output_len,
                  input, input_len,
                  &output[0], &props_size,
                  -1, // level
@@ -138,5 +155,55 @@ int compress_data(unsigned char *input, size_t input_len,
                  -1, // pb (position bits)
                  -1, // fb (word size)
                  -1); // numThreads (number of threads)
+    if (rt != SZ_OK) {
+        log_msg ("Failed to compress data: error %d", rt);
+        return 0;
+    }
     return 1;
+}
+
+int decompress_data(unsigned char *input, size_t input_len,
+                    unsigned char *output, size_t *output_len)
+{
+    /* output - specifies where to store uncompressed data
+     * output_len - stores the length of the uncompressed data
+     * input[LZMA_PROPS_SIZE] - position of the data in the input buffer
+     * &input_len - length of the input buffer
+     * &input[0] - position of the prop info
+     * LZMA_PROPS_SIZE - prop size
+     */
+    int rt = LzmaUncompress(output, output_len,
+                            &input[LZMA_PROPS_SIZE], &input_len,
+                            &input[0], LZMA_PROPS_SIZE);
+    
+    if (rt != SZ_OK) {
+        log_msg ("Failed to decompress data: error %d", rt);
+        return 0;
+    }
+    return 1;
+}
+
+int in_stream_read(void *p, void *buf, size_t *size)
+{
+    /* CLzmaEncHandle is just a pointer */
+    CLzmaEncHandle enc_hand = LzmaEnc_Create(g_Alloc);
+    if (enc_hand == NULL) {
+        log_msg ("Error allocating mem when reading stream");
+        return SZ_ERROR_MEM;
+    }
+    /* create the prop, note the prop is the header of the
+     * compressed file
+     */
+    CLzmaEncProps prop_info;
+    int rt = LzmaEncProps_Init(&prop_info);
+
+    /* if prop wasnt initialized correctly return fail */
+    if (rt != SZ_OK)
+        goto end;
+l
+        
+
+ end:
+    LzmaEnc_Destroy(enc, &g_Alloc, g_Alloc);
+    return rt;
 }
