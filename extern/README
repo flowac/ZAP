@@ -1,3 +1,11 @@
+Transmission is under folder: bit
+./autogen.sh
+./configure --disable-nls --without-gtk --enable-cli --enable-daemon
+
+When in doubt, download fresh source (ideal) or svn co (not recommanded)
+
+------------------------------------------------------------------------
+
 7z source file structure changed completely.
 Currently would only compile under linux
 
@@ -5,3 +13,6 @@ Currently would only compile under linux
 
 If not compiling, check if you are using the right Defs.h
 The Windows one is called DefsW.h
+
+-----------------------------------------------------------------------
+
