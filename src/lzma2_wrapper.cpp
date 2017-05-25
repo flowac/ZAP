@@ -200,8 +200,7 @@ int in_stream_read(void *p, void *buf, size_t *size)
     /* if prop wasnt initialized correctly return fail */
     if (rt != SZ_OK)
         goto end;
-l
-        
+
 
  end:
     LzmaEnc_Destroy(enc, &g_Alloc, g_Alloc);
