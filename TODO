@@ -1,6 +1,7 @@
 More * = more priority
 
 *** Implement save to disk
+*** Implement Incremental compression
 **  Copy pasta some bit torrent source code (check license)
 *   Test magnet link structure
 *   Test RAM usage
