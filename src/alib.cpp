@@ -201,11 +201,11 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
     //3 tabs
     snprintf(buf, len, "\t\t{\
-\n\t\t\tinfo: %s,\
-\n\t\t\tdn  : %s,\
-\n\t\t\txl  : %ld,\
-\n\t\t\txt  : %s,\
-\n\t\t\ttr  : %s,\
+\n\t\t\tPinfo: %s,\
+\n\t\t\tPdn  : %s,\
+\n\t\t\tPxl  : %ld,\
+\n\t\t\tPxt  : %s,\
+\n\t\t\tPtr  : %s,\
 \n\t\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
 
     fputs(buf, fp);
@@ -215,12 +215,12 @@ void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
     //3 tabs
     snprintf(buf, len, "\t\t{\
-\n\t\t\ttime: %d,\
-\n\t\t\tid  : %d,\
-\n\t\t\tsrc : %ld,\
-\n\t\t\tdest: %ld,\
-\n\t\t\tsum : %ld,\
-\n\t\t\tkey : %ld,\
+\n\t\t\tTtime: %d,\
+\n\t\t\tTid  : %d,\
+\n\t\t\tTsrc : %ld,\
+\n\t\t\tTdest: %ld,\
+\n\t\t\tTsum : %ld,\
+\n\t\t\tTkey : %ld,\
 \n\t\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
 
     fputs(buf, fp);
@@ -231,12 +231,12 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
     //2 tabs
     uint32_t i;
     snprintf(buf, len, "\t{\
-\n\t\ttime: %d,\
-\n\t\tcrc : %d,\
-\n\t\tpack: %d,\
-\n\t\ttran: %d,\
-\n\t\t#   : %d,\
-\n\t\tkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
+\n\t\tBtime: %d,\
+\n\t\tBcrc : %d,\
+\n\t\tBpack: %d,\
+\n\t\tBtran: %d,\
+\n\t\tB#   : %d,\
+\n\t\tBkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
 
     fputs(buf, fp);
     for (i = 0; i < bx->nPack; i++) {packToText(bx->packs[i], fp, buf, len);}
@@ -253,7 +253,7 @@ bool chainToText(chain *ch, FILE *fp)
     if (buf == NULL || fp == NULL)
         return 0;
     
-    snprintf(buf, len, "{\n\ttime: %d,\n\tsize: %d,\n", ch->time, ch->size);
+    snprintf(buf, len, "{\n\tCtime: %d,\n\tCsize: %d,\n", ch->time, ch->size);
     
     fputs(buf, fp);
     for (i = 0; i < ch->size; i++) {blockToText(ch->head[i], fp, buf, len);}
@@ -261,6 +261,82 @@ bool chainToText(chain *ch, FILE *fp)
     
     free(buf);
     return 1;
+}
+
+pack *text2Pac(FILE *fp)
+{
+    /*3 tabs
+    snprintf(buf, len, "\t\t{\
+\n\t\t\tinfo: %s,\
+\n\t\t\tdn  : %s,\
+\n\t\t\txl  : %ld,\
+\n\t\t\txt  : %s,\
+\n\t\t\ttr  : %s,\
+\n\t\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+
+    fputs(buf, fp);*/
+    return NULL;
+}
+
+tran *text2Tran(FILE *fp)
+{
+    /*3 tabs
+    snprintf(buf, len, "\t\t{\
+\n\t\t\ttime: %d,\
+\n\t\t\tid  : %d,\
+\n\t\t\tsrc : %ld,\
+\n\t\t\tdest: %ld,\
+\n\t\t\tsum : %ld,\
+\n\t\t\tkey : %ld,\
+\n\t\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
+
+    fputs(buf, fp);*/
+    return NULL;
+}
+
+block *text2Block(FILE *fp)
+{
+    char c;
+    uint32_t nPack = 0;
+    uint64_t key = 0;
+    pack **packs = NULL;
+
+    while ((c = fgetc(fp)) != EOF) {
+        if (c == '{') {
+            pack *px = text2Pac(fp);
+            if (px != NULL) {
+                nPack++;
+                if (nPack > MAX_U16) {
+                    deletePack(px);
+                    printf("nPack limit reached\n");
+                    break;
+                }
+                packs = (pack**)realloc(packs, sizeof(pack *) * nPack);
+                packs[nPack - 1] = px;
+            }
+        } else if (c == 'B') {
+            
+        }
+    }
+    return newBlock(key, nPack, packs);
+}
+
+chain *text2Chainz(FILE *fp)
+{
+    char c;
+    chain *ch = newChain();
+
+    while (ch != NULL && (c = fgetc(fp)) != EOF) {
+        if (c == '{') {
+            block *bx = text2Block(fp);
+            if (bx != NULL) {
+                if (!insertBlock(bx, ch)) {printf("insertBlock failed");}
+            }
+        } else if (c == 'C') {
+            
+        }
+    }
+    return ch;
 }
 
 //! TODO AC
@@ -279,9 +355,30 @@ bool chainCompactor(chain *ch, char *outFile)
     }
     fclose(fp);
     
-    //args to compress: (ignore),        mode,       input,  output,   # of threads, terminator
-    char *args[] = {(char *)"7z", (char *)"e", (char *)tmp, outFile, (char *)"-mt8", NULL};
-    wrap7z(5, (const char **)args);
+    //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
+    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
+    //                    input,  output,   # of threads, terminator
+                    (char *)tmp, outFile, (char *)"-mt8", NULL};
+    wrap7z(8, (const char **)args);
 
     return 1;
+}
+
+//! TODO AC
+//! redirect the file stream or something, instead of writing to a file then telling 7z to open it
+//  return 1 for success, 0 for failure
+chain *chainExtractor(char *inFile)
+{
+    char tmp[] = "temp.file\0";
+    //args to compress: (ignore),        mode,       input,  output,   # of threads, terminator
+    char *args[] = {(char *)"7z", (char *)"d", inFile, (char *)tmp, (char *)"-mt8", NULL};
+    wrap7z(5, (const char **)args);
+    
+    FILE *fp = fopen(tmp, "r");
+    chain *ch = text2Chainz(fp);
+    fclose(fp);
+    
+    if (ch == NULL) {printf("\n! Conversion from 7z failed\n");}
+    
+    return ch;
 }

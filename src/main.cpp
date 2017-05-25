@@ -68,7 +68,7 @@ void chain_test()
 void zip_test()
 {
     //arguments to compress: (ignore)      mode         input name    output name      # of threads
-    char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt4", NULL};
+    char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt8", NULL};
     wrap7z(5, (const char **)args);
 }
 
