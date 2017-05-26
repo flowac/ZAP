@@ -97,7 +97,7 @@ chain *chain_gen(uint64_t size)
             packs[j] = newPack(dn, (rand()%50+1)*1024*1024, dn, dn);
         }
         
-        key = rand() % MAX_U16 * MAX_U16 * MAX_U32;
+        key = rand() % MAX_U16 * MAX_U32;
         if (!insertBlock(newBlock(key, nPack, packs), ch))
             break;
     }
@@ -112,7 +112,7 @@ int main()
 //    chain_test();
 //    zip_test();
     printf("\nGenerating\n");
-    chain *ch = chain_gen(1000);
+    chain *ch = chain_gen(3000);
     
     printf("Compressing\n");
     uint32_t dur = (uint32_t)sNow();
