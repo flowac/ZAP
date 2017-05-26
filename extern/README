@@ -1,4 +1,4 @@
-Transmission is under folder: bit
+Transmission: removed for performance reasons
 ./autogen.sh
 ./configure --disable-nls --without-gtk --enable-cli --enable-daemon
 
