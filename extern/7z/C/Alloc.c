@@ -129,8 +129,8 @@ void BigFree(void *address)
 
 static void *SzAlloc(ISzAllocPtr p, size_t size) { UNUSED_VAR(p); return MyAlloc(size); }
 static void SzFree(ISzAllocPtr p, void *address) { UNUSED_VAR(p); MyFree(address); }
-ISzAlloc const g_Alloc = { SzAlloc, SzFree };
+ISzAlloc g_Alloc = { SzAlloc, SzFree };
 
 static void *SzBigAlloc(ISzAllocPtr p, size_t size) { UNUSED_VAR(p); return BigAlloc(size); }
 static void SzBigFree(ISzAllocPtr p, void *address) { UNUSED_VAR(p); BigFree(address); }
-ISzAlloc const g_BigAlloc = { SzBigAlloc, SzBigFree };
+ISzAlloc g_BigAlloc = { SzBigAlloc, SzBigFree };

@@ -4,7 +4,7 @@
 #include <string>
 #include "C/7zTypes.h"
 
-#define buffer_cread_size 65536
+#define buffer_cread_size 65536 // 1 < 16
 
 /* ISeqInstream struct implementation */
 struct seq_in_stream{

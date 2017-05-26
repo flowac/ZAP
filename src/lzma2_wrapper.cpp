@@ -8,29 +8,29 @@
 #include "lzma2_wrapper.h"
 #include "log.h"
 /* extern */
-#include "Lzma2Encoder.h"
 #include "C/LzmaLib.h"
 #include "C/7zTypes.h"
 #include "C/Alloc.h"
+#include "C/LzmaEnc.h"
 
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-static void *szAlloc(void *p, size_t size)
+void *szAlloc(void *p, size_t size)
 {
-    p = p;
+    (void)p;
     return MyAlloc(size); // just a malloc call...
 }
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-static void szFree(void *p, void *address)
+void szFree(void *p, void *address)
 {
-    p = p;
+    (void)p;
     MyFree(address); // just a free call ... 
 }
 
-static const ISzAlloc g_Alloc = {szAlloc, szFree};
+ISzAlloc g_Alloc = {szAlloc, szFree};
 
 /* Read raw data from a filedescriptor
  * INPUT:
@@ -186,10 +186,11 @@ int decompress_data(unsigned char *input, size_t input_len,
     return 1;
 }
 
-int in_stream_read(void *p, void *buf, size_t *size)
+int in_stream_read(unsigned char *input, unsigned char *output)
 {
+    int rt = 1;
     /* CLzmaEncHandle is just a pointer */
-    CLzmaEncHandle enc_hand = LzmaEnc_Create(g_Alloc);
+    CLzmaEncHandle enc_hand = LzmaEnc_Create(&g_Alloc);
     if (enc_hand == NULL) {
         log_msg ("Error allocating mem when reading stream");
         return SZ_ERROR_MEM;
@@ -197,15 +198,19 @@ int in_stream_read(void *p, void *buf, size_t *size)
     /* create the prop, note the prop is the header of the
      * compressed file
      */
+    unsigned int props_size = LZMA_PROPS_SIZE;
     CLzmaEncProps prop_info;
-    int rt = LzmaEncProps_Init(&prop_info);
-
+    LzmaEncProps_Init(&prop_info);
     /* if prop wasnt initialized correctly return fail */
+    rt = LzmaEnc_WriteProperties(enc_hand, &output[0], &props_size);
     if (rt != SZ_OK)
         goto end;
 
+    /* do encode */
 
+    return 1;
  end:
-    LzmaEnc_Destroy(enc, &g_Alloc, g_Alloc);
+    log_msg("Error occurred compressing data: LZMA errno %d\n", SZ_OK);
+    LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
     return rt;
 }

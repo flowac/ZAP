@@ -29,8 +29,9 @@ void BigFree(void *address);
 
 #endif
 
-extern const ISzAlloc g_Alloc;
-extern const ISzAlloc g_BigAlloc;
+extern ISzAlloc g_Alloc;
+extern ISzAlloc g_BigAlloc;
+
 
 EXTERN_C_END
 
