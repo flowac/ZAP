@@ -18,7 +18,7 @@
  */
 static void *SzAlloc(void *p, size_t size)
 {
-    (void)p;
+    (void)p; /* silence unused var warning */
     return MyAlloc(size); // just a malloc call...
 }
 /* function implementation for struct ISzAlloc 
@@ -26,7 +26,7 @@ static void *SzAlloc(void *p, size_t size)
  */
 static void SzFree(void *p, void *address)
 {
-    (void)p;
+    (void)p; /* silence unused var warning */
     MyFree(address); // just a free call ... 
 }
 
@@ -186,7 +186,7 @@ int decompress_data(unsigned char *input, size_t input_len,
     return 1;
 }
 
-int in_stream_read(unsigned char *input, unsigned char *output)
+int compress_data_incr(unsigned char *input, unsigned char *output)
 {
     int rt = 1;
     /* CLzmaEncHandle is just a pointer */
