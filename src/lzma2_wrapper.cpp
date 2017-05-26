@@ -16,21 +16,24 @@
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
+/*
 static void *SzAlloc(void *p, size_t size)
 {
-    (void)p; /* silence unused var warning */
+    (void)p; // silence unused var warning
     return MyAlloc(size); // just a malloc call...
 }
+*/
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-static void SzFree(void *p, void *address)
+/*static void SzFree(void *p, void *address)
 {
-    (void)p; /* silence unused var warning */
+    (void)p; // silence unused var warning
     MyFree(address); // just a free call ... 
 }
 
-//ISzAlloc g_Alloc = {szAlloc, szFree};
+static ISzAlloc g_Alloc = {SzAlloc, SzFree};
+*/
 
 /* Read raw data from a filedescriptor
  * INPUT:
@@ -45,10 +48,10 @@ static void SzFree(void *p, void *address)
  * 0 - end of file
  * -1 failure
  */
-static int read_data(FILE *fd, unsigned char *data, size_t *data_len)
+static int read_data(void *fd, unsigned char *data, size_t *data_len)
 {
     *data_len = fread(data, sizeof(unsigned char),
-                      buffer_cread_size, fd);
+                      buffer_cread_size, (FILE *)fd);
 
     if (*data_len == buffer_cread_size)
         return 2;
@@ -67,10 +70,10 @@ static int read_data(FILE *fd, unsigned char *data, size_t *data_len)
  * 1 - success
  * 0 - failure
  */
-static int write_data(FILE *fd, unsigned char *data, size_t data_len)
+static int write_data(void *fd, unsigned char *data, size_t data_len)
 {
     data_len = fwrite(data, sizeof(unsigned char),
-                      data_len, fd);
+                      data_len, (FILE *)fd);
 
     if (data_len == buffer_cread_size)
         return 1;
@@ -117,7 +120,7 @@ int compress_file(const char *in_path, const char *out_path)
         return 0;
 
     /* read the file */
-    while(read_data(fd[0], input, &input_len)) {
+    while(read_data((void *)fd[0], input, &input_len)) {
         /* this is not accurate at the end,
          * a good approximate though */
         printf("%d bytes compressesd\n",
@@ -126,7 +129,7 @@ int compress_file(const char *in_path, const char *out_path)
         /* compress data and write to output */
         compress_data(input, input_len,
                       output, &output_len);
-        write_data(fd[1], output, output_len);
+        write_data((void *)fd[1], output, output_len);
     }
 
 
@@ -206,8 +209,8 @@ int compress_data_incr(unsigned char *input, unsigned char *output)
     if (rt != SZ_OK)
         goto end;
 
-    /* do encode */
-
+    /* do the compression */
+    rt = LzmaEnc_Encode(enc,)
     return 1;
  end:
     log_msg("Error occurred compressing data: LZMA errno %d\n", SZ_OK);
