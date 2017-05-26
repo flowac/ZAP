@@ -81,7 +81,7 @@ tran *newTran()
     return NULL;
 }
 
-block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
+block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs)
 {
     block *bx = (block *)malloc(sizeof(block));
     if (bx == NULL) 
@@ -89,7 +89,7 @@ block *newBlock(uint64_t key, uint32_t nPack, pack **packs)
 
     bx->time = (uint32_t)sNow();
     bx->crc = 0;
-    bx->n = 0;
+    bx->n = n;
     bx->key = key;
     
     if (nPack < MAX_U16) {
@@ -244,22 +244,33 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
     fputs("\t},\n", fp);
 }
 
-bool chainToText(chain *ch, FILE *fp)
+bool chainToText(uint8_t part, block *startBx, uint32_t target)
 {
     //1 tab
+    char tmp[16];
+    snprintf(tmp, 15, "temp%u.file", part);
+    FILE *fp = fopen(fin, "w");
+    
     uint32_t i;
     int len = 10000;
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
     if (buf == NULL || fp == NULL)
         return 0;
     
-    snprintf(buf, len, "{\n\tCtime: %d,\n\tCsize: %d,\n", ch->time, ch->size);
+    snprintf(buf, len, "{\n\tCtime: %u,\n\tCsize: %u,\n", part, target);
     
     fputs(buf, fp);
-    for (i = 0; i < ch->size; i++) {blockToText(ch->head[i], fp, buf, len);}
+    for (i = 0; i < target; i++) {blockToText(startBx++, fp, buf, len);}
     fputs("},\n", fp);
     
     free(buf);
+    fclose(fp);
+    
+    //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
+    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
+    //                    input,  output, terminator
+                    (char *)tmp, outFile, NULL};
+    wrap7z(7, (const char **)args);
     return 1;
 }
 
@@ -342,24 +353,20 @@ chain *text2Chainz(FILE *fp)
 //! TODO AC
 //! redirect the file stream or something, instead of writing to a file then telling 7z to open it
 //  return 1 for success, 0 for failure
-bool chainCompactor(chain *ch, char *outFile)
+bool chainCompactor(chain *ch, uint8_t parts = 1)
 {
-    char tmp[] = "temp.file\0";
-    FILE *fp = fopen(tmp, "w");
+    uint8_t i;
     
-    if (!chainToText(ch, fp))
-    {
-        printf("\n! Conversion to text failed\n");
-        fclose(fp);
-        return 0;
+    for (i = 1; i <= parts; i++) {
+    
+        //FILE *fp = fopen(tmp, "w");
+
+        if (!chainToText(i, ch->head[startBx], target))
+        {
+            printf("\n! Conversion to text failed\n");
+            return 0;
+        }
     }
-    fclose(fp);
-    
-    //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
-    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
-    //                    input,  output,   # of threads, terminator
-                    (char *)tmp, outFile, (char *)"-mt8", NULL};
-    wrap7z(8, (const char **)args);
 
     return 1;
 }
@@ -370,8 +377,8 @@ bool chainCompactor(chain *ch, char *outFile)
 chain *chainExtractor(char *inFile)
 {
     char tmp[] = "temp.file\0";
-    //args to compress: (ignore),        mode,       input,  output,   # of threads, terminator
-    char *args[] = {(char *)"7z", (char *)"d", inFile, (char *)tmp, (char *)"-mt8", NULL};
+    //args to compress: (ignore),        mode,  input,      output, terminator
+    char *args[] = {(char *)"7z", (char *)"d", inFile, (char *)tmp, NULL};
     wrap7z(5, (const char **)args);
     
     FILE *fp = fopen(tmp, "r");
@@ -381,4 +388,42 @@ chain *chainExtractor(char *inFile)
     if (ch == NULL) {printf("\n! Conversion from 7z failed\n");}
     
     return ch;
+}
+
+chain *splitChain(chain *ch, uint8_t parts = 0)
+{
+    static uint8_t  nParts  = 4;
+    static uint32_t target  = 0;
+    static uint32_t startBx = 0;
+    static uint8_t  curPart = 0;
+    curPart++;
+    
+    if (ch == NULL || ch->size < MAX_U8)  return NULL;//chain too small to split
+    
+    if (curPart == 1 && parts != 0) {
+        nParts = parts < MAX_U8 ? parts : MAX_U8;
+        target = ch->size / total * part;
+    }
+    
+    if (curPart > nParts) {
+        nParts  = 4;
+        target  = 0;
+        startBx = 0;
+        curPart = 0;
+        return NULL;
+    }
+    
+    chain *ret = newChain();
+    if (ret == NULL)    return NULL;
+    
+    if (curPart == nParts) {
+        ret->size = ch->size - target * (nParts - 1);
+    } else {
+        ret->size = target;
+    }
+    ret->time = curPart;
+    ret->head = ch[startBx];
+    startBx  += target;
+    
+    return ret;
 }

@@ -98,7 +98,7 @@ chain *chain_gen(uint64_t size)
         }
         
         key = rand() % MAX_U16 * MAX_U32;
-        if (!insertBlock(newBlock(key, nPack, packs), ch))
+        if (!insertBlock(newBlock((uint32_t)i, key, nPack, packs), ch))
             break;
     }
     free(dn);
@@ -116,7 +116,7 @@ int main()
     
     printf("Compressing\n");
     uint32_t dur = (uint32_t)sNow();
-    chainCompactor(ch, (char *)"t3.7z");
+    chainCompactor(ch, 4);
     dur = (uint32_t)sNow() - dur;
     printf("Took %u seconds\n", dur);
     

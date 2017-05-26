@@ -47,7 +47,7 @@ tran *newTran();
  * DESCRIPTION:
  * 
  */
-block *newBlock(uint64_t key, uint32_t nPack, pack **packs);
+block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs);
 
 chain *newChain(void);
 
@@ -62,7 +62,7 @@ uint32_t deleteChain(chain *target);
 
 bool chainToText(chain *ch, FILE *fp);
 
-bool chainCompactor(chain *ch, char *outFile);
+bool chainCompactor(chain *ch, uint8_t parts = 1)
 
 #endif//_ALIB_H
 
