@@ -10,6 +10,8 @@
 /* extern */
 #include "Lzma2Encoder.h"
 #include "C/LzmaLib.h"
+#include "C/7zTypes.h"
+#include "C/Alloc.h"
 
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
@@ -27,7 +29,7 @@ static void SzFree(void *p, void *address)
     p = p;
     MyFree(address); // just a free call ... 
 }
-static ISzAlloc g_Alloc {szAlloc, szFree};
+const ISzAlloc g_Alloc = {szAlloc, szFree};
 
 /* Read raw data from a filedescriptor
  * INPUT:
