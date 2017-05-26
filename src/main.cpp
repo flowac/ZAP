@@ -4,8 +4,6 @@
 #include "log.h"
 #include "lzma2_wrapper.h"
 
-#include "../extern/7z/LzmaAlone.h"
-
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>

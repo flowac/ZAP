@@ -16,7 +16,7 @@
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-void *szAlloc(void *p, size_t size)
+static void *SzAlloc(void *p, size_t size)
 {
     (void)p;
     return MyAlloc(size); // just a malloc call...
@@ -24,13 +24,13 @@ void *szAlloc(void *p, size_t size)
 /* function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-void szFree(void *p, void *address)
+static void SzFree(void *p, void *address)
 {
     (void)p;
     MyFree(address); // just a free call ... 
 }
 
-ISzAlloc g_Alloc = {szAlloc, szFree};
+//ISzAlloc g_Alloc = {szAlloc, szFree};
 
 /* Read raw data from a filedescriptor
  * INPUT:
