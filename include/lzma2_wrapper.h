@@ -9,9 +9,13 @@
 /* ISeqInstream struct implementation */
 struct seq_in_stream{
     ISeqInStream in_stream; // need this for implementation
-    unsigned char buffer[buffer_cread_size]; // data buffer
-    size_t buff_size; // size of the data in the buffer
-    int buff_pos; // position in buffer
+    FILE * fd; // file to read from
+};
+
+/* ISeqInstream struct implementation */
+struct seq_out_stream{
+    ISeqOutStream out_stream; // need this for implementation
+    FILE *fd; // file to write to
 };
 
 /* implementation of ISeqinstream, see ISeqInStream struct
