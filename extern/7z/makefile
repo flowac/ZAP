@@ -1,9 +1,11 @@
+debug: CFLAGS += -g
+debug: all
 PROG = lib7z
 AR = ar rcs
 
 CXX = g++ -O2
 CXX_C = gcc -O2 -Wall -Werror
-CFLAGS = -c -DDEBUG
+CFLAGS += -c -DDEBUG
 
 ODIR = ./obj
 SDIR = ./C

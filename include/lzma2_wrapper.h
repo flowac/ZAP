@@ -32,7 +32,7 @@ int in_stream_read(void *p, void *buf, size_t *size);
  * 1 - success
  * 0 - failure
  */
-int compress_file(const char *in_path, const char *out_path);
+int compress_file(char *in_path, char *out_path);
 
 /* compress raw data, currently gonna use lzma ill update later to
  * use lzma2.
@@ -60,4 +60,6 @@ int compress_data(unsigned char *input, size_t input_len,
  */
 int decompress_data(unsigned char *input, size_t input_len,
                     unsigned char *output, size_t *output_len);
+
+int compress_data_incr(FILE *input, FILE *output);
 #endif // _LZMA2_WRAPPER_H

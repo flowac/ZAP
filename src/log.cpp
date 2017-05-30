@@ -48,6 +48,14 @@ int log_msg(char const * msg, ...)
     return 1;
 }
 
+long get_file_size_c(FILE *fd)
+{
+    fseek(fd, 0, SEEK_END);
+    long size = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+    return size;
+}
+
 UInt64 get_file_size(std::ofstream f_stream)
 {
     UInt64 size_u64 = 0;

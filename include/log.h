@@ -16,6 +16,14 @@
  */
 int log_msg(char const *msg, ...);
 
+/* Get the size of a file
+ * INPUT:
+ * FILE *fd - file descriptor pointing to file
+ * OUTPUT:
+ * size of file (long value)
+ */
+long get_file_size_c(FILE *fd);
+
 /* This function will return the size of the file specified
  * by f_stream
  * INPUT:
