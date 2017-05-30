@@ -2,6 +2,8 @@ More * = more priority
 
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
 **  Implement Incremental compression
+**  Implement Incremental decompression
+*   Comment alib.h
 *   Test magnet link structure
 *   Test RAM usage
     Create a simple search engine (or just copy pasta some google's open source code)
