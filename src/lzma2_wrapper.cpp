@@ -140,7 +140,7 @@ int compress_file(char *in_path, char *out_path)
     //                  output, &output_len);
     //    write_data((void *)fd[1], output, output_len);
     //}
-    compress_data_incr(fd[0], fd[1]);
+    compress_data_incr(fd[0], fd[1], NULL);
 
 
     if (fd[0] != NULL)
@@ -212,7 +212,7 @@ int compress_data_incr(FILE *input, FILE *output, char *args)
     }
     /* 5 bytes for lzma prop + 8 bytes for filesize */
     unsigned char props_header[LZMA_PROPS_SIZE + 8];
-    unsigned int props_size = LZMA_PROPS_SIZE;
+    unsigned long props_size = LZMA_PROPS_SIZE;
     long file_size = get_file_size_c(input);
     CLzmaEncProps prop_info;
     /* create the prop, note the prop is the header of the
