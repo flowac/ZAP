@@ -249,7 +249,7 @@ bool chainToText(uint8_t part, block *startBx, uint32_t target)
     //1 tab
     char tmp[16];
     snprintf(tmp, 15, "temp%u.file", part);
-    FILE *fp = fopen(fin, "w");
+    FILE *fp = fopen(tmp, "w");
     
     uint32_t i;
     int len = 10000;
@@ -260,17 +260,19 @@ bool chainToText(uint8_t part, block *startBx, uint32_t target)
     snprintf(buf, len, "{\n\tCtime: %u,\n\tCsize: %u,\n", part, target);
     
     fputs(buf, fp);
-    for (i = 0; i < target; i++) {blockToText(startBx++, fp, buf, len);}
+    for (i = 0; i < target; i++) {
+        blockToText(startBx++, fp, buf, len);
+    }
     fputs("},\n", fp);
     
     free(buf);
     fclose(fp);
     
     //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
-    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
-    //                    input,  output, terminator
-                    (char *)tmp, outFile, NULL};
-    wrap7z(7, (const char **)args);
+    // char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
+    // //                    input,  output, terminator
+        //                 (char *)tmp, outFile, NULL};
+    // wrap7z(7, (const char **)args);
     return 1;
 }
 
@@ -312,6 +314,9 @@ block *text2Block(FILE *fp)
     uint64_t key = 0;
     pack **packs = NULL;
 
+    /* @Flowing water fix this shit why tf you going so many
+     * indent levels in...
+     */
     while ((c = fgetc(fp)) != EOF) {
         if (c == '{') {
             pack *px = text2Pac(fp);
@@ -337,14 +342,18 @@ chain *text2Chainz(FILE *fp)
     char c;
     chain *ch = newChain();
 
+    /* what the fuck is going on here @flowing water,
+     * are you reading a file char by char to get a curly
+     * brace? why?*/
     while (ch != NULL && (c = fgetc(fp)) != EOF) {
         if (c == '{') {
             block *bx = text2Block(fp);
             if (bx != NULL) {
-                if (!insertBlock(bx, ch)) {printf("insertBlock failed");}
+                if (!insertBlock(bx, ch))
+                    printf("insertBlock failed");
             }
         } else if (c == 'C') {
-            
+            /* empty fucking statement? why? */
         }
     }
     return ch;
@@ -392,7 +401,7 @@ chain *chainExtractor(char *inFile)
 
 chain *splitChain(chain *ch, uint8_t parts = 0)
 {
-    static uint8_t  nParts  = 4;
+    static uint8_t  nParts  = 4; /* why 4? @flowingwater */
     static uint32_t target  = 0;
     static uint32_t startBx = 0;
     static uint8_t  curPart = 0;
@@ -405,6 +414,7 @@ chain *splitChain(chain *ch, uint8_t parts = 0)
         target = ch->size / total * part;
     }
     
+    /* what are we checking here @flowingwater? */
     if (curPart > nParts) {
         nParts  = 4;
         target  = 0;
@@ -414,7 +424,8 @@ chain *splitChain(chain *ch, uint8_t parts = 0)
     }
     
     chain *ret = newChain();
-    if (ret == NULL)    return NULL;
+    if (ret == NULL)
+        return NULL;
     
     if (curPart == nParts) {
         ret->size = ch->size - target * (nParts - 1);
