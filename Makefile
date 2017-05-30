@@ -45,4 +45,4 @@ c2: c1
 	rm -f $(LDIR)/*.a
 
 c3: c2
-	rm -f log temp.file t2.7z t3.7z
+	rm -f log temp.file temp*.file t2.7z t3.7z

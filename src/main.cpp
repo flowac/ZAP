@@ -52,7 +52,7 @@ void chain_test()
                                (char *)"tr:testtesttesttesttesttesttesttest");
         }
 
-        if (!insertBlock(newBlock(key, len, packs), ch))
+        if (!insertBlock(newBlock(i, key, len, packs), ch))
             break;
     }
     printBlock(ch->head[0]);
@@ -112,11 +112,11 @@ int main()
 //    chain_test();
 //    zip_test();
     printf("\nGenerating\n");
-    chain *ch = chain_gen(3000);
+    chain *ch = chain_gen(3);
     
     printf("Compressing\n");
     uint32_t dur = (uint32_t)sNow();
-    chainCompactor(ch, 4);
+    chainCompactor(ch, 1);
     dur = (uint32_t)sNow() - dur;
     printf("Took %u seconds\n", dur);
     
