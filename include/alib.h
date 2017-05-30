@@ -62,7 +62,7 @@ uint32_t deleteChain(chain *target);
 
 bool chainToText(chain *ch, FILE *fp);
 
-bool chainCompactor(chain *ch, uint8_t parts = 1)
+bool chainCompactor(chain *ch, uint8_t parts = 1);
 
 #endif//_ALIB_H
 
