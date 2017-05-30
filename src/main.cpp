@@ -66,8 +66,8 @@ void chain_test()
 
 void compression_test()
 {
-    compress_file("/home/gator/Downloads/Tc/temp.file",
-                  "/home/gator/Downloads/Tc/temp.file.7z");
+    compress_file("/home/gi/multimedia/projects/Torrent/temp.file",
+                  "/home/gi/multimedia/projects/Torrent/temp.file.7z");
 }
 
 int main()
