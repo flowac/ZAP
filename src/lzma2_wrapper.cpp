@@ -35,13 +35,6 @@ static void SzFree(void *p, void *address)
 
 ISzAlloc g_Alloc = {SzAlloc, SzFree};
 
-static size_t my_read_data(FILE *fd, void *data, size_t data_len)
-{
-    if (data_len == 0)
-        return 0;
-    return fread(data, sizeof(unsigned char), data_len, fd);
-}
-
 /* Read raw data from a filedescriptor
  * INPUT:
  * FILE *fd - file descriptor
@@ -50,26 +43,22 @@ static size_t my_read_data(FILE *fd, void *data, size_t data_len)
  * size_t *data_len - the size of the read data, this will
  * also indicate when we have reached the end of the file
  * OUTPUT:
- * 2 - more data
- * 1 - last chunk of data
- * SZ_OK - end of file
- * -1 failure
+ * size of data read
  */
+static size_t my_read_data(FILE *fd, void *data, size_t data_len)
+{
+    if (data_len == 0)
+        return 0;
+    return fread(data, sizeof(unsigned char), data_len, fd);
+}
+
+/* implementation of ISeqoutstream->read */
 static int read_data(void *p, void *data, size_t *data_len)
 {
     if (*data_len == 0)
         return SZ_OK;
     *data_len = my_read_data(((seq_in_stream *)p)->fd, data, *data_len);
         return SZ_OK;
-}
-
-static size_t my_write_data(FILE *fd, const void *data, size_t data_len)
-{
-    if (ferror(fd))
-        log_msg("error");
-    if (data_len == 0)
-        return 0;
-    return fwrite(data, sizeof(unsigned char), data_len, fd);
 }
 
 /* write raw data to a filedescriptor
@@ -80,11 +69,24 @@ static size_t my_write_data(FILE *fd, const void *data, size_t data_len)
  * OUTPUT:
  * number of bytes written
  */
+static size_t my_write_data(FILE *fd, const void *data, size_t data_len)
+{
+    if (data_len == 0)
+        return 0;
+    return fwrite(data, sizeof(unsigned char), data_len, fd);
+}
+
+/* implementation of ISeqinstream->write */
 static size_t write_data(void *p, const void *data, size_t data_len)
 {
     return my_write_data(((seq_out_stream *)p)->fd, data, data_len );
 }
 
+/* Open two files, one for input one for output
+ * INPUT:
+ * const char *in_path - path to input file
+ * const char *out_path - path to output file
+ */
 static int open_io_files(const char *in_path, const char*out_path,
                          FILE *fd[])
 {
@@ -110,6 +112,7 @@ static int open_io_files(const char *in_path, const char*out_path,
     return 0;
 }
 
+/* work in progress, wrapper fn for compression call */
 int compress_file(char *in_path, char *out_path)
 {
     FILE *fd[2]; /* i/o file descriptors */
@@ -196,7 +199,7 @@ int decompress_data(unsigned char *input, size_t input_len,
     return 1;
 }
 
-int compress_data_incr(FILE *input, FILE *output)
+int compress_data_incr(FILE *input, FILE *output, char *args)
 {
     int rt = 1;
     seq_in_stream i_stream = {{read_data}, input};
@@ -207,13 +210,14 @@ int compress_data_incr(FILE *input, FILE *output)
         log_msg ("Error allocating mem when reading stream");
         return SZ_ERROR_MEM;
     }
-    /* create the prop, note the prop is the header of the
-     * compressed file
-     */
-    unsigned char props_header[LZMA_PROPS_SIZE + 8]; // idk why +8
+    /* 5 bytes for lzma prop + 8 bytes for filesize */
+    unsigned char props_header[LZMA_PROPS_SIZE + 8];
     unsigned int props_size = LZMA_PROPS_SIZE;
     long file_size = get_file_size_c(input);
     CLzmaEncProps prop_info;
+    /* create the prop, note the prop is the header of the
+     * compressed file
+     */
     LzmaEncProps_Init(&prop_info);
     /* if prop wasnt initialized correctly return fail */
     rt = LzmaEnc_SetProps(enc_hand, &prop_info);
@@ -221,16 +225,16 @@ int compress_data_incr(FILE *input, FILE *output)
         goto end;
 
     rt = LzmaEnc_WriteProperties(enc_hand, props_header, &props_size);
-    for (int i = 0; i < 7; i++) {
+    /* write filesize to prop header and then to file */
+    for (int i = 0; i < 8; i++)
         props_header[props_size++] = (unsigned char)(file_size >> (8 * i));
-        write_data((void*)&o_stream, props_header, props_size);
-        /* do the compression */
-        if (rt == SZ_OK)
-            rt = LzmaEnc_Encode(enc_hand,
-                                &(o_stream.out_stream),
-                                &(i_stream.in_stream),
-                                NULL, &g_Alloc, &g_Alloc);
-    }
+    write_data((void*)&o_stream, props_header, props_size);
+    /* do the compression */
+    if (rt == SZ_OK)
+        rt = LzmaEnc_Encode(enc_hand,
+                            &(o_stream.out_stream),
+                            &(i_stream.in_stream),
+                            NULL, &g_Alloc, &g_Alloc);
     LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
     return 1;
 
@@ -238,4 +242,9 @@ int compress_data_incr(FILE *input, FILE *output)
     log_msg("Error occurred compressing data: LZMA errno %d\n", SZ_OK);
     LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
     return rt;
+}
+
+int decompress_data_incr(FILE *input, FILE *output)
+{
+    
 }

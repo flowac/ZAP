@@ -61,5 +61,19 @@ int compress_data(unsigned char *input, size_t input_len,
 int decompress_data(unsigned char *input, size_t input_len,
                     unsigned char *output, size_t *output_len);
 
-int compress_data_incr(FILE *input, FILE *output);
+/* compress data incrementally, it works using fn
+ * callbacks that are implemented as static functions.
+ * these functions just provide implementation for
+ * Iseqinstream->read and Iseqoutstream->write
+ * INPUT:
+ * FILE *input - file stream to input file
+ * FILE *output - file stream to ouput file
+ * char *args - arguments to pass to the encode fn,
+ * look at LzmaEnc.h for more info (props struct)
+ * OUTPUT:
+ * not implemented yet
+ */
+int compress_data_incr(FILE *input, FILE *output, char *args);
+
+int decompress_data_incr(FILE *input, FILE *output);
 #endif // _LZMA2_WRAPPER_H
