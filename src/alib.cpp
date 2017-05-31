@@ -126,6 +126,7 @@ chain *newChain(void)
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch)
 {
+    if (bx == NULL) return 0;
     block **tmp = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
 
     // if realloc was successfull assign to head
@@ -200,53 +201,53 @@ uint32_t deleteChain(chain *target)
 
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
-    //3 tabs
+    //2 tabs
     if (!pk || !fp || !buf) return;
-    snprintf(buf, len, "\t\t{\
-\n\t\t\tPinfo: %s,\
-\n\t\t\tPdn  : %s,\
-\n\t\t\tPxl  : %ld,\
-\n\t\t\tPxt  : %s,\
-\n\t\t\tPtr  : %s,\
-\n\t\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+    snprintf(buf, len, "\t{P\
+\n\t\tPinfo: %s,\
+\n\t\tPdn  : %s,\
+\n\t\tPlen : %ld,\
+\n\t\tPxt  : %s,\
+\n\t\tPtr  : %s,\
+\n\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
 
     fwrite(buf, 1, strlen(buf), fp);
 }
 
 void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
-    //3 tabs
+    //2 tabs
     if (!tx || !fp || !buf) return;
-    snprintf(buf, len, "\t\t{\
-\n\t\t\tTtime: %d,\
-\n\t\t\tTid  : %d,\
-\n\t\t\tTsrc : %ld,\
-\n\t\t\tTdest: %ld,\
-\n\t\t\tTsum : %ld,\
-\n\t\t\tTkey : %ld,\
-\n\t\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
+    snprintf(buf, len, "\t{T\
+\n\t\tTtime: %d,\
+\n\t\tTid  : %d,\
+\n\t\tTsrc : %ld,\
+\n\t\tTdest: %ld,\
+\n\t\tTsum : %ld,\
+\n\t\tTkey : %ld,\
+\n\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
 
     fwrite(buf, 1, strlen(buf), fp);
 }
 
 void blockToText(block *bx, FILE *fp, char *buf, int len)
 {
-    //2 tabs
+    //1 tabs
     uint32_t i;
-    snprintf(buf, len, "\t{\
-\n\t\tBtime: %d,\
-\n\t\tBcrc : %d,\
-\n\t\tBpack: %d,\
-\n\t\tBtran: %d,\
-\n\t\tB#   : %d,\
-\n\t\tBkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
+    snprintf(buf, len, "{B\
+\n\tBgmt : %d,\
+\n\tBcrc : %d,\
+\n\tBpack: %d,\
+\n\tBtran: %d,\
+\n\tBn   : %d,\
+\n\tBkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
 
     fwrite(buf, 1, strlen(buf), fp);
     
     for (i = 0; i < bx->nPack; i++) {packToText(bx->packs[i], fp, buf, len);}
     for (i = 0; i < bx->nTran; i++) {tranToText(bx->trans[i], fp, buf, len);}
     
-    strcpy(buf, "\t},\n");
+    strcpy(buf, "},\n");
     fwrite(buf, 1, strlen(buf), fp);
 }
 
@@ -269,7 +270,7 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     if (buf == NULL || fp == NULL)
         return NULL;
     
-    snprintf(buf, len, "{\n\tCtime: %u,\n\tCsize: %u,\n", part, target);
+    snprintf(buf, len, "Ctime: %u,\nCsize: %u,\n", part, target);
     
     fwrite(buf, 1, strlen(buf), fp);
     
@@ -277,7 +278,7 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
         blockToText(head[i], fp, buf, len);
     }
     
-    strcpy(buf, "},\nEOF\n");
+    strcpy(buf, "EOF\n");
     fwrite(buf, 1, strlen(buf), fp);
     
     fclose(fp);
@@ -294,47 +295,40 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
 
 pack *text2Pac(FILE *fp)
 {
-    /*3 tabs
-    snprintf(buf, len, "\t\t{\
-\n\t\t\tinfo: %s,\
-\n\t\t\tdn  : %s,\
-\n\t\t\txl  : %ld,\
-\n\t\t\txt  : %s,\
-\n\t\t\ttr  : %s,\
-\n\t\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+    char s[MAX_U8 + 1];
+    pack *px = NULL;
 
-    fputs(buf, fp);*/
-    return NULL;
+    while (fgets(s, MAX_U8, fp) != NULL) {
+        char *data = strstr(s, (char *)"P");
+        int len = strlen(data);
+        if (len > 1) {
+            switch (data[1]) {
+                case 'i':   break;
+                case 'd':   break;
+                case 'l':   break;
+                case 'x':   break;
+                case 't':   break;
+                default :   break;
+            }
+        }
+    }
+    return px;
 }
 
 tran *text2Tran(FILE *fp)
 {
-    /*3 tabs
-    snprintf(buf, len, "\t\t{\
-\n\t\t\ttime: %d,\
-\n\t\t\tid  : %d,\
-\n\t\t\tsrc : %ld,\
-\n\t\t\tdest: %ld,\
-\n\t\t\tsum : %ld,\
-\n\t\t\tkey : %ld,\
-\n\t\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
-
-    fputs(buf, fp);*/
     return NULL;
 }
 
 block *text2Block(FILE *fp)
 {
-    char c;
+    char s[MAX_U8 + 1];
     uint32_t nPack = 0;
     uint64_t key = 0;
     pack **packs = NULL;
 
-    /* @Flowing water fix this shit why tf you going so many
-     * indent levels in...
-     */
-    while ((c = fgetc(fp)) != EOF) {
-        if (c == '{') {
+    while (fgets(s, MAX_U8, fp) != NULL) {
+        if (strstr(s, (char *)"{P") != NULL) {
             pack *px = text2Pac(fp);
             if (px != NULL) {
                 nPack++;
@@ -346,8 +340,20 @@ block *text2Block(FILE *fp)
                 packs = (pack**)realloc(packs, sizeof(pack *) * nPack);
                 packs[nPack - 1] = px;
             }
-        } else if (c == 'B') {
-            
+        } else {
+            char *data = strstr(s, (char *)"B");
+            int len = strlen(data);
+            if (len > 1) {
+                switch (data[1]) {
+                    case 'g':   break;
+                    case 'c':   break;
+                    case 'p':   break;
+                    case 't':   break;
+                    case 'n':   break;
+                    case 'k':   break;
+                    default :   break;
+                }
+            }
         }
     }
     return (block *)newBlock(0, key, nPack, packs);
@@ -355,21 +361,23 @@ block *text2Block(FILE *fp)
 
 chain *text2Chainz(FILE *fp)
 {
-    char c;
+    char s[MAX_U8 + 1];
     chain *ch = newChain();
-
-    /* what the fuck is going on here @flowing water,
-     * are you reading a file char by char to get a curly
-     * brace? why?*/
-    while (ch != NULL && (c = fgetc(fp)) != EOF) {
-        if (c == '{') {
-            block *bx = text2Block(fp);
-            if (bx != NULL) {
-                if (!insertBlock(bx, ch))
-                    printf("insertBlock failed");
+    if (ch == NULL) return NULL;
+    
+    while (fgets(s, MAX_U8, fp) != NULL) {
+        if (strstr(s, (char *)"{B") != NULL) {
+            if (!insertBlock(text2Block(fp), ch))   printf("insertBlock failed");
+        } else {
+            char *data = strstr(s, (char *)"C");
+            int len = strlen(data);
+            if (len > 1) {
+                switch (data[1]) {
+                    case 't':   break;
+                    case 's':   break;
+                    default :   break;
+                }
             }
-        } else if (c == 'C') {
-            /* empty fucking statement? why? */
         }
     }
     return ch;
