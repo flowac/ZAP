@@ -5,7 +5,7 @@
 
 #include "../extern/7z/LzmaAlone.h"
 
-#include <iostream>
+#include <sstream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -61,8 +61,6 @@ void chain_test()
     printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
 
     free(ch);
-
-    std::cout.imbue(std::locale());
 }
 
 void zip_test()
@@ -112,7 +110,7 @@ int main()
 //    chain_test();
 //    zip_test();
     printf("\nGenerating\n");
-    chain *ch = chain_gen(3);
+    chain *ch = chain_gen(3000);
     
     printf("Compressing\n");
     uint32_t dur = (uint32_t)sNow();
@@ -123,6 +121,7 @@ int main()
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
     
+    //std::cout.imbue(std::locale());
     return 0;
 }
 

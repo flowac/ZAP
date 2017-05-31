@@ -200,6 +200,7 @@ uint32_t deleteChain(chain *target)
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
     //3 tabs
+    if (!pk || !fp || !buf) return;
     snprintf(buf, len, "\t\t{\
 \n\t\t\tPinfo: %s,\
 \n\t\t\tPdn  : %s,\
@@ -214,6 +215,7 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
 void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
     //3 tabs
+    if (!tx || !fp || !buf) return;
     snprintf(buf, len, "\t\t{\
 \n\t\t\tTtime: %d,\
 \n\t\t\tTid  : %d,\
@@ -240,18 +242,19 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 
     fwrite(buf, 1, strlen(buf), fp);
     
-    for (i = 0; i < bx->nPack && bx->packs[i] != NULL; i++) {packToText(bx->packs[i], fp, buf, len);}
+    for (i = 0; i < bx->nPack; i++) {packToText(bx->packs[i], fp, buf, len);}
     for (i = 0; i < bx->nTran; i++) {tranToText(bx->trans[i], fp, buf, len);}
     
     strcpy(buf, "\t},\n");
     fwrite(buf, 1, strlen(buf), fp);
 }
 
-bool chainToText(uint8_t part, block *startBx, uint32_t target)
+bool chainToText(uint8_t part, block **head, uint32_t start, uint32_t target)
 {
     //1 tab
-    char tmp[16];
+    char tmp[16], tmp7z[16];
     snprintf(tmp, 15, "temp%u.file", part);
+    snprintf(tmp7z, 15, "temp%u.7z", part);
     FILE *fp = fopen(tmp, "w");
     
     uint32_t i;
@@ -264,8 +267,8 @@ bool chainToText(uint8_t part, block *startBx, uint32_t target)
     
     fwrite(buf, 1, strlen(buf), fp);
     
-    for (i = 0; i < target; i++) {
-        blockToText(startBx++, fp, buf, len);
+    for (i = start; i < target; i++) {
+        blockToText(head[i], fp, buf, len);
     }
     
     strcpy(buf, "},\nEOF\n");
@@ -275,10 +278,10 @@ bool chainToText(uint8_t part, block *startBx, uint32_t target)
     free(buf);
     
     //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
-    // char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
-    // //                    input,  output, terminator
-        //                 (char *)tmp, outFile, NULL};
-    // wrap7z(7, (const char **)args);
+    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
+    //                         input,        output, terminator
+                         (char *)tmp, (char *)tmp7z, NULL};
+    wrap7z(7, (const char **)args);
     return 1;
 }
 
@@ -378,13 +381,13 @@ bool chainCompactor(chain *ch, uint8_t parts)
     
     target = size / parts;
     done = target + (size % parts);//standard part size + all remainders
-    if (!chainToText(i++, ch->head[0], done)) {
+    if (!chainToText(i++, ch->head, 0, done)) {
         printf("\n! Conversion to text failed\n");
         return 0;
     }
     
     for (; i <= parts;) {
-        if (!chainToText(i++, ch->head[done], done + target)) {
+        if (!chainToText(i++, ch->head, done, done + target)) {
             printf("\n! Conversion to text failed\n");
             return 0;
         }
