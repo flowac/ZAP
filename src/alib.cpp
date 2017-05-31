@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
+#include <pthread.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "../extern/7z/LzmaAlone.h"
 
@@ -249,8 +250,13 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
     fwrite(buf, 1, strlen(buf), fp);
 }
 
-bool chainToText(uint8_t part, block **head, uint32_t start, uint32_t target)
+void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint32_t target)
 {
+    threadParams *tp = (threadParams *)args;
+    uint8_t part =      tp->i;
+    block **head =      tp->head;
+    uint32_t start =    tp->start;
+    uint32_t target =   tp->end;
     //1 tab
     char tmp[16], tmp7z[16];
     snprintf(tmp, 15, "temp%u.file", part);
@@ -261,7 +267,7 @@ bool chainToText(uint8_t part, block **head, uint32_t start, uint32_t target)
     int len = 3000;
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
     if (buf == NULL || fp == NULL)
-        return 0;
+        return NULL;
     
     snprintf(buf, len, "{\n\tCtime: %u,\n\tCsize: %u,\n", part, target);
     
@@ -278,11 +284,12 @@ bool chainToText(uint8_t part, block **head, uint32_t start, uint32_t target)
     free(buf);
     
     //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
-    char *args[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
+    char *args7z[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
     //                         input,        output, terminator
                          (char *)tmp, (char *)tmp7z, NULL};
-    wrap7z(7, (const char **)args);
-    return 1;
+    wrap7z(7, (const char **)args7z);
+    
+    return NULL;
 }
 
 pack *text2Pac(FILE *fp)
@@ -373,26 +380,29 @@ chain *text2Chainz(FILE *fp)
 //  return 1 for success, 0 for failure
 bool chainCompactor(chain *ch, uint8_t parts)
 {
-    uint32_t size = ch->size, target, done, i = 1;
+    uint32_t size = ch->size, target, done;
+    uint8_t i;
     
     if (parts == 0 || parts > MAX_U8) {
         parts = 1;
     }
+    pthread_t threads[parts];
+    threadParams tp[parts];
     
+    done = 0;
     target = size / parts;
-    done = target + (size % parts);//standard part size + all remainders
-    if (!chainToText(i++, ch->head, 0, done)) {
-        printf("\n! Conversion to text failed\n");
-        return 0;
-    }
     
-    for (; i <= parts;) {
-        if (!chainToText(i++, ch->head, done, done + target)) {
-            printf("\n! Conversion to text failed\n");
-            return 0;
-        }
+    for (i = 0; i < parts; i++) {
+        tp[i].i = i + 1;
+        tp[i].head = ch->head;
+        tp[i].start = done;
         done += target;
+        if (i == 0) done += (size % parts);
+        tp[i].end = done;
+        
+        pthread_create(&threads[i], NULL, &chainToText, (void *)&tp[i]);
     }
+    for (i = 0; i < parts; i++) pthread_join(threads[i], NULL);
 
     return 1;
 }

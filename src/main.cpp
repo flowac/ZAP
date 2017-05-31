@@ -114,7 +114,7 @@ int main()
     
     printf("Compressing\n");
     uint32_t dur = (uint32_t)sNow();
-    chainCompactor(ch, 1);
+    chainCompactor(ch, 5);
     dur = (uint32_t)sNow() - dur;
     printf("Took %u seconds\n", dur);
     

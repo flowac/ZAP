@@ -64,8 +64,8 @@ OBJS = \
   LzmaDec.o \
   LzmaEnc.o \
   Lzma86Dec.o \
-  Lzma86Enc.o \
-  Lzma2Enc.o \
+  Lzma86Enc.o
+#  Lzma2Enc.o \
   Lzma2Dec.o \
   Lzma2Encoder.o \
   Lzma2Decoder.o \

@@ -21,7 +21,7 @@ OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # compile flags and libraries
 FLAGS = -Wall -I$(IDIR) -I/usr/include/openssl
-LIBS = -L/usr/include/boost/ -lssl -lcrypto
+LIBS = -L/usr/include/boost/ -lssl -lcrypto -lpthread
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 
@@ -37,6 +37,9 @@ extern:
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE)
 	$(CC) -c -o $@ $< $(FLAGS)
 
+cf:
+	rm -f log temp*.file t*.7z
+
 c1:
 	rm -f $(PRG) $(ODIR)/*.o
 
@@ -44,5 +47,4 @@ c2: c1
 	$(MAKE) -C extern/7z clean
 	rm -f $(LDIR)/*.a
 
-c3: c2
-	rm -f log temp.file temp*.file t2.7z t3.7z
+c3: c2 cf

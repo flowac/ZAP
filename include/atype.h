@@ -76,4 +76,11 @@ typedef struct
     block **head;//expandable
 }chain;
 
+typedef struct{
+    uint32_t i;
+    block **head;
+    uint32_t start;
+    uint32_t end;
+}threadParams;
+
 #endif//_ATYPE_H
