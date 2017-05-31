@@ -5,7 +5,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "../extern/7z/LzmaAlone.h"
+#include "lzma_wrapper.h"
 
 namespace pt = boost::posix_time;
 
@@ -283,11 +283,7 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     fclose(fp);
     free(buf);
     
-    //args to compress: (ignore),        mode,     intensity,dictionary size,     #fast bytes,
-    char *args7z[] = {(char *)"7z", (char *)"e", (char *)"-a0", (char *)"-d16", (char *)"-fb32",
-    //                         input,        output, terminator
-                         (char *)tmp, (char *)tmp7z, NULL};
-    wrap7z(7, (const char **)args7z);
+    compress_file(tmp, tmp7z, NULL);
     
     return NULL;
 }
@@ -413,9 +409,7 @@ bool chainCompactor(chain *ch, uint8_t parts)
 chain *chainExtractor(char *inFile)
 {
     char tmp[] = "temp.file\0";
-    //args to compress: (ignore),        mode,  input,      output, terminator
-    char *args[] = {(char *)"7z", (char *)"d", inFile, (char *)tmp, NULL};
-    wrap7z(5, (const char **)args);
+    compress_file(tmp, "tmp.file.mycomp", NULL);
     
     FILE *fp = fopen(tmp, "r");
     chain *ch = text2Chainz(fp);

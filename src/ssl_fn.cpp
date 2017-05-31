@@ -10,7 +10,7 @@
 #include <string.h>
 #include <errno.h>
 
-unsigned char *create_sha1sum(char *dst)
+unsigned char *create_sha1sum(const char *dst)
 {
     SHA_CTX ctx; // sha1 struct (look at sha.h)
     unsigned char *sha1sum = NULL, // sha1sum dest

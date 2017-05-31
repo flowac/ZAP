@@ -1,14 +1,18 @@
 /* Flowingwater slap a liscence
  */
-
-#include "log.h"
-#include "time_fn.h"
-
 #include <time.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
+#include <ostream>
+#include <iostream>
+#include <fstream>
+
+#include "log.h"
+#include "time_fn.h"
+/* extern */
+#include "C/7zTypes.h"
 
 int log_msg(char const * msg, ...)
 {
@@ -42,4 +46,25 @@ int log_msg(char const * msg, ...)
         fclose(fd);
     va_end(msg_formatted);
     return 1;
+}
+
+long get_file_size_c(FILE *fd)
+{
+    fseek(fd, 0, SEEK_END);
+    long size = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+    return size;
+}
+
+UInt64 get_file_size(std::ofstream f_stream)
+{
+    UInt64 size_u64 = 0;
+
+    std::char_traits<char>::pos_type file_start = f_stream.tellp(); // get start pos
+    f_stream.seekp(0, std::ios_base::end); // goto end and get pos
+    std::char_traits<char>::pos_type file_end = f_stream.tellp();
+    size_u64 = (UInt64)(file_end - file_start);
+    f_stream.seekp(0, std::ios_base::beg);
+
+    return size_u64;
 }

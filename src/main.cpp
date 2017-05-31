@@ -2,8 +2,7 @@
 #include "atype.h"
 #include "ssl_fn.h"
 #include "log.h"
-
-#include "../extern/7z/LzmaAlone.h"
+#include "lzma_wrapper.h"
 
 #include <sstream>
 #include <stdlib.h>
@@ -65,9 +64,7 @@ void chain_test()
 
 void zip_test()
 {
-    //arguments to compress: (ignore)      mode         input name    output name      # of threads
-    char *args[] = {(char *)"7z", (char *)"e", (char *)"t2", (char *)"t2.7z", (char *)"-mt8", NULL};
-    wrap7z(5, (const char **)args);
+    compress_file("t2","t2.my7z", NULL);
 }
 
 chain *chain_gen(uint64_t size)
@@ -102,6 +99,14 @@ chain *chain_gen(uint64_t size)
     free(dn);
     return ch;
 }
+void uncompress_test() {
+    for (int i = 1; i < 6; i++) {
+        char buff1[64], buff2 [64];
+        sprintf(buff1,"temp%d.7z", i);
+        sprintf(buff2, "temp%d.unc",i);
+        decompress_file(buff1, buff2, NULL);
+    }
+}
 
 int main()
 {
@@ -122,6 +127,7 @@ int main()
     free(ch);
     
     //std::cout.imbue(std::locale());
+    uncompress_test();
     return 0;
 }
 
