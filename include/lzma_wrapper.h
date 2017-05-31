@@ -28,38 +28,27 @@ int in_stream_read(void *p, void *buf, size_t *size);
  * INPUT:
  * char *in_path - path to the file we want to open
  * char *out_path - path to file we will write compressed data to
+ * void *args - available compression options see CLzmaEncprops in
+ * LzmaEnc.h for more info
  * OUTPUT:
  * 1 - success
  * 0 - failure
  */
-int compress_file(char *in_path, char *out_path);
+int compress_file(const char *in_path,
+                  const char *out_path,
+                  void *args);
 
-/* compress raw data, currently gonna use lzma ill update later to
- * use lzma2.
+/* decompress a compressed file, barely modified from lzmautil
+ * thank @flowing water for rushing me
  * INPUT:
- * unsigned char *input - raw data that we will compress
- * unsigned char *output - destination of compressed data
- * OUTPUT:
- * 1 - success
- * 0 - failure
- * unsigned char *output will hold the compressed data
+ * const char *in_path - string containing path to compressed file
+ * const char *out_path - string  containing path to store
+ * uncompressed file
+ * void *args available parameters, see CLzmaDec in LzmaDec.h
  */
-int compress_data(unsigned char *input, size_t input_len,
-                  unsigned char *output, size_t *output_len);
-
-/* decompress raw data
- * INPUT:
- * unsigned char *input - raw data to decompress
- * size_t input_len - length of input
- * unsigned char *output - destination of decompressed data
- * size_t *output_len - size of buffer
- * RETURN:
- * 1 - success
- * 0 - failure
- * output_len will hold size of decompressed data
- */
-int decompress_data(unsigned char *input, size_t input_len,
-                    unsigned char *output, size_t *output_len);
+int decompress_file(const char *in_path,
+                    const char *out_path,
+                    void *args);
 
 /* compress data incrementally, it works using fn
  * callbacks that are implemented as static functions.
@@ -73,7 +62,17 @@ int decompress_data(unsigned char *input, size_t input_len,
  * OUTPUT:
  * not implemented yet
  */
-int compress_data_incr(FILE *input, FILE *output, char *args);
+int compress_data_incr(FILE *input, FILE *output, const char *args);
 
+/* decompress data incrementally, reads file size and then calculates
+ * how much more is left to read based on how much data has alrdy been
+ * processed, it knows its done when its processed "file_size" bytes of
+ * data
+ * INPUT:
+ * FILE *input - filestream to input file (compressed filee)
+ * FILE *output - filestream to desired destination
+ * OUTPUT:
+ * n/a at the moment
+ */
 int decompress_data_incr(FILE *input, FILE *output);
 #endif // _LZMA2_WRAPPER_H
