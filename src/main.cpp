@@ -104,8 +104,8 @@ chain *chain_gen(uint64_t size)
 void uncompress_test() {
     for (int i = 1; i < 6; i++) {
         char buff1[64], buff2 [64];
-        sprintf(buff1,"temp%d.7z", i);
-        sprintf(buff2, "temp%d.unc",i);
+        sprintf(buff1,"temp%d.file.7z", i);
+        sprintf(buff2, "temp%d.file.unc",i);
         decompress_file(buff1, buff2);
     }
 }

@@ -96,14 +96,14 @@ static int open_io_files(const char *in_path, const char*out_path,
 {
     fd[0] = fopen(in_path, "r");
     if (fd[0] == NULL)  {
-        log_msg("Error opening input file for compression: %s\n",
-                strerror(errno));
+        log_msg("Error opening input file for compression: %s filename: %s\n",
+                strerror(errno), in_path);
         goto cleanup;
     }
     fd[1] = fopen(out_path, "w+");
     if (fd[0] == NULL)  {
-        log_msg("Error opening output file for compression: %s\n",
-                strerror(errno));
+        log_msg("Error opening output file for compression: %s filename: %s\n",
+                strerror(errno), out_path);
         goto cleanup;
     }
     return 1;
@@ -194,7 +194,7 @@ int compress_file(const char *in_path,
                            out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("compressing %s\n", in_path);
+    printf("compressing %s -> %s\n", in_path, out_path_local);
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;
@@ -219,9 +219,9 @@ int decompress_file(const char *in_path,
                              out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("decompressing %s\n", in_path);
+    printf("decompressing %s -> %s\n", in_path, out_path_local);
     /* open i/o files, return fail if this failes */
-    if (!open_io_files(in_path, out_path, fd))
+    if (!open_io_files(in_path, out_path_local, fd))
         return 0;
     if (!decompress_data_incr(fd[0], fd[1]))
         log_msg("Failed to decompress\n");

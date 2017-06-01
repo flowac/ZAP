@@ -54,7 +54,7 @@ int compress_file(const char *in_path,
  * void *args available parameters, see CLzmaDec in LzmaDec.h
  */
 int decompress_file(const char *in_path,
-                    const char *out_path);
+                    const char *out_path = NULL);
 
 /* compress data incrementally, it works using fn
  * callbacks that are implemented as static functions.
