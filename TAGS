@@ -1,0 +1,3392 @@
+
+extern/7z/C/LzmaEnc.c,8959
+#define _7ZIP_ST16,324
+static unsigned g_STAT_OFFSET 27,460
+#define kMaxHistorySize 30,506
+#define kBlockSizeMax 33,600
+#define kBlockSize 35,663
+#define kUnpackBlockSize 36,693
+#define kMatchArraySize 37,729
+#define kMatchRecordMaxSize 38,764
+#define kNumMaxDirectBits 40,847
+#define kNumTopBits 42,881
+#define kTopValue 43,905
+#define kNumBitModelTotalBits 45,953
+#define kBitModelTotal 46,987
+#define kNumMoveBits 47,1040
+#define kProbInitValue 48,1064
+#define kNumMoveReducingBits 50,1112
+#define kNumBitPriceShiftBits 51,1144
+#define kBitPrice 52,1177
+void LzmaEncProps_Init(54,1227
+void LzmaEncProps_Normalize(63,1479
+UInt32 LzmaEncProps_GetDictSize(99,2556
+#define kDicLogSizeMaxCompress 113,2848
+#define BSR2_RET(115,2885
+static UInt32 GetPosSlot1(117,3009
+#define GetPosSlot2(123,3107
+#define GetPosSlot(124,3162
+#define kNumLogBits 128,3256
+#define kDicLogSizeMaxCompress 131,3361
+static void LzmaEnc_FastPosInit(133,3423
+#define BSR2_RET(163,4238
+#define GetPosSlot1(172,4588
+#define GetPosSlot2(173,4632
+#define GetPosSlot(174,4687
+#define LZMA_NUM_REPS 179,4814
+typedef unsigned CState;181,4841
+  UInt32 price;185,4888
+  CState state;187,4907
+  int prev1IsChar;188,4924
+  int prev2;189,4944
+  UInt32 posPrev2;191,4960
+  UInt32 backPrev2;192,4980
+  UInt32 posPrev;194,5003
+  UInt32 backPrev;195,5022
+  UInt32 backs[backs196,5042
+} COptimal;197,5074
+#define kNumOpts 199,5089
+#define kNumLenToPosStates 201,5119
+#define kNumPosSlotBits 202,5149
+#define kDicLogSizeMin 203,5176
+#define kDicLogSizeMax 204,5202
+#define kDistTableSizeMax 205,5229
+#define kNumAlignBits 208,5281
+#define kAlignTableSize 209,5306
+#define kAlignMask 210,5352
+#define kStartPosModelIndex 212,5396
+#define kEndPosModelIndex 213,5427
+#define kNumPosModels 214,5457
+#define kNumFullDistances 216,5524
+#define CLzmaProb 219,5606
+#define CLzmaProb 221,5639
+#define LZMA_PB_MAX 224,5675
+#define LZMA_LC_MAX 225,5698
+#define LZMA_LP_MAX 226,5721
+#define LZMA_NUM_PB_STATES_MAX 228,5746
+#define kLenNumLowBits 231,5801
+#define kLenNumLowSymbols 232,5827
+#define kLenNumMidBits 233,5876
+#define kLenNumMidSymbols 234,5902
+#define kLenNumHighBits 235,5951
+#define kLenNumHighSymbols 236,5978
+#define kLenNumSymbolsTotal 238,6031
+#define LZMA_MATCH_LEN_MIN 240,6123
+#define LZMA_MATCH_LEN_MAX 241,6153
+#define kNumStates 243,6230
+  CLzmaProb choice;248,6276
+  CLzmaProb choice2;249,6297
+  CLzmaProb low[low250,6319
+  CLzmaProb mid[mid251,6379
+  CLzmaProb high[high252,6439
+} CLenEnc;253,6478
+  CLenEnc p;258,6513
+  UInt32 tableSize;259,6527
+  UInt32 prices[prices260,6548
+  UInt32 counters[counters261,6611
+} CLenPriceEnc;262,6655
+  UInt32 range;267,6695
+  Byte cache;268,6712
+  UInt64 low;269,6727
+  UInt64 cacheSize;270,6742
+  Byte *buf;buf271,6763
+  Byte *bufLim;bufLim272,6777
+  Byte *bufBase;bufBase273,6794
+  ISeqOutStream *outStream;outStream274,6812
+  UInt64 processed;275,6841
+  SRes res;276,6862
+} CRangeEnc;277,6875
+  CLzmaProb *litProbs;litProbs282,6912
+  UInt32 state;284,6938
+  UInt32 reps[reps285,6955
+  CLzmaProb isMatch[isMatch287,6988
+  CLzmaProb isRep[isRep288,7046
+  CLzmaProb isRepG0[isRepG0289,7078
+  CLzmaProb isRepG1[isRepG1290,7112
+  CLzmaProb isRepG2[isRepG2291,7146
+  CLzmaProb isRep0Long[isRep0Long292,7180
+  CLzmaProb posSlotEncoder[posSlotEncoder294,7243
+  CLzmaProb posEncoders[posEncoders295,7314
+  CLzmaProb posAlignEncoder[posAlignEncoder296,7379
+  CLenPriceEnc lenEnc;298,7433
+  CLenPriceEnc repLenEnc;299,7457
+} CSaveState;300,7484
+  void *matchFinderObj;matchFinderObj305,7522
+  IMatchFinder matchFinder;306,7547
+  UInt32 optimumEndIndex;308,7578
+  UInt32 optimumCurrentIndex;309,7605
+  UInt32 longestMatchLength;311,7638
+  UInt32 numPairs;312,7668
+  UInt32 numAvail;313,7688
+  UInt32 numFastBytes;315,7710
+  UInt32 additionalOffset;316,7734
+  UInt32 reps[reps317,7762
+  UInt32 state;318,7793
+  unsigned lc,320,7812
+  unsigned lc, lp,320,7812
+  unsigned lc, lp, pb;320,7812
+  unsigned lpMask,321,7836
+  unsigned lpMask, pbMask;321,7836
+  unsigned lclp;322,7864
+  CLzmaProb *litProbs;litProbs324,7884
+  Bool fastMode;326,7910
+  Bool writeEndMark;327,7928
+  Bool finished;328,7950
+  Bool multiThread;329,7968
+  Bool needInit;330,7989
+  UInt64 nowPos64;332,8009
+  UInt32 matchPriceCount;334,8033
+  UInt32 alignPriceCount;335,8060
+  UInt32 distTableSize;337,8089
+  UInt32 dictSize;339,8116
+  SRes result;340,8136
+  CRangeEnc rc;342,8154
+  Bool mtMode;345,8193
+  CMatchFinderMt matchFinderMt;346,8209
+  CMatchFinder matchFinderBase;349,8254
+  Byte pad[pad352,8309
+  COptimal opt[opt355,8341
+  Byte g_FastPos[g_FastPos358,8396
+  UInt32 ProbPrices[ProbPrices361,8445
+  UInt32 matches[matches362,8507
+  UInt32 posSlotPrices[posSlotPrices364,8560
+  UInt32 distancesPrices[distancesPrices365,8624
+  UInt32 alignPrices[alignPrices366,8690
+  CLzmaProb isMatch[isMatch368,8732
+  CLzmaProb isRep[isRep369,8790
+  CLzmaProb isRepG0[isRepG0370,8822
+  CLzmaProb isRepG1[isRepG1371,8856
+  CLzmaProb isRepG2[isRepG2372,8890
+  CLzmaProb isRep0Long[isRep0Long373,8924
+  CLzmaProb posSlotEncoder[posSlotEncoder375,8987
+  CLzmaProb posEncoders[posEncoders376,9058
+  CLzmaProb posAlignEncoder[posAlignEncoder377,9123
+  CLenPriceEnc lenEnc;379,9177
+  CLenPriceEnc repLenEnc;380,9201
+  CSaveState saveState;382,9230
+  Byte pad2[pad2385,9277
+} CLzmaEnc;387,9306
+void LzmaEnc_SaveState(390,9323
+void LzmaEnc_RestoreState(416,10389
+SRes LzmaEnc_SetProps(442,11470
+static const int kLiteralNextStates[kLiteralNextStates499,12828
+static const int kMatchNextStates[kMatchNextStates500,12921
+static const int kRepNextStates[kRepNextStates501,13015
+static const int kShortRepNextStates[kShortRepNextStates502,13109
+#define IsCharState(504,13205
+#define GetLenToPosState(506,13241
+#define kInfinityPrice 508,13346
+static void RangeEnc_Construct(510,13382
+#define RangeEnc_GetProcessed(516,13482
+#define RC_BUF_SIZE 518,13580
+static int RangeEnc_Alloc(519,13611
+static void RangeEnc_Free(531,13862
+static void RangeEnc_Init(537,13982
+static void RangeEnc_FlushStream(551,14202
+static void MY_FAST_CALL RangeEnc_ShiftLow(563,14484
+static void RangeEnc_FlushData(584,15002
+static void RangeEnc_EncodeDirectBits(591,15120
+static void RangeEnc_EncodeBit(606,15432
+static void LitEnc_Encode(629,15930
+static void LitEnc_EncodeMatched(640,16166
+static void LzmaEnc_InitPriceTables(654,16539
+#define GET_PRICE(678,17129
+#define GET_PRICEa(681,17264
+#define GET_PRICE_0(684,17397
+#define GET_PRICE_1(685,17470
+#define GET_PRICE_0a(687,17570
+#define GET_PRICE_1a(688,17641
+static UInt32 LitEnc_GetPrice(690,17739
+static UInt32 LitEnc_GetPriceMatched(703,18030
+static void RcTree_Encode(720,18460
+static void RcTree_ReverseEncode(734,18760
+static UInt32 RcTree_GetPrice(747,19062
+static UInt32 RcTree_ReverseGetPrice(759,19366
+static void LenEnc_Init(775,19726
+static void LenEnc_Encode(787,20110
+static void LenEnc_SetPrices(810,20840
+static void MY_FAST_CALL LenPriceEnc_UpdateTable(833,21749
+static void LenPriceEnc_UpdateTables(839,21993
+static void LenEnc_Encode2(846,22237
+static void MovePos(857,22550
+static UInt32 ReadMatchDistances(871,22806
+#define MakeAsChar(911,24019
+#define MakeAsShortRep(912,24098
+#define IsShortRep(913,24170
+static UInt32 GetRepLen1Price(915,24216
+static UInt32 GetPureRepPrice(922,24397
+static UInt32 GetRepPrice(944,24934
+static UInt32 Backward(950,25162
+#define LIT_PROBS(986,26128
+static UInt32 GetOptimum(988,26259
+#define ChangePair(1556,43901
+static UInt32 GetOptimumFast(1558,43976
+static void WriteEndMarker(1666,46947
+static SRes CheckErrors(1679,47618
+static SRes Flush(1692,47922
+static void FillAlignPrices(1703,48186
+static void FillDistancesPrices(1711,48419
+void LzmaEnc_Construct(1744,49780
+CLzmaEncHandle LzmaEnc_Create(1769,50318
+void LzmaEnc_FreeLits(1778,50494
+void LzmaEnc_Destruct(1786,50693
+void LzmaEnc_Destroy(1797,50980
+static SRes LzmaEnc_CodeOneBlock(1803,51144
+#define kBigHashDicLimit 1965,56435
+static SRes LzmaEnc_Alloc(1967,56481
+void LzmaEnc_Init(2017,58123
+void LzmaEnc_InitPrices(2076,59467
+static SRes LzmaEnc_AllocAndInit(2091,59841
+static SRes LzmaEnc_Prepare(2108,60302
+SRes LzmaEnc_PrepareForLzma2(2118,60631
+static void LzmaEnc_SetInputBuf(2128,60944
+SRes LzmaEnc_MemPrepare(2135,61163
+void LzmaEnc_Finish(2145,61474
+  ISeqOutStream funcTable;2159,61705
+  Byte *data;data2160,61733
+  SizeT rem;2161,61748
+  Bool overflow;2162,61762
+} CSeqOutStreamBuf;2163,61780
+static size_t MyWrite(2165,61803
+UInt32 LzmaEnc_GetNumAvailableBytes(2180,62090
+const Byte *LzmaEnc_GetCurBuf(LzmaEnc_GetCurBuf2187,62261
+SRes LzmaEnc_CodeOneMemBlock(2194,62450
+static SRes LzmaEnc_Encode2(2229,63296
+SRes LzmaEnc_Encode(2267,64020
+SRes LzmaEnc_WriteProperties(2275,64313
+SRes LzmaEnc_MemEncode(2303,65109
+SRes LzmaEncode(2335,65924
+
+extern/7z/C/LzmaLib.c,64
+MY_STDAPI LzmaCompress(9,173
+MY_STDAPI LzmaUncompress(35,1025
+
+extern/7z/C/tmp/Xz.c,279
+const Byte XZ_SIG[XZ_SIG11,168
+const Byte XZ_FOOTER_SIG[XZ_FOOTER_SIG12,235
+unsigned Xz_WriteVarInt(14,299
+void Xz_Construct(27,500
+void Xz_Free(34,621
+unsigned XzFlags_GetCheckSize(41,771
+void XzCheck_Init(47,916
+void XzCheck_Update(58,1189
+int XzCheck_Final(68,1528
+
+extern/7z/C/tmp/Bra86.c,54
+#define Test86MSByte(8,135
+SizeT x86_Convert(10,188
+
+extern/7z/C/tmp/7zBuf.c,66
+void Buf_Init(8,120
+int Buf_Create(14,184
+void Buf_Free(31,452
+
+extern/7z/C/tmp/Bcj2Enc.c,323
+#define PRF(10,191
+#define PRF(12,216
+#define CProb 21,330
+#define kTopValue 23,354
+#define kNumModelBits 24,391
+#define kBitModelTotal 25,417
+#define kNumMoveBits 26,462
+void Bcj2Enc_Init(28,488
+static Bool MY_FAST_CALL RangeEnc_ShiftLow(56,973
+static void Bcj2Enc_Encode_2(81,1607
+void Bcj2Enc_Encode(244,5745
+
+extern/7z/C/tmp/Ppmd7.c,1547
+const Byte PPMD7_kExpEscape[PPMD7_kExpEscape11,216
+static const UInt16 kInitBinEsc[kInitBinEsc12,305
+#define MAX_FREQ 14,411
+#define UNIT_SIZE 15,433
+#define U2B(17,457
+#define U2I(18,501
+#define I2U(19,544
+  #define REF(22,606
+  #define REF(24,639
+#define STATS_REF(27,707
+#define CTX(29,761
+#define STATS(30,824
+#define ONE_STATE(31,867
+#define SUFFIX(32,918
+typedef CPpmd7_Context * CTX_PTR;34,960
+  CPpmd7_Node_Ref;44,1109
+typedef struct CPpmd7_Node_46,1131
+  UInt16 Stamp;48,1163
+  UInt16 NU;49,1254
+  CPpmd7_Node_Ref Next;50,1268
+  CPpmd7_Node_Ref Prev;51,1322
+} CPpmd7_Node;52,1347
+  #define NODE(55,1384
+  #define NODE(57,1418
+void Ppmd7_Construct(60,1486
+void Ppmd7_Free(91,2182
+Bool Ppmd7_Alloc(98,2299
+static void InsertNode(120,2778
+static void *RemoveNode(RemoveNode126,2932
+static void SplitBlock(133,3117
+static void GlueFreeBlocks(145,3449
+static void *AllocUnitsRare(AllocUnitsRare217,5208
+static void *AllocUnits(AllocUnits243,5788
+#define MyMem12Cpy(258,6137
+static void *ShrinkUnits(ShrinkUnits262,6349
+#define SUCCESSOR(279,6748
+static void SetSuccessor(281,6847
+static void RestartModel(287,7034
+void Ppmd7_Init(334,8436
+static CTX_PTR CreateSuccessors(343,8657
+static void SwapStates(416,10369
+static void UpdateModel(423,10489
+static void Rescale(572,14034
+CPpmd_See *Ppmd7_MakeEscFreq(Ppmd7_MakeEscFreq636,15723
+static void NextContext(661,16457
+void Ppmd7_Update1(670,16665
+void Ppmd7_Update1_0(685,16955
+void Ppmd7_UpdateBin(695,17219
+void Ppmd7_Update2(703,17412
+
+extern/7z/C/tmp/LzmaEnc.c,8959
+#define _7ZIP_ST16,324
+static unsigned g_STAT_OFFSET 27,460
+#define kMaxHistorySize 30,506
+#define kBlockSizeMax 33,600
+#define kBlockSize 35,663
+#define kUnpackBlockSize 36,693
+#define kMatchArraySize 37,729
+#define kMatchRecordMaxSize 38,764
+#define kNumMaxDirectBits 40,847
+#define kNumTopBits 42,881
+#define kTopValue 43,905
+#define kNumBitModelTotalBits 45,953
+#define kBitModelTotal 46,987
+#define kNumMoveBits 47,1040
+#define kProbInitValue 48,1064
+#define kNumMoveReducingBits 50,1112
+#define kNumBitPriceShiftBits 51,1144
+#define kBitPrice 52,1177
+void LzmaEncProps_Init(54,1227
+void LzmaEncProps_Normalize(63,1479
+UInt32 LzmaEncProps_GetDictSize(99,2556
+#define kDicLogSizeMaxCompress 113,2848
+#define BSR2_RET(115,2885
+static UInt32 GetPosSlot1(117,3009
+#define GetPosSlot2(123,3107
+#define GetPosSlot(124,3162
+#define kNumLogBits 128,3256
+#define kDicLogSizeMaxCompress 131,3361
+static void LzmaEnc_FastPosInit(133,3423
+#define BSR2_RET(163,4238
+#define GetPosSlot1(172,4588
+#define GetPosSlot2(173,4632
+#define GetPosSlot(174,4687
+#define LZMA_NUM_REPS 179,4814
+typedef unsigned CState;181,4841
+  UInt32 price;185,4888
+  CState state;187,4907
+  int prev1IsChar;188,4924
+  int prev2;189,4944
+  UInt32 posPrev2;191,4960
+  UInt32 backPrev2;192,4980
+  UInt32 posPrev;194,5003
+  UInt32 backPrev;195,5022
+  UInt32 backs[backs196,5042
+} COptimal;197,5074
+#define kNumOpts 199,5089
+#define kNumLenToPosStates 201,5119
+#define kNumPosSlotBits 202,5149
+#define kDicLogSizeMin 203,5176
+#define kDicLogSizeMax 204,5202
+#define kDistTableSizeMax 205,5229
+#define kNumAlignBits 208,5281
+#define kAlignTableSize 209,5306
+#define kAlignMask 210,5352
+#define kStartPosModelIndex 212,5396
+#define kEndPosModelIndex 213,5427
+#define kNumPosModels 214,5457
+#define kNumFullDistances 216,5524
+#define CLzmaProb 219,5606
+#define CLzmaProb 221,5639
+#define LZMA_PB_MAX 224,5675
+#define LZMA_LC_MAX 225,5698
+#define LZMA_LP_MAX 226,5721
+#define LZMA_NUM_PB_STATES_MAX 228,5746
+#define kLenNumLowBits 231,5801
+#define kLenNumLowSymbols 232,5827
+#define kLenNumMidBits 233,5876
+#define kLenNumMidSymbols 234,5902
+#define kLenNumHighBits 235,5951
+#define kLenNumHighSymbols 236,5978
+#define kLenNumSymbolsTotal 238,6031
+#define LZMA_MATCH_LEN_MIN 240,6123
+#define LZMA_MATCH_LEN_MAX 241,6153
+#define kNumStates 243,6230
+  CLzmaProb choice;248,6276
+  CLzmaProb choice2;249,6297
+  CLzmaProb low[low250,6319
+  CLzmaProb mid[mid251,6379
+  CLzmaProb high[high252,6439
+} CLenEnc;253,6478
+  CLenEnc p;258,6513
+  UInt32 tableSize;259,6527
+  UInt32 prices[prices260,6548
+  UInt32 counters[counters261,6611
+} CLenPriceEnc;262,6655
+  UInt32 range;267,6695
+  Byte cache;268,6712
+  UInt64 low;269,6727
+  UInt64 cacheSize;270,6742
+  Byte *buf;buf271,6763
+  Byte *bufLim;bufLim272,6777
+  Byte *bufBase;bufBase273,6794
+  ISeqOutStream *outStream;outStream274,6812
+  UInt64 processed;275,6841
+  SRes res;276,6862
+} CRangeEnc;277,6875
+  CLzmaProb *litProbs;litProbs282,6912
+  UInt32 state;284,6938
+  UInt32 reps[reps285,6955
+  CLzmaProb isMatch[isMatch287,6988
+  CLzmaProb isRep[isRep288,7046
+  CLzmaProb isRepG0[isRepG0289,7078
+  CLzmaProb isRepG1[isRepG1290,7112
+  CLzmaProb isRepG2[isRepG2291,7146
+  CLzmaProb isRep0Long[isRep0Long292,7180
+  CLzmaProb posSlotEncoder[posSlotEncoder294,7243
+  CLzmaProb posEncoders[posEncoders295,7314
+  CLzmaProb posAlignEncoder[posAlignEncoder296,7379
+  CLenPriceEnc lenEnc;298,7433
+  CLenPriceEnc repLenEnc;299,7457
+} CSaveState;300,7484
+  void *matchFinderObj;matchFinderObj305,7522
+  IMatchFinder matchFinder;306,7547
+  UInt32 optimumEndIndex;308,7578
+  UInt32 optimumCurrentIndex;309,7605
+  UInt32 longestMatchLength;311,7638
+  UInt32 numPairs;312,7668
+  UInt32 numAvail;313,7688
+  UInt32 numFastBytes;315,7710
+  UInt32 additionalOffset;316,7734
+  UInt32 reps[reps317,7762
+  UInt32 state;318,7793
+  unsigned lc,320,7812
+  unsigned lc, lp,320,7812
+  unsigned lc, lp, pb;320,7812
+  unsigned lpMask,321,7836
+  unsigned lpMask, pbMask;321,7836
+  unsigned lclp;322,7864
+  CLzmaProb *litProbs;litProbs324,7884
+  Bool fastMode;326,7910
+  Bool writeEndMark;327,7928
+  Bool finished;328,7950
+  Bool multiThread;329,7968
+  Bool needInit;330,7989
+  UInt64 nowPos64;332,8009
+  UInt32 matchPriceCount;334,8033
+  UInt32 alignPriceCount;335,8060
+  UInt32 distTableSize;337,8089
+  UInt32 dictSize;339,8116
+  SRes result;340,8136
+  CRangeEnc rc;342,8154
+  Bool mtMode;345,8193
+  CMatchFinderMt matchFinderMt;346,8209
+  CMatchFinder matchFinderBase;349,8254
+  Byte pad[pad352,8309
+  COptimal opt[opt355,8341
+  Byte g_FastPos[g_FastPos358,8396
+  UInt32 ProbPrices[ProbPrices361,8445
+  UInt32 matches[matches362,8507
+  UInt32 posSlotPrices[posSlotPrices364,8560
+  UInt32 distancesPrices[distancesPrices365,8624
+  UInt32 alignPrices[alignPrices366,8690
+  CLzmaProb isMatch[isMatch368,8732
+  CLzmaProb isRep[isRep369,8790
+  CLzmaProb isRepG0[isRepG0370,8822
+  CLzmaProb isRepG1[isRepG1371,8856
+  CLzmaProb isRepG2[isRepG2372,8890
+  CLzmaProb isRep0Long[isRep0Long373,8924
+  CLzmaProb posSlotEncoder[posSlotEncoder375,8987
+  CLzmaProb posEncoders[posEncoders376,9058
+  CLzmaProb posAlignEncoder[posAlignEncoder377,9123
+  CLenPriceEnc lenEnc;379,9177
+  CLenPriceEnc repLenEnc;380,9201
+  CSaveState saveState;382,9230
+  Byte pad2[pad2385,9277
+} CLzmaEnc;387,9306
+void LzmaEnc_SaveState(390,9323
+void LzmaEnc_RestoreState(416,10389
+SRes LzmaEnc_SetProps(442,11470
+static const int kLiteralNextStates[kLiteralNextStates499,12828
+static const int kMatchNextStates[kMatchNextStates500,12921
+static const int kRepNextStates[kRepNextStates501,13015
+static const int kShortRepNextStates[kShortRepNextStates502,13109
+#define IsCharState(504,13205
+#define GetLenToPosState(506,13241
+#define kInfinityPrice 508,13346
+static void RangeEnc_Construct(510,13382
+#define RangeEnc_GetProcessed(516,13482
+#define RC_BUF_SIZE 518,13580
+static int RangeEnc_Alloc(519,13611
+static void RangeEnc_Free(531,13862
+static void RangeEnc_Init(537,13982
+static void RangeEnc_FlushStream(551,14202
+static void MY_FAST_CALL RangeEnc_ShiftLow(563,14484
+static void RangeEnc_FlushData(584,15002
+static void RangeEnc_EncodeDirectBits(591,15120
+static void RangeEnc_EncodeBit(606,15432
+static void LitEnc_Encode(629,15930
+static void LitEnc_EncodeMatched(640,16166
+static void LzmaEnc_InitPriceTables(654,16539
+#define GET_PRICE(678,17129
+#define GET_PRICEa(681,17264
+#define GET_PRICE_0(684,17397
+#define GET_PRICE_1(685,17470
+#define GET_PRICE_0a(687,17570
+#define GET_PRICE_1a(688,17641
+static UInt32 LitEnc_GetPrice(690,17739
+static UInt32 LitEnc_GetPriceMatched(703,18030
+static void RcTree_Encode(720,18460
+static void RcTree_ReverseEncode(734,18760
+static UInt32 RcTree_GetPrice(747,19062
+static UInt32 RcTree_ReverseGetPrice(759,19366
+static void LenEnc_Init(775,19726
+static void LenEnc_Encode(787,20110
+static void LenEnc_SetPrices(810,20840
+static void MY_FAST_CALL LenPriceEnc_UpdateTable(833,21749
+static void LenPriceEnc_UpdateTables(839,21993
+static void LenEnc_Encode2(846,22237
+static void MovePos(857,22550
+static UInt32 ReadMatchDistances(871,22806
+#define MakeAsChar(911,24019
+#define MakeAsShortRep(912,24098
+#define IsShortRep(913,24170
+static UInt32 GetRepLen1Price(915,24216
+static UInt32 GetPureRepPrice(922,24397
+static UInt32 GetRepPrice(944,24934
+static UInt32 Backward(950,25162
+#define LIT_PROBS(986,26128
+static UInt32 GetOptimum(988,26259
+#define ChangePair(1556,43901
+static UInt32 GetOptimumFast(1558,43976
+static void WriteEndMarker(1666,46947
+static SRes CheckErrors(1679,47618
+static SRes Flush(1692,47922
+static void FillAlignPrices(1703,48186
+static void FillDistancesPrices(1711,48419
+void LzmaEnc_Construct(1744,49780
+CLzmaEncHandle LzmaEnc_Create(1769,50318
+void LzmaEnc_FreeLits(1778,50494
+void LzmaEnc_Destruct(1786,50693
+void LzmaEnc_Destroy(1797,50980
+static SRes LzmaEnc_CodeOneBlock(1803,51144
+#define kBigHashDicLimit 1965,56435
+static SRes LzmaEnc_Alloc(1967,56481
+void LzmaEnc_Init(2017,58123
+void LzmaEnc_InitPrices(2076,59467
+static SRes LzmaEnc_AllocAndInit(2091,59841
+static SRes LzmaEnc_Prepare(2108,60302
+SRes LzmaEnc_PrepareForLzma2(2118,60631
+static void LzmaEnc_SetInputBuf(2128,60944
+SRes LzmaEnc_MemPrepare(2135,61163
+void LzmaEnc_Finish(2145,61474
+  ISeqOutStream funcTable;2159,61705
+  Byte *data;data2160,61733
+  SizeT rem;2161,61748
+  Bool overflow;2162,61762
+} CSeqOutStreamBuf;2163,61780
+static size_t MyWrite(2165,61803
+UInt32 LzmaEnc_GetNumAvailableBytes(2180,62090
+const Byte *LzmaEnc_GetCurBuf(LzmaEnc_GetCurBuf2187,62261
+SRes LzmaEnc_CodeOneMemBlock(2194,62450
+static SRes LzmaEnc_Encode2(2229,63296
+SRes LzmaEnc_Encode(2267,64020
+SRes LzmaEnc_WriteProperties(2275,64313
+SRes LzmaEnc_MemEncode(2303,65109
+SRes LzmaEncode(2335,65924
+
+extern/7z/C/tmp/DllSecur.c,258
+typedef BOOL (WINAPI *Func_SetDefaultDllDirectories)Func_SetDefaultDllDirectories14,196
+#define MY_LOAD_LIBRARY_SEARCH_USER_DIRS 16,275
+#define MY_LOAD_LIBRARY_SEARCH_SYSTEM32 17,323
+static const char * const g_Dlls 19,373
+void LoadSecurityDlls(35,592
+
+extern/7z/C/tmp/LzFindMt.c,1898
+static void MtSync_Construct(10,182
+static void MtSync_GetNextBlock(23,545
+static void MtSync_StopWriting(51,1197
+static void MtSync_Destruct(74,1738
+#define RINOK_THREAD(100,2313
+static SRes MtSync_Create2(102,2382
+static SRes MtSync_Create(124,3097
+void MtSync_Init(132,3328
+#define kMtMaxValForNormalize 134,3385
+#define DEF_GetHeads2(136,3429
+#define DEF_GetHeads(142,3772
+DEF_GetHeads(145,3921
+static void MatchFinderMt_GetNextBlock_Hash(220,6492
+#define kEmptyHashValue 228,6828
+#define NO_INLINE 234,6914
+static Int32 NO_INLINE GetMatchesSpecN(236,6948
+static void BtGetMatches(313,8918
+static void BtFillBlock(388,11325
+void BtThreadFunc(413,11969
+void MatchFinderMt_Construct(439,12537
+static void MatchFinderMt_FreeMem(446,12684
+void MatchFinderMt_Destruct(452,12820
+#define kHashBufferSize 459,12995
+#define kBtBufferSize 460,13058
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE HashThreadFunc2(462,13117
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE BtThreadFunc2(463,13245
+SRes MatchFinderMt_Create(474,13514
+void MatchFinderMt_Init(499,14503
+void MatchFinderMt_ReleaseStream(527,15340
+static void MatchFinderMt_Normalize(533,15478
+static void MatchFinderMt_GetNextBlock_Bt(539,15661
+static const Byte * MatchFinderMt_GetPointerToCurrentPos(551,16118
+#define GET_NEXT_BLOCK_IF_REQUIRED 556,16233
+static UInt32 MatchFinderMt_GetNumAvailableBytes(558,16342
+static UInt32 * MixMatches2(564,16480
+static UInt32 * MixMatches3(585,16965
+#define INCREASE_LZ_POS 675,19321
+static UInt32 MatchFinderMt2_GetMatches(677,19382
+static UInt32 MatchFinderMt_GetMatches(695,19767
+#define SKIP_HEADER2_MT 725,20565
+#define SKIP_HEADER_MT(726,20623
+#define SKIP_FOOTER_MT 727,20763
+static void MatchFinderMt0_Skip(729,20871
+static void MatchFinderMt2_Skip(735,21004
+static void MatchFinderMt3_Skip(744,21182
+void MatchFinderMt_CreateVTable(769,21710
+
+extern/7z/C/tmp/7zCrc.c,504
+#define kCrcPoly 9,141
+  #define CRC_NUM_TABLES 12,190
+  #define CRC_NUM_TABLES 14,225
+  #define CRC_UINT32_SWAP(16,255
+typedef UInt32 (MY_FAST_CALL *CRC_FUNC)CRC_FUNC27,798
+CRC_FUNC g_CrcUpdateT4;29,904
+CRC_FUNC g_CrcUpdateT8;30,929
+CRC_FUNC g_CrcUpdate;31,954
+UInt32 g_CrcTable[g_CrcTable33,979
+UInt32 MY_FAST_CALL CrcUpdate(35,1023
+UInt32 MY_FAST_CALL CrcCalc(40,1153
+#define CRC_UPDATE_BYTE_2(45,1297
+UInt32 MY_FAST_CALL CrcUpdateT1(47,1379
+void MY_FAST_CALL CrcGenerateTable(56,1627
+
+extern/7z/C/tmp/XzCrc64Opt.c,198
+#define CRC_UPDATE_BYTE_2(10,154
+UInt64 MY_FAST_CALL XzCrc64UpdateT4(12,236
+#define CRC_UINT64_SWAP(36,892
+#define CRC_UPDATE_BYTE_2_BE(46,1228
+UInt64 MY_FAST_CALL XzCrc64UpdateT1_BeT4(48,1318
+
+extern/7z/C/tmp/CpuArch.c,468
+#define USE_ASM11,231
+static UInt32 CheckFlag(19,380
+#define CHECK_CPUID_IS_SUPPORTED 53,1054
+#define CHECK_CPUID_IS_SUPPORTED55,1165
+void MyCPUID(58,1209
+Bool x86cpuid_CheckAndRead(118,2254
+static const UInt32 kVendors[kVendors126,2466
+int x86cpuid_GetFirm(133,2637
+Bool CPU_Is_InOrder(147,2945
+static Bool CPU_Sys_Is_SSE_Supported(178,3857
+#define CHECK_SYS_SSE_SUPPORT 186,4046
+#define CHECK_SYS_SSE_SUPPORT188,4131
+Bool CPU_Is_Aes_Supported(191,4172
+
+extern/7z/C/tmp/XzIn.c,544
+SRes Xz_ReadHeader(12,177
+#define READ_VARINT_AND_CHECK(21,485
+SRes XzBlock_ReadHeader(25,656
+#define ADD_SIZE_CHECH(45,1212
+UInt64 Xz_GetUnpackSize(48,1350
+UInt64 Xz_GetPackSize(57,1542
+static SRes Xz_ReadIndex2(73,1919
+static SRes Xz_ReadIndex(118,3160
+static SRes LookInStream_SeekRead_ForArc(138,3730
+static SRes Xz_ReadBackward(145,4013
+      #define TEMP_BUF_SIZE 165,4587
+void Xzs_Construct(235,6558
+void Xzs_Free(241,6647
+UInt64 Xzs_GetNumBlocks(251,6865
+UInt64 Xzs_GetUnpackSize(260,7029
+SRes Xzs_ReadBackward(280,7416
+
+extern/7z/C/tmp/Ppmd7Enc.c,312
+#define kTopValue 9,198
+void Ppmd7z_RangeEnc_Init(11,229
+static void RangeEnc_ShiftLow(19,364
+static void RangeEnc_Encode(36,785
+static void RangeEnc_EncodeBit_0(47,1037
+static void RangeEnc_EncodeBit_1(57,1244
+void Ppmd7z_RangeEnc_FlushData(69,1506
+#define MASK(77,1638
+void Ppmd7_EncodeSymbol(79,1690
+
+extern/7z/C/tmp/LzmaLib.c,64
+MY_STDAPI LzmaCompress(9,173
+MY_STDAPI LzmaUncompress(35,1025
+
+extern/7z/C/tmp/Bra.c,109
+SizeT ARM_Convert(8,129
+SizeT ARMT_Convert(35,752
+SizeT PPC_Convert(71,1614
+SizeT SPARC_Convert(101,2384
+
+extern/7z/C/tmp/7zBuf2.c,110
+void DynBuf_Construct(10,144
+void DynBuf_SeekToBeg(17,234
+int DynBuf_Write(22,292
+void DynBuf_Free(45,808
+
+extern/7z/C/tmp/7zAlloc.c,167
+int g_allocCount 18,317
+int g_allocCountTemp 19,340
+void *SzAlloc(SzAlloc23,379
+void SzFree(35,640
+void *SzAllocTemp(SzAllocTemp48,869
+void SzFreeTemp(63,1223
+
+extern/7z/C/tmp/Sort.c,75
+#define HeapSortDown(8,121
+void HeapSort(17,363
+void HeapSort64(63,1122
+
+extern/7z/C/tmp/Bcj2.c,269
+#define CProb 9,166
+#define kTopValue 11,190
+#define kNumModelBits 12,227
+#define kBitModelTotal 13,253
+#define kNumMoveBits 14,298
+#define _IF_BIT_0 16,324
+#define _UPDATE_0 17,420
+#define _UPDATE_1 18,522
+void Bcj2Dec_Init(20,626
+SRes Bcj2Dec_Decode(33,886
+
+extern/7z/C/tmp/Lzma86Dec.c,61
+SRes Lzma86_GetUnpackSize(12,207
+SRes Lzma86_Decode(23,523
+
+extern/7z/C/tmp/7zDec.c,945
+#define k_Copy 23,391
+#define k_Delta 24,409
+#define k_LZMA2 25,428
+#define k_LZMA 26,450
+#define k_BCJ 27,475
+#define k_BCJ2 28,502
+#define k_PPC 29,529
+#define k_IA64 30,556
+#define k_ARM 31,583
+#define k_ARMT 32,610
+#define k_SPARC 33,637
+#define k_PPMD 38,698
+  IByteIn p;42,743
+  const Byte *cur;cur43,757
+  const Byte *end;end44,777
+  const Byte *begin;begin45,797
+  UInt64 processed;46,819
+  Bool extra;47,840
+  SRes res;48,855
+  ILookInStream *inStream;inStream49,868
+} CByteInToLook;50,896
+static Byte ReadByte(52,916
+static SRes SzDecodePpmd(73,1434
+static SRes SzDecodeLzma(134,3023
+static SRes SzDecodeLzma2(194,4590
+static SRes SzDecodeCopy(253,6103
+static Bool IS_MAIN_METHOD(272,6619
+static Bool IS_SUPPORTED_CODER(289,6888
+#define IS_BCJ2(297,7084
+static SRes CheckSupportedFolder(299,7156
+#define CASE_BRA_CONV(368,8953
+static SRes SzFolder_Decode2(370,9049
+SRes SzAr_DecodeFolder(549,14433
+
+extern/7z/C/tmp/XzEnc.c,2039
+#define XzBlock_ClearFlags(22,338
+#define XzBlock_SetNumFilters(23,391
+#define XzBlock_SetHasPackSize(24,453
+#define XzBlock_SetHasUnpackSize(25,521
+static SRes WriteBytes(27,593
+static SRes WriteBytesAndCrc(32,742
+static SRes Xz_WriteHeader(38,915
+static SRes XzBlock_WriteHeader(51,1351
+static SRes Xz_WriteFooter(81,2213
+static SRes Xz_AddIndexRecord(130,3458
+  ISeqInStream p;163,4374
+  ISeqInStream *realStream;realStream164,4393
+  UInt64 processed;165,4422
+  CXzCheck check;166,4443
+} CSeqCheckInStream;167,4462
+static void SeqCheckInStream_Init(169,4486
+static void SeqCheckInStream_GetDigest(175,4621
+static SRes SeqCheckInStream_Read(180,4742
+  ISeqOutStream p;194,5088
+  ISeqOutStream *realStream;realStream195,5108
+  UInt64 processed;196,5138
+} CSeqSizeOutStream;197,5159
+static size_t MyWrite(199,5183
+#define FILTER_BUF_SIZE 210,5452
+  ISeqInStream p;214,5508
+  ISeqInStream *realStream;realStream215,5527
+  IStateCoder StateCoder;216,5556
+  Byte *buf;buf217,5583
+  size_t curPos;218,5597
+  size_t endPos;219,5615
+  int srcWasFinished;220,5633
+} CSeqInFilter;221,5656
+static SRes SeqInFilter_Read(223,5675
+static void SeqInFilter_Construct(255,6542
+static void SeqInFilter_Free(261,6653
+static SRes SeqInFilter_Init(272,6882
+  ISeqInStream p;295,7459
+  ISeqInStream *inStream;inStream296,7478
+  CSbEnc enc;297,7505
+} CSbEncInStream;298,7520
+static SRes SbEncInStream_Read(300,7541
+void SbEncInStream_Construct(329,8298
+SRes SbEncInStream_Init(335,8443
+void SbEncInStream_Free(340,8526
+  CLzma2EncHandle lzma2;350,8633
+  CSbEncInStream sb;352,8682
+  CSeqInFilter filter;354,8714
+  ISzAlloc *alloc;alloc355,8738
+  ISzAlloc *bigAlloc;bigAlloc356,8758
+} CLzma2WithFilters;357,8781
+static void Lzma2WithFilters_Construct(360,8807
+static SRes Lzma2WithFilters_Create(371,9096
+static void Lzma2WithFilters_Free(379,9278
+void XzProps_Init(393,9524
+void XzFilterProps_Init(400,9647
+static SRes Xz_Compress(409,9771
+SRes Xz_Encode(511,12708
+SRes Xz_EncodeEmpty(528,13197
+
+extern/7z/C/tmp/XzCrc64.c,388
+#define kCrc64Poly 9,152
+  #define CRC_NUM_TABLES 12,225
+  #define CRC_NUM_TABLES 14,260
+  #define CRC_UINT64_SWAP(15,288
+typedef UInt64 (MY_FAST_CALL *CRC_FUNC)CRC_FUNC32,874
+static CRC_FUNC g_Crc64Update;34,980
+UInt64 g_Crc64Table[g_Crc64Table35,1012
+UInt64 MY_FAST_CALL Crc64Update(37,1058
+UInt64 MY_FAST_CALL Crc64Calc(42,1194
+void MY_FAST_CALL Crc64GenerateTable(47,1348
+
+extern/7z/C/tmp/Ppmd7Dec.c,306
+#define kTopValue 9,198
+Bool Ppmd7z_RangeDec_Init(11,229
+static UInt32 Range_GetThreshold(23,538
+static void Range_Normalize(29,696
+static void Range_Decode(43,1020
+static UInt32 Range_DecodeBit(51,1216
+void Ppmd7z_RangeDec_CreateVTable(71,1602
+#define MASK(79,1779
+int Ppmd7_DecodeSymbol(81,1831
+
+extern/7z/C/tmp/AesOpt.c,469
+#define USE_INTEL_AES10,173
+void MY_FAST_CALL AesCbc_Encode_Intel(18,264
+#define NUM_WAYS 41,833
+#define AES_OP_W(43,855
+#define AES_DEC(50,993
+#define AES_DEC_LAST(51,1043
+#define AES_ENC(52,1102
+#define AES_ENC_LAST(53,1152
+void MY_FAST_CALL AesCbc_Decode_Intel(55,1213
+void MY_FAST_CALL AesCtr_Code_Intel(110,2584
+void MY_FAST_CALL AesCbc_Encode_Intel(169,4236
+void MY_FAST_CALL AesCbc_Decode_Intel(174,4362
+void MY_FAST_CALL AesCtr_Code_Intel(179,4488
+
+extern/7z/C/tmp/Lzma2Dec.c,1052
+#define LZMA2_CONTROL_LZMA 30,592
+#define LZMA2_CONTROL_COPY_NO_RESET 31,629
+#define LZMA2_CONTROL_COPY_RESET_DIC 32,668
+#define LZMA2_CONTROL_EOF 33,708
+#define LZMA2_IS_UNCOMPRESSED_STATE(35,739
+#define LZMA2_GET_LZMA_MODE(37,824
+#define LZMA2_IS_THERE_PROP(38,882
+#define LZMA2_LCLP_MAX 40,933
+#define LZMA2_DIC_SIZE_FROM_PROP(41,959
+#define PRF(44,1066
+#define PRF(46,1091
+  LZMA2_STATE_CONTROL,51,1134
+  LZMA2_STATE_UNPACK0,52,1158
+  LZMA2_STATE_UNPACK1,53,1182
+  LZMA2_STATE_PACK0,54,1206
+  LZMA2_STATE_PACK1,55,1228
+  LZMA2_STATE_PROP,56,1250
+  LZMA2_STATE_DATA,57,1271
+  LZMA2_STATE_DATA_CONT,58,1292
+  LZMA2_STATE_FINISHED,59,1318
+  LZMA2_STATE_ERROR60,1343
+} ELzma2State;61,1364
+static SRes Lzma2Dec_GetOldProps(63,1382
+SRes Lzma2Dec_AllocateProbs(77,1786
+SRes Lzma2Dec_Allocate(84,2019
+void Lzma2Dec_Init(91,2242
+static ELzma2State Lzma2Dec_UpdateState(100,2430
+static void LzmaDec_UpdateWithUncompressed(161,4208
+SRes Lzma2Dec_DecodeToDic(172,4592
+SRes Lzma2Dec_DecodeToBuf(319,8797
+SRes Lzma2Decode(358,9970
+
+extern/7z/C/tmp/7zFile.c,652
+#define kChunkSizeMax 26,663
+void File_Construct(30,708
+static WRes File_Open(40,905
+WRes InFile_Open(60,1454
+WRes OutFile_Open(61,1536
+static WRes File_OpenW(65,1654
+WRes InFile_OpenW(74,1997
+WRes OutFile_OpenW(75,2082
+WRes File_Close(78,2178
+WRes File_Read(99,2554
+WRes File_Write(134,3319
+WRes File_Seek(169,4093
+WRes File_GetLength(212,5244
+static SRes FileSeqInStream_Read(241,5817
+void FileSeqInStream_CreateVTable(247,6014
+static SRes FileInStream_Read(255,6161
+static SRes FileInStream_Seek(261,6351
+void FileInStream_CreateVTable(267,6515
+static size_t FileOutStream_Write(276,6688
+void FileOutStream_CreateVTable(283,6871
+
+extern/7z/C/tmp/Aes.c,948
+static UInt32 T[T9,154
+static const Byte Sbox[Sbox10,181
+AES_CODE_FUNC g_AesCbc_Encode;36,2293
+AES_CODE_FUNC g_AesCbc_Decode;37,2325
+AES_CODE_FUNC g_AesCtr_Code;38,2357
+static UInt32 D[D40,2389
+static Byte InvS[InvS41,2416
+static const Byte Rcon[Rcon43,2442
+#define xtime(45,2544
+#define Ui32(47,2619
+#define gb0(49,2734
+#define gb1(50,2773
+#define gb2(51,2812
+#define gb3(52,2851
+void AesGenTables(54,2892
+#define HT(102,4076
+#define HT4(104,4139
+#define HT16(110,4266
+#define FT(116,4389
+#define FT4(117,4437
+#define HD(120,4520
+#define HD4(122,4583
+#define HD16(128,4711
+#define FD(134,4834
+#define FD4(135,4882
+void MY_FAST_CALL Aes_SetKey_Enc(137,4963
+void MY_FAST_CALL Aes_SetKey_Dec(160,5587
+static void Aes_Encode(181,6173
+static void Aes_Decode(204,6601
+void AesCbc_Init(225,7024
+void MY_FAST_CALL AesCbc_Encode(232,7152
+void MY_FAST_CALL AesCbc_Decode(250,7598
+void MY_FAST_CALL AesCtr_Code(274,8182
+
+extern/7z/C/tmp/Lzma2Enc.c,1464
+#define NUM_MT_CODER_THREADS_MAX 16,250
+#define LZMA2_CONTROL_LZMA 19,296
+#define LZMA2_CONTROL_COPY_NO_RESET 20,333
+#define LZMA2_CONTROL_COPY_RESET_DIC 21,372
+#define LZMA2_CONTROL_EOF 22,412
+#define LZMA2_LCLP_MAX 24,443
+#define LZMA2_DIC_SIZE_FROM_PROP(26,471
+#define LZMA2_PACK_SIZE_MAX 28,554
+#define LZMA2_COPY_CHUNK_SIZE 29,593
+#define LZMA2_UNPACK_SIZE_MAX 30,644
+#define LZMA2_KEEP_WINDOW_SIZE 31,685
+#define LZMA2_CHUNK_SIZE_COMPRESSED_MAX 33,741
+#define PRF(36,803
+  CLzmaEncHandle enc;42,892
+  UInt64 srcPos;43,915
+  Byte props;44,933
+  Bool needInitState;45,948
+  Bool needInitProp;46,971
+} CLzma2EncInt;47,993
+static SRes Lzma2EncInt_Init(49,1012
+static SRes Lzma2EncInt_EncodeSubblock(74,2026
+void Lzma2EncProps_Init(176,4923
+void Lzma2EncProps_Normalize(184,5089
+static SRes Progress(265,6843
+  Byte propEncoded;275,7071
+  CLzma2EncProps props;276,7092
+  Byte *outBuf;outBuf278,7121
+  ISzAlloc *alloc;alloc280,7140
+  ISzAlloc *allocBig;allocBig281,7160
+  CLzma2EncInt coders[coders283,7185
+  CMtCoder mtCoder;286,7257
+} CLzma2Enc;289,7290
+static SRes Lzma2Enc_EncodeMt1(294,7354
+  IMtCoderCallback funcTable;342,8529
+  CLzma2Enc *lzma2Enc;lzma2Enc343,8560
+} CMtCallbackImp;344,8584
+static SRes MtCallbackImp_Code(346,8605
+CLzma2EncHandle Lzma2Enc_Create(406,10057
+void Lzma2Enc_Destroy(429,10566
+SRes Lzma2Enc_SetProps(451,11005
+Byte Lzma2Enc_WriteProperties(463,11366
+SRes Lzma2Enc_Encode(474,11652
+
+extern/7z/C/tmp/LzmaDec.c,2789
+#define kNumTopBits 10,148
+#define kTopValue 11,172
+#define kNumBitModelTotalBits 13,220
+#define kBitModelTotal 14,254
+#define kNumMoveBits 15,307
+#define RC_INIT_SIZE 17,333
+#define NORMALIZE 19,359
+#define IF_BIT_0(21,451
+#define UPDATE_0(22,561
+#define UPDATE_1(23,665
+#define GET_BIT2(24,766
+#define GET_BIT(27,897
+#define TREE_GET_BIT(29,944
+#define TREE_DECODE(30,1005
+#define TREE_6_DECODE(36,1178
+#define TREE_6_DECODE(38,1250
+#define NORMAL_LITER_DEC 49,1499
+#define MATCHED_LITER_DEC 50,1556
+#define NORMALIZE_CHECK 56,1739
+#define IF_BIT_0_CHECK(58,1878
+#define UPDATE_0_CHECK 59,2000
+#define UPDATE_1_CHECK 60,2039
+#define GET_BIT2_CHECK(61,2094
+#define GET_BIT_CHECK(64,2243
+#define TREE_DECODE_CHECK(65,2300
+#define kNumPosBitsMax 69,2430
+#define kNumPosStatesMax 70,2456
+#define kLenNumLowBits 72,2506
+#define kLenNumLowSymbols 73,2532
+#define kLenNumMidBits 74,2581
+#define kLenNumMidSymbols 75,2607
+#define kLenNumHighBits 76,2656
+#define kLenNumHighSymbols 77,2683
+#define LenChoice 79,2736
+#define LenChoice2 80,2757
+#define LenLow 81,2793
+#define LenMid 82,2826
+#define LenHigh 83,2890
+#define kNumLenProbs 84,2955
+#define kNumStates 87,3012
+#define kNumLitStates 88,3035
+#define kStartPosModelIndex 90,3062
+#define kEndPosModelIndex 91,3093
+#define kNumFullDistances 92,3123
+#define kNumPosSlotBits 94,3184
+#define kNumLenToPosStates 95,3211
+#define kNumAlignBits 97,3243
+#define kAlignTableSize 98,3268
+#define kMatchMinLen 100,3316
+#define kMatchSpecLenStart 101,3340
+#define IsMatch 103,3446
+#define IsRep 104,3465
+#define IsRepG0 105,3523
+#define IsRepG1 106,3561
+#define IsRepG2 107,3601
+#define IsRep0Long 108,3641
+#define PosSlot 109,3684
+#define SpecPos 110,3747
+#define Align 111,3816
+#define LenCoder 112,3881
+#define RepLenCoder 113,3925
+#define Literal 114,3972
+#define LZMA_BASE_SIZE 116,4020
+#define LZMA_LIT_SIZE 117,4049
+#define LzmaProps_GetNumProbs(123,4142
+#define LZMA_DIC_MIN 125,4237
+static int MY_FAST_CALL LzmaDec_DecodeReal(140,4692
+static void MY_FAST_CALL LzmaDec_WriteRem(515,14808
+static int MY_FAST_CALL LzmaDec_DecodeReal2(543,15598
+  DUMMY_ERROR,572,16332
+  DUMMY_LIT,573,16385
+  DUMMY_MATCH,574,16399
+  DUMMY_REP575,16415
+} ELzmaDummy;576,16428
+static ELzmaDummy LzmaDec_TryDummy(578,16445
+void LzmaDec_InitDicAndState(769,21613
+void LzmaDec_Init(785,21911
+static void LzmaDec_InitStateReal(791,22012
+SRes LzmaDec_DecodeToDic(803,22336
+SRes LzmaDec_DecodeToBuf(938,26444
+void LzmaDec_FreeProbs(978,27554
+static void LzmaDec_FreeDict(984,27669
+void LzmaDec_Free(990,27786
+SRes LzmaProps_Decode(996,27906
+static SRes LzmaDec_AllocateProbs2(1022,28444
+SRes LzmaDec_AllocateProbs(1036,28861
+SRes LzmaDec_Allocate(1045,29138
+SRes LzmaDecode(1077,30063
+
+extern/7z/C/tmp/Alloc.c,519
+int g_allocCount 18,339
+int g_allocCountMid 19,362
+int g_allocCountBig 20,388
+void *MyAlloc(MyAlloc23,424
+void MyFree(38,722
+void *MidAlloc(MidAlloc49,944
+void MidFree(59,1197
+#undef _7ZIP_LARGE_PAGES71,1460
+SIZE_T g_LargePageSize 75,1522
+typedef SIZE_T (WINAPI *GetLargePageMinimumP)GetLargePageMinimumP76,1551
+void SetLargePageSize(79,1611
+void *BigAlloc(BigAlloc95,2016
+void BigFree(115,2587
+static void *SzBigAlloc(SzBigAlloc134,3055
+static void SzBigFree(135,3144
+ISzAlloc g_BigAlloc 136,3228
+
+extern/7z/C/tmp/BraIA64.c,78
+static const Byte kBranchTable[kBranchTable8,133
+SizeT IA64_Convert(16,287
+
+extern/7z/C/tmp/Threads.c,584
+static WRes GetError(12,185
+WRes HandleToWRes(18,283
+WRes BOOLToWRes(19,350
+WRes HandlePtr_Close(21,408
+WRes Handle_WaitObject(30,548
+WRes Thread_Create(32,635
+WRes Event_Create(52,1143
+WRes Event_Set(58,1314
+WRes Event_Reset(59,1378
+WRes ManualResetEvent_Create(61,1448
+WRes AutoResetEvent_Create(62,1558
+WRes ManualResetEvent_CreateNotSignaled(63,1665
+WRes AutoResetEvent_CreateNotSignaled(64,1770
+WRes Semaphore_Create(67,1873
+static WRes Semaphore_Release(73,2052
+WRes Semaphore_ReleaseN(75,2215
+WRes Semaphore_Release1(77,2320
+WRes CriticalSection_Init(79,2399
+
+extern/7z/C/tmp/Sha256.c,758
+#define _SHA256_UNROLL15,329
+#define _SHA256_UNROLL216,353
+void Sha256_Init(21,421
+#define S0(34,708
+#define S1(35,778
+#define s0(36,848
+#define s1(37,910
+#define blk0(39,975
+#define blk2(40,999
+#define Ch(42,1083
+#define Maj(43,1116
+#define R(47,1182
+#define RX_8(52,1333
+#define RX_16 62,1589
+#define a(66,1634
+#define b(67,1661
+#define c(68,1688
+#define d(69,1715
+#define e(70,1742
+#define f(71,1769
+#define g(72,1796
+#define h(73,1823
+#define R(75,1852
+#define RX_8(82,2049
+#define RX_16 83,2131
+#define RX_16 87,2176
+static const UInt32 K[K93,2261
+static void Sha256_WriteByteBlock(112,3113
+#undef S0173,4173
+#undef S1174,4184
+#undef s0175,4195
+#undef s1176,4206
+void Sha256_Update(178,4219
+void Sha256_Final(215,4845
+
+extern/7z/C/tmp/7zStream.c,652
+SRes SeqInStream_Read2(10,156
+SRes SeqInStream_Read(24,499
+SRes SeqInStream_ReadByte(29,644
+SRes LookInStream_SeekTo(36,843
+SRes LookInStream_LookRead(42,985
+SRes LookInStream_Read2(52,1250
+SRes LookInStream_Read(66,1595
+static SRes LookToRead_Look_Lookahead(71,1743
+static SRes LookToRead_Look_Exact(89,2190
+static SRes LookToRead_Skip(108,2679
+static SRes LookToRead_Read(115,2818
+static SRes LookToRead_Seek(129,3166
+void LookToRead_CreateVTable(136,3364
+void LookToRead_Init(146,3621
+static SRes SecToLook_Read(151,3692
+void SecToLook_CreateVTable(157,3859
+static SRes SecToRead_Read(162,3942
+void SecToRead_CreateVTable(168,4107
+
+extern/7z/C/tmp/7zCrcOpt.c,277
+#define CRC_UPDATE_BYTE_2(10,152
+UInt32 MY_FAST_CALL CrcUpdateT4(12,234
+UInt32 MY_FAST_CALL CrcUpdateT8(31,825
+#define CRC_UINT32_SWAP(62,1683
+#define CRC_UPDATE_BYTE_2_BE(64,1783
+UInt32 MY_FAST_CALL CrcUpdateT1_BeT4(66,1869
+UInt32 MY_FAST_CALL CrcUpdateT1_BeT8(87,2534
+
+extern/7z/C/tmp/LzFind.c,2270
+#define kEmptyHashValue 11,185
+#define kMaxValForNormalize 12,212
+#define kNormalizeStepMin 13,262
+#define kNormalizeMask 14,327
+#define kMaxHistorySize 15,386
+#define kStartMaxLen 17,431
+static void LzInWindow_Free(19,457
+static int LzInWindow_Create(30,700
+Byte *MatchFinder_GetPointerToCurrentPos(MatchFinder_GetPointerToCurrentPos47,1180
+UInt32 MatchFinder_GetNumAvailableBytes(49,1263
+void MatchFinder_ReduceOffsets(51,1357
+static void MatchFinder_ReadBlock(58,1511
+void MatchFinder_MoveBlock(98,2508
+int MatchFinder_NeedMove(106,2736
+void MatchFinder_ReadIfRequired(114,2956
+static void MatchFinder_CheckAndMoveAndRead(122,3139
+static void MatchFinder_SetDefaultSettings(129,3301
+#define kCrcPoly 137,3452
+void MatchFinder_Construct(139,3483
+static void MatchFinder_FreeThisClassMemory(157,3831
+void MatchFinder_Free(163,3969
+static CLzRef* AllocRefs(169,4110
+int MatchFinder_Create(177,4343
+static void MatchFinder_SetLimits(266,6840
+void MatchFinder_Init_2(295,7462
+void MatchFinder_Init(315,7906
+static UInt32 MatchFinder_GetSubValue(320,7988
+void MatchFinder_Normalize3(325,8110
+static void MatchFinder_Normalize(339,8402
+static void MatchFinder_CheckLimits(346,8612
+static UInt32 * Hc_GetMatchesSpec(357,8969
+UInt32 * GetMatchesSpec1(388,9907
+static void SkipMatchesSpec(443,11426
+#define MOVE_POS 493,12724
+#define MOVE_POS_RET 498,12851
+static void MatchFinder_MovePos(500,12899
+#define GET_MATCHES_HEADER2(502,12965
+#define GET_MATCHES_HEADER(507,13192
+#define SKIP_HEADER(508,13266
+#define MF_PARAMS(510,13342
+#define GET_MATCHES_FOOTER(512,13446
+#define SKIP_FOOTER 516,13626
+#define UPDATE_maxLen 519,13715
+static UInt32 Bt2_MatchFinder_GetMatches(526,13959
+UInt32 Bt3Zip_MatchFinder_GetMatches(537,14203
+static UInt32 Bt3_MatchFinder_GetMatches(548,14446
+static UInt32 Bt4_MatchFinder_GetMatches(585,15150
+static UInt32 Hc4_MatchFinder_GetMatches(717,17896
+UInt32 Hc3Zip_MatchFinder_GetMatches(853,20823
+static void Bt2_MatchFinder_Skip(865,21144
+void Bt3Zip_MatchFinder_Skip(878,21364
+static void Bt3_MatchFinder_Skip(891,21583
+static void Bt4_MatchFinder_Skip(908,21901
+static void Hc4_MatchFinder_Skip(947,22685
+void Hc3Zip_MatchFinder_Skip(988,23554
+void MatchFinder_CreateVTable(1002,23814
+
+extern/7z/C/tmp/Delta.c,104
+void Delta_Init(8,124
+static void MyMemCpy(15,238
+void Delta_Encode(22,380
+void Delta_Decode(45,876
+
+extern/7z/C/tmp/7zArcIn.c,3836
+#define MY_ALLOC(13,211
+#define MY_ALLOC_ZE(16,344
+#define MY_ALLOC_AND_CPY(18,450
+#define MY_ALLOC_ZE_AND_CPY(21,567
+#define k7zMajorVersion 24,706
+enum EIdEnum26,735
+  k7zIdEnd,28,752
+  k7zIdHeader,29,765
+  k7zIdArchiveProperties,30,781
+  k7zIdAdditionalStreamsInfo,31,808
+  k7zIdMainStreamsInfo,32,839
+  k7zIdFilesInfo,33,864
+  k7zIdPackInfo,34,883
+  k7zIdUnpackInfo,35,901
+  k7zIdSubStreamsInfo,36,921
+  k7zIdSize,37,945
+  k7zIdCRC,38,959
+  k7zIdFolder,39,972
+  k7zIdCodersUnpackSize,40,988
+  k7zIdNumUnpackStream,41,1014
+  k7zIdEmptyStream,42,1039
+  k7zIdEmptyFile,43,1060
+  k7zIdAnti,44,1079
+  k7zIdName,45,1093
+  k7zIdCTime,46,1107
+  k7zIdATime,47,1122
+  k7zIdMTime,48,1137
+  k7zIdWinAttrib,49,1152
+  k7zIdComment,50,1171
+  k7zIdEncodedHeader,51,1188
+  k7zIdStartPos,52,1211
+  k7zIdDummy53,1229
+const Byte k7zSignature[k7zSignature59,1301
+#define SzBitUi32s_Init(61,1384
+static SRes SzBitUi32s_Alloc(63,1454
+void SzBitUi32s_Free(78,1738
+#define SzBitUi64s_Init(84,1897
+void SzBitUi64s_Free(86,1967
+static void SzAr_Init(93,2128
+static void SzAr_Free(110,2485
+void SzArEx_Init(127,2929
+void SzArEx_Free(150,3368
+static int TestSignatureCandidate(172,3916
+#define SzData_Clear(181,4111
+#define SZ_READ_BYTE_SD(183,4175
+#define SZ_READ_BYTE(184,4300
+#define SZ_READ_BYTE_2(185,4354
+#define SKIP_DATA(187,4459
+#define SKIP_DATA2(188,4548
+#define SZ_READ_32(190,4638
+static MY_NO_INLINE SRes ReadNumber(193,4758
+static MY_NO_INLINE SRes SzReadNumber32(231,5535
+#define ReadID(254,6107
+static SRes SkipData(256,6158
+static SRes WaitId(266,6345
+static SRes RememberBitVector(280,6595
+static UInt32 CountDefinedBits(290,6843
+static MY_NO_INLINE SRes ReadBitVector(308,7136
+static MY_NO_INLINE SRes ReadUi32s(336,7878
+static SRes ReadBitUi32s(357,8339
+static SRes SkipBitUi32s(364,8579
+static SRes ReadPackInfo(383,9082
+#define k_NumCodersStreams_in_Folder_MAX 430,10156
+SRes SzGetNextFolderItem(432,10265
+static MY_NO_INLINE SRes SkipNumbers(599,14572
+#define k_Scan_NumCoders_MAX 630,15201
+#define k_Scan_NumCodersStreams_in_Folder_MAX 631,15234
+static SRes ReadUnpackInfo(634,15288
+UInt64 SzAr_GetFolderUnpackSize(843,21073
+  UInt32 NumTotalSubStreams;851,21282
+  UInt32 NumSubDigests;852,21312
+  CSzData sdNumSubStreams;853,21337
+  CSzData sdSizes;854,21365
+  CSzData sdCRCs;855,21385
+} CSubStreamInfo;856,21404
+static SRes ReadSubStreamsInfo(859,21427
+static SRes SzReadStreamsInfo(932,23402
+static SRes SzReadAndDecodePackedStreams(972,24367
+static SRes SzReadFileNames(1014,25491
+static MY_NO_INLINE SRes ReadTime(1043,26206
+#define NUM_ADDITIONAL_STREAMS_MAX 1091,27252
+static SRes SzReadHeader2(1094,27294
+  UInt32 numFiles 1164,28778
+  UInt32 numEmptyStreams 1165,28802
+  const Byte *emptyStreams emptyStreams1166,28833
+  const Byte *emptyFiles emptyFiles1167,28869
+  p->NumFiles NumFiles1170,28948
+    UInt64 type;1174,28994
+    UInt64 size;1175,29012
+    UInt64 type;1282,32082
+    UInt32 i;1290,32210
+    UInt32 emptyFileIndex 1291,32225
+    UInt32 folderIndex 1292,32257
+    UInt32 remSubStreams 1293,32286
+    UInt32 numSubStreams 1294,32317
+    UInt64 unpackPos 1295,32348
+    const Byte *digestsDefs digestsDefs1296,32375
+    const Byte *digestsVals digestsVals1297,32412
+    UInt32 digestsValsIndex 1298,32449
+    UInt32 digestIndex;1299,32483
+    Byte allDigestsDefined 1300,32508
+    Byte isDirMask 1301,32541
+    Byte crcMask 1302,32566
+    Byte mask 1303,32589
+    digestIndex 1325,33314
+    for (i = 0; i < numFiles;1327,33342
+    p->UnpackPositions[UnpackPositions1437,36615
+      p->FolderToFile[FolderToFile1444,36741
+static SRes SzReadHeader(1471,37449
+static SRes SzArEx_Open2(1501,38069
+SRes SzArEx_Open(1625,41507
+SRes SzArEx_Extract(1635,41750
+size_t SzArEx_GetFileNameUtf16(1712,43808
+
+extern/7z/C/tmp/MtCoder.c,1021
+void LoopThread_Construct(8,131
+void LoopThread_Close(15,290
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE LoopThreadFunc(22,433
+WRes LoopThread_Create(37,794
+WRes LoopThread_StopAndWait(45,1037
+WRes LoopThread_StartSubThread(53,1209
+WRes LoopThread_WaitSubThread(54,1295
+static SRes Progress(56,1386
+static void MtProgress_Init(61,1556
+static void MtProgress_Reinit(71,1831
+#define UPDATE_PROGRESS(77,1955
+SRes MtProgress_Set(80,2076
+static void MtProgress_SetError(93,2502
+static void MtCoder_SetError(101,2680
+void CMtThread_Construct(111,2892
+#define RINOK_THREAD(121,3123
+static void CMtThread_CloseEvents(123,3192
+static void CMtThread_Destruct(129,3308
+#define MY_BUF_ALLOC(148,3710
+static SRes CMtThread_Prepare(154,3956
+static SRes FullRead(167,4345
+#define GET_NEXT_THREAD(185,4755
+static SRes MtThread_Process(187,4866
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE ThreadFunc(226,6014
+void MtCoder_Construct(249,6577
+void MtCoder_Destruct(263,6878
+SRes MtCoder_Code(272,7109
+
+extern/7z/C/tmp/Lzma86Enc.c,59
+#define SZE_OUT_OVERFLOW 14,230
+int Lzma86_Encode(16,273
+
+extern/7z/C/tmp/XzDec.c,1556
+#define XZ_CHECK_SIZE_MAX 29,428
+#define CODER_BUF_SIZE 31,460
+unsigned Xz_ReadVarInt(33,496
+#define BRA_BUF_SIZE 51,889
+  size_t bufPos;55,942
+  size_t bufConv;56,960
+  size_t bufTotal;57,979
+  UInt32 methodId;59,1001
+  int encodeMode;60,1021
+  UInt32 delta;61,1040
+  UInt32 ip;62,1057
+  UInt32 x86State;63,1071
+  Byte deltaState[deltaState64,1091
+  Byte buf[buf66,1131
+} CBraState;67,1158
+static void BraState_Free(69,1174
+static SRes BraState_SetProps(74,1263
+static void BraState_Init(115,2217
+#define CASE_BRA_CONV(124,2445
+static SRes BraState_Code(126,2575
+SRes BraState_SetFromMethod(200,4654
+static void SbState_Free(229,5410
+static SRes SbState_SetProps(236,5545
+static void SbState_Init(244,5767
+static SRes SbState_Code(249,5840
+SRes SbState_SetFromMethod(267,6389
+static void Lzma2State_Free(287,6854
+static SRes Lzma2State_SetProps(293,6987
+static void Lzma2State_Init(300,7210
+static SRes Lzma2State_Code(305,7292
+static SRes Lzma2State_SetFromMethod(316,7820
+void MixCoder_Construct(331,8221
+void MixCoder_Free(341,8438
+void MixCoder_Init(358,8778
+SRes MixCoder_SetFromMethod(374,9082
+SRes MixCoder_Code(390,9577
+SRes Xz_ParseHeader(497,12135
+static Bool Xz_CheckFooter(506,12468
+#define READ_VARINT_AND_CHECK(515,12781
+SRes XzBlock_Parse(520,12954
+SRes XzDec_Init(573,14437
+void XzUnpacker_Init(609,15315
+void XzUnpacker_Construct(619,15518
+void XzUnpacker_Free(625,15652
+SRes XzUnpacker_Code(630,15729
+Bool XzUnpacker_IsStreamWasFinished(900,23178
+UInt64 XzUnpacker_GetExtraSize(905,23323
+
+extern/7z/C/LzmaDec.c,2789
+#define kNumTopBits 10,148
+#define kTopValue 11,172
+#define kNumBitModelTotalBits 13,220
+#define kBitModelTotal 14,254
+#define kNumMoveBits 15,307
+#define RC_INIT_SIZE 17,333
+#define NORMALIZE 19,359
+#define IF_BIT_0(21,451
+#define UPDATE_0(22,561
+#define UPDATE_1(23,665
+#define GET_BIT2(24,766
+#define GET_BIT(27,897
+#define TREE_GET_BIT(29,944
+#define TREE_DECODE(30,1005
+#define TREE_6_DECODE(36,1178
+#define TREE_6_DECODE(38,1250
+#define NORMAL_LITER_DEC 49,1499
+#define MATCHED_LITER_DEC 50,1556
+#define NORMALIZE_CHECK 56,1739
+#define IF_BIT_0_CHECK(58,1878
+#define UPDATE_0_CHECK 59,2000
+#define UPDATE_1_CHECK 60,2039
+#define GET_BIT2_CHECK(61,2094
+#define GET_BIT_CHECK(64,2243
+#define TREE_DECODE_CHECK(65,2300
+#define kNumPosBitsMax 69,2430
+#define kNumPosStatesMax 70,2456
+#define kLenNumLowBits 72,2506
+#define kLenNumLowSymbols 73,2532
+#define kLenNumMidBits 74,2581
+#define kLenNumMidSymbols 75,2607
+#define kLenNumHighBits 76,2656
+#define kLenNumHighSymbols 77,2683
+#define LenChoice 79,2736
+#define LenChoice2 80,2757
+#define LenLow 81,2793
+#define LenMid 82,2826
+#define LenHigh 83,2890
+#define kNumLenProbs 84,2955
+#define kNumStates 87,3012
+#define kNumLitStates 88,3035
+#define kStartPosModelIndex 90,3062
+#define kEndPosModelIndex 91,3093
+#define kNumFullDistances 92,3123
+#define kNumPosSlotBits 94,3184
+#define kNumLenToPosStates 95,3211
+#define kNumAlignBits 97,3243
+#define kAlignTableSize 98,3268
+#define kMatchMinLen 100,3316
+#define kMatchSpecLenStart 101,3340
+#define IsMatch 103,3446
+#define IsRep 104,3465
+#define IsRepG0 105,3523
+#define IsRepG1 106,3561
+#define IsRepG2 107,3601
+#define IsRep0Long 108,3641
+#define PosSlot 109,3684
+#define SpecPos 110,3747
+#define Align 111,3816
+#define LenCoder 112,3881
+#define RepLenCoder 113,3925
+#define Literal 114,3972
+#define LZMA_BASE_SIZE 116,4020
+#define LZMA_LIT_SIZE 117,4049
+#define LzmaProps_GetNumProbs(123,4142
+#define LZMA_DIC_MIN 125,4237
+static int MY_FAST_CALL LzmaDec_DecodeReal(140,4692
+static void MY_FAST_CALL LzmaDec_WriteRem(515,14808
+static int MY_FAST_CALL LzmaDec_DecodeReal2(543,15598
+  DUMMY_ERROR,572,16332
+  DUMMY_LIT,573,16385
+  DUMMY_MATCH,574,16399
+  DUMMY_REP575,16415
+} ELzmaDummy;576,16428
+static ELzmaDummy LzmaDec_TryDummy(578,16445
+void LzmaDec_InitDicAndState(769,21613
+void LzmaDec_Init(785,21911
+static void LzmaDec_InitStateReal(791,22012
+SRes LzmaDec_DecodeToDic(803,22336
+SRes LzmaDec_DecodeToBuf(938,26444
+void LzmaDec_FreeProbs(978,27554
+static void LzmaDec_FreeDict(984,27669
+void LzmaDec_Free(990,27786
+SRes LzmaProps_Decode(996,27906
+static SRes LzmaDec_AllocateProbs2(1022,28444
+SRes LzmaDec_AllocateProbs(1036,28861
+SRes LzmaDec_Allocate(1045,29138
+SRes LzmaDecode(1077,30063
+
+extern/7z/C/Alloc.c,519
+int g_allocCount 18,339
+int g_allocCountMid 19,362
+int g_allocCountBig 20,388
+void *MyAlloc(MyAlloc23,424
+void MyFree(38,722
+void *MidAlloc(MidAlloc49,944
+void MidFree(59,1197
+#undef _7ZIP_LARGE_PAGES71,1460
+SIZE_T g_LargePageSize 75,1522
+typedef SIZE_T (WINAPI *GetLargePageMinimumP)GetLargePageMinimumP76,1551
+void SetLargePageSize(79,1611
+void *BigAlloc(BigAlloc95,2016
+void BigFree(115,2587
+static void *SzBigAlloc(SzBigAlloc134,3055
+static void SzBigFree(135,3144
+ISzAlloc g_BigAlloc 136,3228
+
+extern/7z/C/LzFind.c,2270
+#define kEmptyHashValue 11,185
+#define kMaxValForNormalize 12,212
+#define kNormalizeStepMin 13,262
+#define kNormalizeMask 14,327
+#define kMaxHistorySize 15,386
+#define kStartMaxLen 17,431
+static void LzInWindow_Free(19,457
+static int LzInWindow_Create(30,700
+Byte *MatchFinder_GetPointerToCurrentPos(MatchFinder_GetPointerToCurrentPos47,1180
+UInt32 MatchFinder_GetNumAvailableBytes(49,1263
+void MatchFinder_ReduceOffsets(51,1357
+static void MatchFinder_ReadBlock(58,1511
+void MatchFinder_MoveBlock(98,2508
+int MatchFinder_NeedMove(106,2736
+void MatchFinder_ReadIfRequired(114,2956
+static void MatchFinder_CheckAndMoveAndRead(122,3139
+static void MatchFinder_SetDefaultSettings(129,3301
+#define kCrcPoly 137,3452
+void MatchFinder_Construct(139,3483
+static void MatchFinder_FreeThisClassMemory(157,3831
+void MatchFinder_Free(163,3969
+static CLzRef* AllocRefs(169,4110
+int MatchFinder_Create(177,4343
+static void MatchFinder_SetLimits(266,6840
+void MatchFinder_Init_2(295,7462
+void MatchFinder_Init(315,7906
+static UInt32 MatchFinder_GetSubValue(320,7988
+void MatchFinder_Normalize3(325,8110
+static void MatchFinder_Normalize(339,8402
+static void MatchFinder_CheckLimits(346,8612
+static UInt32 * Hc_GetMatchesSpec(357,8969
+UInt32 * GetMatchesSpec1(388,9907
+static void SkipMatchesSpec(443,11426
+#define MOVE_POS 493,12724
+#define MOVE_POS_RET 498,12851
+static void MatchFinder_MovePos(500,12899
+#define GET_MATCHES_HEADER2(502,12965
+#define GET_MATCHES_HEADER(507,13192
+#define SKIP_HEADER(508,13266
+#define MF_PARAMS(510,13342
+#define GET_MATCHES_FOOTER(512,13446
+#define SKIP_FOOTER 516,13626
+#define UPDATE_maxLen 519,13715
+static UInt32 Bt2_MatchFinder_GetMatches(526,13959
+UInt32 Bt3Zip_MatchFinder_GetMatches(537,14203
+static UInt32 Bt3_MatchFinder_GetMatches(548,14446
+static UInt32 Bt4_MatchFinder_GetMatches(585,15150
+static UInt32 Hc4_MatchFinder_GetMatches(717,17896
+UInt32 Hc3Zip_MatchFinder_GetMatches(853,20823
+static void Bt2_MatchFinder_Skip(865,21144
+void Bt3Zip_MatchFinder_Skip(878,21364
+static void Bt3_MatchFinder_Skip(891,21583
+static void Bt4_MatchFinder_Skip(908,21901
+static void Hc4_MatchFinder_Skip(947,22685
+void Hc3Zip_MatchFinder_Skip(988,23554
+void MatchFinder_CreateVTable(1002,23814
+
+src/ssl_fn.cpp,53
+unsigned char *create_sha1sum(create_sha1sum13,234
+
+src/alib.cpp,662
+time_t sNow(12,232
+void printTime(19,299
+void printBlock(25,412
+pack *newPack(newPack40,738
+tran *newTran(newTran80,1632
+block *newBlock(newBlock85,1670
+chain *newChain(newChain115,2303
+bool insertBlock(127,2489
+uint32_t deletePack(144,2894
+uint32_t deleteBlock(166,3340
+uint32_t deleteChain(190,3993
+void packToText(202,4272
+void tranToText(217,4595
+void blockToText(233,4955
+void *chainToText(chainToText254,5499
+pack *text2Pac(text2Pac292,6465
+tran *text2Tran(text2Tran314,6970
+block *text2Block(text2Block319,7018
+chain *text2Chainz(text2Chainz358,8164
+bool chainCompactor(385,8955
+chain *chainExtractor(chainExtractor417,9774
+
+src/main.cpp,178
+void sha1_test(16,261
+void log_test(32,566
+void chain_test(37,622
+void zip_test(66,1491
+chain *chain_gen(chain_gen71,1553
+void uncompress_test(103,2474
+int main(112,2702
+
+src/main.cpp.orig,178
+void sha1_test(15,243
+void log_test(31,548
+void chain_test(36,604
+void zip_test(65,1473
+chain *chain_gen(chain_gen70,1535
+void uncompress_test(102,2456
+int main(111,2684
+
+src/log.cpp,80
+int log_msg(17,266
+long get_file_size_c(51,1220
+UInt64 get_file_size(59,1356
+
+src/lzma_wrapper.cpp,469
+#define LZMA_PROPS_SIZE_FILESIZE 18,316
+static void *SzAlloc(SzAlloc24,467
+static void SzFree(33,705
+ISzAlloc g_Alloc 39,842
+static size_t my_read_data(51,1177
+static int read_data(59,1394
+static size_t my_write_data(75,1817
+static size_t write_data(83,2042
+static int open_io_files(93,2338
+static unsigned long get_header(121,3066
+int compress_file(135,3554
+int decompress_file(152,3981
+int compress_data_incr(169,4410
+int decompress_data_incr(222,6432
+
+src/time_fn.cpp,43
+struct tm *get_loc_time(get_loc_time5,41
+
+extern_backup/7z/C/LzmaEnc.c,8959
+#define _7ZIP_ST16,324
+static unsigned g_STAT_OFFSET 27,460
+#define kMaxHistorySize 30,506
+#define kBlockSizeMax 33,600
+#define kBlockSize 35,663
+#define kUnpackBlockSize 36,693
+#define kMatchArraySize 37,729
+#define kMatchRecordMaxSize 38,764
+#define kNumMaxDirectBits 40,847
+#define kNumTopBits 42,881
+#define kTopValue 43,905
+#define kNumBitModelTotalBits 45,953
+#define kBitModelTotal 46,987
+#define kNumMoveBits 47,1040
+#define kProbInitValue 48,1064
+#define kNumMoveReducingBits 50,1112
+#define kNumBitPriceShiftBits 51,1144
+#define kBitPrice 52,1177
+void LzmaEncProps_Init(54,1227
+void LzmaEncProps_Normalize(63,1479
+UInt32 LzmaEncProps_GetDictSize(99,2556
+#define kDicLogSizeMaxCompress 113,2848
+#define BSR2_RET(115,2885
+static UInt32 GetPosSlot1(117,3009
+#define GetPosSlot2(123,3107
+#define GetPosSlot(124,3162
+#define kNumLogBits 128,3256
+#define kDicLogSizeMaxCompress 131,3361
+static void LzmaEnc_FastPosInit(133,3423
+#define BSR2_RET(163,4238
+#define GetPosSlot1(172,4588
+#define GetPosSlot2(173,4632
+#define GetPosSlot(174,4687
+#define LZMA_NUM_REPS 179,4814
+typedef unsigned CState;181,4841
+  UInt32 price;185,4888
+  CState state;187,4907
+  int prev1IsChar;188,4924
+  int prev2;189,4944
+  UInt32 posPrev2;191,4960
+  UInt32 backPrev2;192,4980
+  UInt32 posPrev;194,5003
+  UInt32 backPrev;195,5022
+  UInt32 backs[backs196,5042
+} COptimal;197,5074
+#define kNumOpts 199,5089
+#define kNumLenToPosStates 201,5119
+#define kNumPosSlotBits 202,5149
+#define kDicLogSizeMin 203,5176
+#define kDicLogSizeMax 204,5202
+#define kDistTableSizeMax 205,5229
+#define kNumAlignBits 208,5281
+#define kAlignTableSize 209,5306
+#define kAlignMask 210,5352
+#define kStartPosModelIndex 212,5396
+#define kEndPosModelIndex 213,5427
+#define kNumPosModels 214,5457
+#define kNumFullDistances 216,5524
+#define CLzmaProb 219,5606
+#define CLzmaProb 221,5639
+#define LZMA_PB_MAX 224,5675
+#define LZMA_LC_MAX 225,5698
+#define LZMA_LP_MAX 226,5721
+#define LZMA_NUM_PB_STATES_MAX 228,5746
+#define kLenNumLowBits 231,5801
+#define kLenNumLowSymbols 232,5827
+#define kLenNumMidBits 233,5876
+#define kLenNumMidSymbols 234,5902
+#define kLenNumHighBits 235,5951
+#define kLenNumHighSymbols 236,5978
+#define kLenNumSymbolsTotal 238,6031
+#define LZMA_MATCH_LEN_MIN 240,6123
+#define LZMA_MATCH_LEN_MAX 241,6153
+#define kNumStates 243,6230
+  CLzmaProb choice;248,6276
+  CLzmaProb choice2;249,6297
+  CLzmaProb low[low250,6319
+  CLzmaProb mid[mid251,6379
+  CLzmaProb high[high252,6439
+} CLenEnc;253,6478
+  CLenEnc p;258,6513
+  UInt32 tableSize;259,6527
+  UInt32 prices[prices260,6548
+  UInt32 counters[counters261,6611
+} CLenPriceEnc;262,6655
+  UInt32 range;267,6695
+  Byte cache;268,6712
+  UInt64 low;269,6727
+  UInt64 cacheSize;270,6742
+  Byte *buf;buf271,6763
+  Byte *bufLim;bufLim272,6777
+  Byte *bufBase;bufBase273,6794
+  ISeqOutStream *outStream;outStream274,6812
+  UInt64 processed;275,6841
+  SRes res;276,6862
+} CRangeEnc;277,6875
+  CLzmaProb *litProbs;litProbs282,6912
+  UInt32 state;284,6938
+  UInt32 reps[reps285,6955
+  CLzmaProb isMatch[isMatch287,6988
+  CLzmaProb isRep[isRep288,7046
+  CLzmaProb isRepG0[isRepG0289,7078
+  CLzmaProb isRepG1[isRepG1290,7112
+  CLzmaProb isRepG2[isRepG2291,7146
+  CLzmaProb isRep0Long[isRep0Long292,7180
+  CLzmaProb posSlotEncoder[posSlotEncoder294,7243
+  CLzmaProb posEncoders[posEncoders295,7314
+  CLzmaProb posAlignEncoder[posAlignEncoder296,7379
+  CLenPriceEnc lenEnc;298,7433
+  CLenPriceEnc repLenEnc;299,7457
+} CSaveState;300,7484
+  void *matchFinderObj;matchFinderObj305,7522
+  IMatchFinder matchFinder;306,7547
+  UInt32 optimumEndIndex;308,7578
+  UInt32 optimumCurrentIndex;309,7605
+  UInt32 longestMatchLength;311,7638
+  UInt32 numPairs;312,7668
+  UInt32 numAvail;313,7688
+  UInt32 numFastBytes;315,7710
+  UInt32 additionalOffset;316,7734
+  UInt32 reps[reps317,7762
+  UInt32 state;318,7793
+  unsigned lc,320,7812
+  unsigned lc, lp,320,7812
+  unsigned lc, lp, pb;320,7812
+  unsigned lpMask,321,7836
+  unsigned lpMask, pbMask;321,7836
+  unsigned lclp;322,7864
+  CLzmaProb *litProbs;litProbs324,7884
+  Bool fastMode;326,7910
+  Bool writeEndMark;327,7928
+  Bool finished;328,7950
+  Bool multiThread;329,7968
+  Bool needInit;330,7989
+  UInt64 nowPos64;332,8009
+  UInt32 matchPriceCount;334,8033
+  UInt32 alignPriceCount;335,8060
+  UInt32 distTableSize;337,8089
+  UInt32 dictSize;339,8116
+  SRes result;340,8136
+  CRangeEnc rc;342,8154
+  Bool mtMode;345,8193
+  CMatchFinderMt matchFinderMt;346,8209
+  CMatchFinder matchFinderBase;349,8254
+  Byte pad[pad352,8309
+  COptimal opt[opt355,8341
+  Byte g_FastPos[g_FastPos358,8396
+  UInt32 ProbPrices[ProbPrices361,8445
+  UInt32 matches[matches362,8507
+  UInt32 posSlotPrices[posSlotPrices364,8560
+  UInt32 distancesPrices[distancesPrices365,8624
+  UInt32 alignPrices[alignPrices366,8690
+  CLzmaProb isMatch[isMatch368,8732
+  CLzmaProb isRep[isRep369,8790
+  CLzmaProb isRepG0[isRepG0370,8822
+  CLzmaProb isRepG1[isRepG1371,8856
+  CLzmaProb isRepG2[isRepG2372,8890
+  CLzmaProb isRep0Long[isRep0Long373,8924
+  CLzmaProb posSlotEncoder[posSlotEncoder375,8987
+  CLzmaProb posEncoders[posEncoders376,9058
+  CLzmaProb posAlignEncoder[posAlignEncoder377,9123
+  CLenPriceEnc lenEnc;379,9177
+  CLenPriceEnc repLenEnc;380,9201
+  CSaveState saveState;382,9230
+  Byte pad2[pad2385,9277
+} CLzmaEnc;387,9306
+void LzmaEnc_SaveState(390,9323
+void LzmaEnc_RestoreState(416,10389
+SRes LzmaEnc_SetProps(442,11470
+static const int kLiteralNextStates[kLiteralNextStates499,12828
+static const int kMatchNextStates[kMatchNextStates500,12921
+static const int kRepNextStates[kRepNextStates501,13015
+static const int kShortRepNextStates[kShortRepNextStates502,13109
+#define IsCharState(504,13205
+#define GetLenToPosState(506,13241
+#define kInfinityPrice 508,13346
+static void RangeEnc_Construct(510,13382
+#define RangeEnc_GetProcessed(516,13482
+#define RC_BUF_SIZE 518,13580
+static int RangeEnc_Alloc(519,13611
+static void RangeEnc_Free(531,13862
+static void RangeEnc_Init(537,13982
+static void RangeEnc_FlushStream(551,14202
+static void MY_FAST_CALL RangeEnc_ShiftLow(563,14484
+static void RangeEnc_FlushData(584,15002
+static void RangeEnc_EncodeDirectBits(591,15120
+static void RangeEnc_EncodeBit(606,15432
+static void LitEnc_Encode(629,15930
+static void LitEnc_EncodeMatched(640,16166
+static void LzmaEnc_InitPriceTables(654,16539
+#define GET_PRICE(678,17129
+#define GET_PRICEa(681,17264
+#define GET_PRICE_0(684,17397
+#define GET_PRICE_1(685,17470
+#define GET_PRICE_0a(687,17570
+#define GET_PRICE_1a(688,17641
+static UInt32 LitEnc_GetPrice(690,17739
+static UInt32 LitEnc_GetPriceMatched(703,18030
+static void RcTree_Encode(720,18460
+static void RcTree_ReverseEncode(734,18760
+static UInt32 RcTree_GetPrice(747,19062
+static UInt32 RcTree_ReverseGetPrice(759,19366
+static void LenEnc_Init(775,19726
+static void LenEnc_Encode(787,20110
+static void LenEnc_SetPrices(810,20840
+static void MY_FAST_CALL LenPriceEnc_UpdateTable(833,21749
+static void LenPriceEnc_UpdateTables(839,21993
+static void LenEnc_Encode2(846,22237
+static void MovePos(857,22550
+static UInt32 ReadMatchDistances(871,22806
+#define MakeAsChar(911,24019
+#define MakeAsShortRep(912,24098
+#define IsShortRep(913,24170
+static UInt32 GetRepLen1Price(915,24216
+static UInt32 GetPureRepPrice(922,24397
+static UInt32 GetRepPrice(944,24934
+static UInt32 Backward(950,25162
+#define LIT_PROBS(986,26128
+static UInt32 GetOptimum(988,26259
+#define ChangePair(1556,43901
+static UInt32 GetOptimumFast(1558,43976
+static void WriteEndMarker(1666,46947
+static SRes CheckErrors(1679,47618
+static SRes Flush(1692,47922
+static void FillAlignPrices(1703,48186
+static void FillDistancesPrices(1711,48419
+void LzmaEnc_Construct(1744,49780
+CLzmaEncHandle LzmaEnc_Create(1769,50318
+void LzmaEnc_FreeLits(1778,50494
+void LzmaEnc_Destruct(1786,50693
+void LzmaEnc_Destroy(1797,50980
+static SRes LzmaEnc_CodeOneBlock(1803,51144
+#define kBigHashDicLimit 1965,56435
+static SRes LzmaEnc_Alloc(1967,56481
+void LzmaEnc_Init(2017,58123
+void LzmaEnc_InitPrices(2076,59467
+static SRes LzmaEnc_AllocAndInit(2091,59841
+static SRes LzmaEnc_Prepare(2108,60302
+SRes LzmaEnc_PrepareForLzma2(2118,60631
+static void LzmaEnc_SetInputBuf(2128,60944
+SRes LzmaEnc_MemPrepare(2135,61163
+void LzmaEnc_Finish(2145,61474
+  ISeqOutStream funcTable;2159,61705
+  Byte *data;data2160,61733
+  SizeT rem;2161,61748
+  Bool overflow;2162,61762
+} CSeqOutStreamBuf;2163,61780
+static size_t MyWrite(2165,61803
+UInt32 LzmaEnc_GetNumAvailableBytes(2180,62090
+const Byte *LzmaEnc_GetCurBuf(LzmaEnc_GetCurBuf2187,62261
+SRes LzmaEnc_CodeOneMemBlock(2194,62450
+static SRes LzmaEnc_Encode2(2229,63296
+SRes LzmaEnc_Encode(2267,64020
+SRes LzmaEnc_WriteProperties(2275,64313
+SRes LzmaEnc_MemEncode(2303,65109
+SRes LzmaEncode(2335,65924
+
+extern_backup/7z/C/LzmaLib.c,64
+MY_STDAPI LzmaCompress(9,173
+MY_STDAPI LzmaUncompress(35,1025
+
+extern_backup/7z/C/tmp/Xz.c,279
+const Byte XZ_SIG[XZ_SIG11,168
+const Byte XZ_FOOTER_SIG[XZ_FOOTER_SIG12,235
+unsigned Xz_WriteVarInt(14,299
+void Xz_Construct(27,500
+void Xz_Free(34,621
+unsigned XzFlags_GetCheckSize(41,771
+void XzCheck_Init(47,916
+void XzCheck_Update(58,1189
+int XzCheck_Final(68,1528
+
+extern_backup/7z/C/tmp/Bra86.c,54
+#define Test86MSByte(8,135
+SizeT x86_Convert(10,188
+
+extern_backup/7z/C/tmp/7zBuf.c,66
+void Buf_Init(8,120
+int Buf_Create(14,184
+void Buf_Free(31,452
+
+extern_backup/7z/C/tmp/Bcj2Enc.c,323
+#define PRF(10,191
+#define PRF(12,216
+#define CProb 21,330
+#define kTopValue 23,354
+#define kNumModelBits 24,391
+#define kBitModelTotal 25,417
+#define kNumMoveBits 26,462
+void Bcj2Enc_Init(28,488
+static Bool MY_FAST_CALL RangeEnc_ShiftLow(56,973
+static void Bcj2Enc_Encode_2(81,1607
+void Bcj2Enc_Encode(244,5745
+
+extern_backup/7z/C/tmp/Ppmd7.c,1547
+const Byte PPMD7_kExpEscape[PPMD7_kExpEscape11,216
+static const UInt16 kInitBinEsc[kInitBinEsc12,305
+#define MAX_FREQ 14,411
+#define UNIT_SIZE 15,433
+#define U2B(17,457
+#define U2I(18,501
+#define I2U(19,544
+  #define REF(22,606
+  #define REF(24,639
+#define STATS_REF(27,707
+#define CTX(29,761
+#define STATS(30,824
+#define ONE_STATE(31,867
+#define SUFFIX(32,918
+typedef CPpmd7_Context * CTX_PTR;34,960
+  CPpmd7_Node_Ref;44,1109
+typedef struct CPpmd7_Node_46,1131
+  UInt16 Stamp;48,1163
+  UInt16 NU;49,1254
+  CPpmd7_Node_Ref Next;50,1268
+  CPpmd7_Node_Ref Prev;51,1322
+} CPpmd7_Node;52,1347
+  #define NODE(55,1384
+  #define NODE(57,1418
+void Ppmd7_Construct(60,1486
+void Ppmd7_Free(91,2182
+Bool Ppmd7_Alloc(98,2299
+static void InsertNode(120,2778
+static void *RemoveNode(RemoveNode126,2932
+static void SplitBlock(133,3117
+static void GlueFreeBlocks(145,3449
+static void *AllocUnitsRare(AllocUnitsRare217,5208
+static void *AllocUnits(AllocUnits243,5788
+#define MyMem12Cpy(258,6137
+static void *ShrinkUnits(ShrinkUnits262,6349
+#define SUCCESSOR(279,6748
+static void SetSuccessor(281,6847
+static void RestartModel(287,7034
+void Ppmd7_Init(334,8436
+static CTX_PTR CreateSuccessors(343,8657
+static void SwapStates(416,10369
+static void UpdateModel(423,10489
+static void Rescale(572,14034
+CPpmd_See *Ppmd7_MakeEscFreq(Ppmd7_MakeEscFreq636,15723
+static void NextContext(661,16457
+void Ppmd7_Update1(670,16665
+void Ppmd7_Update1_0(685,16955
+void Ppmd7_UpdateBin(695,17219
+void Ppmd7_Update2(703,17412
+
+extern_backup/7z/C/tmp/LzmaEnc.c,8959
+#define _7ZIP_ST16,324
+static unsigned g_STAT_OFFSET 27,460
+#define kMaxHistorySize 30,506
+#define kBlockSizeMax 33,600
+#define kBlockSize 35,663
+#define kUnpackBlockSize 36,693
+#define kMatchArraySize 37,729
+#define kMatchRecordMaxSize 38,764
+#define kNumMaxDirectBits 40,847
+#define kNumTopBits 42,881
+#define kTopValue 43,905
+#define kNumBitModelTotalBits 45,953
+#define kBitModelTotal 46,987
+#define kNumMoveBits 47,1040
+#define kProbInitValue 48,1064
+#define kNumMoveReducingBits 50,1112
+#define kNumBitPriceShiftBits 51,1144
+#define kBitPrice 52,1177
+void LzmaEncProps_Init(54,1227
+void LzmaEncProps_Normalize(63,1479
+UInt32 LzmaEncProps_GetDictSize(99,2556
+#define kDicLogSizeMaxCompress 113,2848
+#define BSR2_RET(115,2885
+static UInt32 GetPosSlot1(117,3009
+#define GetPosSlot2(123,3107
+#define GetPosSlot(124,3162
+#define kNumLogBits 128,3256
+#define kDicLogSizeMaxCompress 131,3361
+static void LzmaEnc_FastPosInit(133,3423
+#define BSR2_RET(163,4238
+#define GetPosSlot1(172,4588
+#define GetPosSlot2(173,4632
+#define GetPosSlot(174,4687
+#define LZMA_NUM_REPS 179,4814
+typedef unsigned CState;181,4841
+  UInt32 price;185,4888
+  CState state;187,4907
+  int prev1IsChar;188,4924
+  int prev2;189,4944
+  UInt32 posPrev2;191,4960
+  UInt32 backPrev2;192,4980
+  UInt32 posPrev;194,5003
+  UInt32 backPrev;195,5022
+  UInt32 backs[backs196,5042
+} COptimal;197,5074
+#define kNumOpts 199,5089
+#define kNumLenToPosStates 201,5119
+#define kNumPosSlotBits 202,5149
+#define kDicLogSizeMin 203,5176
+#define kDicLogSizeMax 204,5202
+#define kDistTableSizeMax 205,5229
+#define kNumAlignBits 208,5281
+#define kAlignTableSize 209,5306
+#define kAlignMask 210,5352
+#define kStartPosModelIndex 212,5396
+#define kEndPosModelIndex 213,5427
+#define kNumPosModels 214,5457
+#define kNumFullDistances 216,5524
+#define CLzmaProb 219,5606
+#define CLzmaProb 221,5639
+#define LZMA_PB_MAX 224,5675
+#define LZMA_LC_MAX 225,5698
+#define LZMA_LP_MAX 226,5721
+#define LZMA_NUM_PB_STATES_MAX 228,5746
+#define kLenNumLowBits 231,5801
+#define kLenNumLowSymbols 232,5827
+#define kLenNumMidBits 233,5876
+#define kLenNumMidSymbols 234,5902
+#define kLenNumHighBits 235,5951
+#define kLenNumHighSymbols 236,5978
+#define kLenNumSymbolsTotal 238,6031
+#define LZMA_MATCH_LEN_MIN 240,6123
+#define LZMA_MATCH_LEN_MAX 241,6153
+#define kNumStates 243,6230
+  CLzmaProb choice;248,6276
+  CLzmaProb choice2;249,6297
+  CLzmaProb low[low250,6319
+  CLzmaProb mid[mid251,6379
+  CLzmaProb high[high252,6439
+} CLenEnc;253,6478
+  CLenEnc p;258,6513
+  UInt32 tableSize;259,6527
+  UInt32 prices[prices260,6548
+  UInt32 counters[counters261,6611
+} CLenPriceEnc;262,6655
+  UInt32 range;267,6695
+  Byte cache;268,6712
+  UInt64 low;269,6727
+  UInt64 cacheSize;270,6742
+  Byte *buf;buf271,6763
+  Byte *bufLim;bufLim272,6777
+  Byte *bufBase;bufBase273,6794
+  ISeqOutStream *outStream;outStream274,6812
+  UInt64 processed;275,6841
+  SRes res;276,6862
+} CRangeEnc;277,6875
+  CLzmaProb *litProbs;litProbs282,6912
+  UInt32 state;284,6938
+  UInt32 reps[reps285,6955
+  CLzmaProb isMatch[isMatch287,6988
+  CLzmaProb isRep[isRep288,7046
+  CLzmaProb isRepG0[isRepG0289,7078
+  CLzmaProb isRepG1[isRepG1290,7112
+  CLzmaProb isRepG2[isRepG2291,7146
+  CLzmaProb isRep0Long[isRep0Long292,7180
+  CLzmaProb posSlotEncoder[posSlotEncoder294,7243
+  CLzmaProb posEncoders[posEncoders295,7314
+  CLzmaProb posAlignEncoder[posAlignEncoder296,7379
+  CLenPriceEnc lenEnc;298,7433
+  CLenPriceEnc repLenEnc;299,7457
+} CSaveState;300,7484
+  void *matchFinderObj;matchFinderObj305,7522
+  IMatchFinder matchFinder;306,7547
+  UInt32 optimumEndIndex;308,7578
+  UInt32 optimumCurrentIndex;309,7605
+  UInt32 longestMatchLength;311,7638
+  UInt32 numPairs;312,7668
+  UInt32 numAvail;313,7688
+  UInt32 numFastBytes;315,7710
+  UInt32 additionalOffset;316,7734
+  UInt32 reps[reps317,7762
+  UInt32 state;318,7793
+  unsigned lc,320,7812
+  unsigned lc, lp,320,7812
+  unsigned lc, lp, pb;320,7812
+  unsigned lpMask,321,7836
+  unsigned lpMask, pbMask;321,7836
+  unsigned lclp;322,7864
+  CLzmaProb *litProbs;litProbs324,7884
+  Bool fastMode;326,7910
+  Bool writeEndMark;327,7928
+  Bool finished;328,7950
+  Bool multiThread;329,7968
+  Bool needInit;330,7989
+  UInt64 nowPos64;332,8009
+  UInt32 matchPriceCount;334,8033
+  UInt32 alignPriceCount;335,8060
+  UInt32 distTableSize;337,8089
+  UInt32 dictSize;339,8116
+  SRes result;340,8136
+  CRangeEnc rc;342,8154
+  Bool mtMode;345,8193
+  CMatchFinderMt matchFinderMt;346,8209
+  CMatchFinder matchFinderBase;349,8254
+  Byte pad[pad352,8309
+  COptimal opt[opt355,8341
+  Byte g_FastPos[g_FastPos358,8396
+  UInt32 ProbPrices[ProbPrices361,8445
+  UInt32 matches[matches362,8507
+  UInt32 posSlotPrices[posSlotPrices364,8560
+  UInt32 distancesPrices[distancesPrices365,8624
+  UInt32 alignPrices[alignPrices366,8690
+  CLzmaProb isMatch[isMatch368,8732
+  CLzmaProb isRep[isRep369,8790
+  CLzmaProb isRepG0[isRepG0370,8822
+  CLzmaProb isRepG1[isRepG1371,8856
+  CLzmaProb isRepG2[isRepG2372,8890
+  CLzmaProb isRep0Long[isRep0Long373,8924
+  CLzmaProb posSlotEncoder[posSlotEncoder375,8987
+  CLzmaProb posEncoders[posEncoders376,9058
+  CLzmaProb posAlignEncoder[posAlignEncoder377,9123
+  CLenPriceEnc lenEnc;379,9177
+  CLenPriceEnc repLenEnc;380,9201
+  CSaveState saveState;382,9230
+  Byte pad2[pad2385,9277
+} CLzmaEnc;387,9306
+void LzmaEnc_SaveState(390,9323
+void LzmaEnc_RestoreState(416,10389
+SRes LzmaEnc_SetProps(442,11470
+static const int kLiteralNextStates[kLiteralNextStates499,12828
+static const int kMatchNextStates[kMatchNextStates500,12921
+static const int kRepNextStates[kRepNextStates501,13015
+static const int kShortRepNextStates[kShortRepNextStates502,13109
+#define IsCharState(504,13205
+#define GetLenToPosState(506,13241
+#define kInfinityPrice 508,13346
+static void RangeEnc_Construct(510,13382
+#define RangeEnc_GetProcessed(516,13482
+#define RC_BUF_SIZE 518,13580
+static int RangeEnc_Alloc(519,13611
+static void RangeEnc_Free(531,13862
+static void RangeEnc_Init(537,13982
+static void RangeEnc_FlushStream(551,14202
+static void MY_FAST_CALL RangeEnc_ShiftLow(563,14484
+static void RangeEnc_FlushData(584,15002
+static void RangeEnc_EncodeDirectBits(591,15120
+static void RangeEnc_EncodeBit(606,15432
+static void LitEnc_Encode(629,15930
+static void LitEnc_EncodeMatched(640,16166
+static void LzmaEnc_InitPriceTables(654,16539
+#define GET_PRICE(678,17129
+#define GET_PRICEa(681,17264
+#define GET_PRICE_0(684,17397
+#define GET_PRICE_1(685,17470
+#define GET_PRICE_0a(687,17570
+#define GET_PRICE_1a(688,17641
+static UInt32 LitEnc_GetPrice(690,17739
+static UInt32 LitEnc_GetPriceMatched(703,18030
+static void RcTree_Encode(720,18460
+static void RcTree_ReverseEncode(734,18760
+static UInt32 RcTree_GetPrice(747,19062
+static UInt32 RcTree_ReverseGetPrice(759,19366
+static void LenEnc_Init(775,19726
+static void LenEnc_Encode(787,20110
+static void LenEnc_SetPrices(810,20840
+static void MY_FAST_CALL LenPriceEnc_UpdateTable(833,21749
+static void LenPriceEnc_UpdateTables(839,21993
+static void LenEnc_Encode2(846,22237
+static void MovePos(857,22550
+static UInt32 ReadMatchDistances(871,22806
+#define MakeAsChar(911,24019
+#define MakeAsShortRep(912,24098
+#define IsShortRep(913,24170
+static UInt32 GetRepLen1Price(915,24216
+static UInt32 GetPureRepPrice(922,24397
+static UInt32 GetRepPrice(944,24934
+static UInt32 Backward(950,25162
+#define LIT_PROBS(986,26128
+static UInt32 GetOptimum(988,26259
+#define ChangePair(1556,43901
+static UInt32 GetOptimumFast(1558,43976
+static void WriteEndMarker(1666,46947
+static SRes CheckErrors(1679,47618
+static SRes Flush(1692,47922
+static void FillAlignPrices(1703,48186
+static void FillDistancesPrices(1711,48419
+void LzmaEnc_Construct(1744,49780
+CLzmaEncHandle LzmaEnc_Create(1769,50318
+void LzmaEnc_FreeLits(1778,50494
+void LzmaEnc_Destruct(1786,50693
+void LzmaEnc_Destroy(1797,50980
+static SRes LzmaEnc_CodeOneBlock(1803,51144
+#define kBigHashDicLimit 1965,56435
+static SRes LzmaEnc_Alloc(1967,56481
+void LzmaEnc_Init(2017,58123
+void LzmaEnc_InitPrices(2076,59467
+static SRes LzmaEnc_AllocAndInit(2091,59841
+static SRes LzmaEnc_Prepare(2108,60302
+SRes LzmaEnc_PrepareForLzma2(2118,60631
+static void LzmaEnc_SetInputBuf(2128,60944
+SRes LzmaEnc_MemPrepare(2135,61163
+void LzmaEnc_Finish(2145,61474
+  ISeqOutStream funcTable;2159,61705
+  Byte *data;data2160,61733
+  SizeT rem;2161,61748
+  Bool overflow;2162,61762
+} CSeqOutStreamBuf;2163,61780
+static size_t MyWrite(2165,61803
+UInt32 LzmaEnc_GetNumAvailableBytes(2180,62090
+const Byte *LzmaEnc_GetCurBuf(LzmaEnc_GetCurBuf2187,62261
+SRes LzmaEnc_CodeOneMemBlock(2194,62450
+static SRes LzmaEnc_Encode2(2229,63296
+SRes LzmaEnc_Encode(2267,64020
+SRes LzmaEnc_WriteProperties(2275,64313
+SRes LzmaEnc_MemEncode(2303,65109
+SRes LzmaEncode(2335,65924
+
+extern_backup/7z/C/tmp/DllSecur.c,258
+typedef BOOL (WINAPI *Func_SetDefaultDllDirectories)Func_SetDefaultDllDirectories14,196
+#define MY_LOAD_LIBRARY_SEARCH_USER_DIRS 16,275
+#define MY_LOAD_LIBRARY_SEARCH_SYSTEM32 17,323
+static const char * const g_Dlls 19,373
+void LoadSecurityDlls(35,592
+
+extern_backup/7z/C/tmp/LzFindMt.c,1898
+static void MtSync_Construct(10,182
+static void MtSync_GetNextBlock(23,545
+static void MtSync_StopWriting(51,1197
+static void MtSync_Destruct(74,1738
+#define RINOK_THREAD(100,2313
+static SRes MtSync_Create2(102,2382
+static SRes MtSync_Create(124,3097
+void MtSync_Init(132,3328
+#define kMtMaxValForNormalize 134,3385
+#define DEF_GetHeads2(136,3429
+#define DEF_GetHeads(142,3772
+DEF_GetHeads(145,3921
+static void MatchFinderMt_GetNextBlock_Hash(220,6492
+#define kEmptyHashValue 228,6828
+#define NO_INLINE 234,6914
+static Int32 NO_INLINE GetMatchesSpecN(236,6948
+static void BtGetMatches(313,8918
+static void BtFillBlock(388,11325
+void BtThreadFunc(413,11969
+void MatchFinderMt_Construct(439,12537
+static void MatchFinderMt_FreeMem(446,12684
+void MatchFinderMt_Destruct(452,12820
+#define kHashBufferSize 459,12995
+#define kBtBufferSize 460,13058
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE HashThreadFunc2(462,13117
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE BtThreadFunc2(463,13245
+SRes MatchFinderMt_Create(474,13514
+void MatchFinderMt_Init(499,14503
+void MatchFinderMt_ReleaseStream(527,15340
+static void MatchFinderMt_Normalize(533,15478
+static void MatchFinderMt_GetNextBlock_Bt(539,15661
+static const Byte * MatchFinderMt_GetPointerToCurrentPos(551,16118
+#define GET_NEXT_BLOCK_IF_REQUIRED 556,16233
+static UInt32 MatchFinderMt_GetNumAvailableBytes(558,16342
+static UInt32 * MixMatches2(564,16480
+static UInt32 * MixMatches3(585,16965
+#define INCREASE_LZ_POS 675,19321
+static UInt32 MatchFinderMt2_GetMatches(677,19382
+static UInt32 MatchFinderMt_GetMatches(695,19767
+#define SKIP_HEADER2_MT 725,20565
+#define SKIP_HEADER_MT(726,20623
+#define SKIP_FOOTER_MT 727,20763
+static void MatchFinderMt0_Skip(729,20871
+static void MatchFinderMt2_Skip(735,21004
+static void MatchFinderMt3_Skip(744,21182
+void MatchFinderMt_CreateVTable(769,21710
+
+extern_backup/7z/C/tmp/7zCrc.c,504
+#define kCrcPoly 9,141
+  #define CRC_NUM_TABLES 12,190
+  #define CRC_NUM_TABLES 14,225
+  #define CRC_UINT32_SWAP(16,255
+typedef UInt32 (MY_FAST_CALL *CRC_FUNC)CRC_FUNC27,798
+CRC_FUNC g_CrcUpdateT4;29,904
+CRC_FUNC g_CrcUpdateT8;30,929
+CRC_FUNC g_CrcUpdate;31,954
+UInt32 g_CrcTable[g_CrcTable33,979
+UInt32 MY_FAST_CALL CrcUpdate(35,1023
+UInt32 MY_FAST_CALL CrcCalc(40,1153
+#define CRC_UPDATE_BYTE_2(45,1297
+UInt32 MY_FAST_CALL CrcUpdateT1(47,1379
+void MY_FAST_CALL CrcGenerateTable(56,1627
+
+extern_backup/7z/C/tmp/XzCrc64Opt.c,198
+#define CRC_UPDATE_BYTE_2(10,154
+UInt64 MY_FAST_CALL XzCrc64UpdateT4(12,236
+#define CRC_UINT64_SWAP(36,892
+#define CRC_UPDATE_BYTE_2_BE(46,1228
+UInt64 MY_FAST_CALL XzCrc64UpdateT1_BeT4(48,1318
+
+extern_backup/7z/C/tmp/CpuArch.c,468
+#define USE_ASM11,231
+static UInt32 CheckFlag(19,380
+#define CHECK_CPUID_IS_SUPPORTED 53,1054
+#define CHECK_CPUID_IS_SUPPORTED55,1165
+void MyCPUID(58,1209
+Bool x86cpuid_CheckAndRead(118,2254
+static const UInt32 kVendors[kVendors126,2466
+int x86cpuid_GetFirm(133,2637
+Bool CPU_Is_InOrder(147,2945
+static Bool CPU_Sys_Is_SSE_Supported(178,3857
+#define CHECK_SYS_SSE_SUPPORT 186,4046
+#define CHECK_SYS_SSE_SUPPORT188,4131
+Bool CPU_Is_Aes_Supported(191,4172
+
+extern_backup/7z/C/tmp/XzIn.c,544
+SRes Xz_ReadHeader(12,177
+#define READ_VARINT_AND_CHECK(21,485
+SRes XzBlock_ReadHeader(25,656
+#define ADD_SIZE_CHECH(45,1212
+UInt64 Xz_GetUnpackSize(48,1350
+UInt64 Xz_GetPackSize(57,1542
+static SRes Xz_ReadIndex2(73,1919
+static SRes Xz_ReadIndex(118,3160
+static SRes LookInStream_SeekRead_ForArc(138,3730
+static SRes Xz_ReadBackward(145,4013
+      #define TEMP_BUF_SIZE 165,4587
+void Xzs_Construct(235,6558
+void Xzs_Free(241,6647
+UInt64 Xzs_GetNumBlocks(251,6865
+UInt64 Xzs_GetUnpackSize(260,7029
+SRes Xzs_ReadBackward(280,7416
+
+extern_backup/7z/C/tmp/Ppmd7Enc.c,312
+#define kTopValue 9,198
+void Ppmd7z_RangeEnc_Init(11,229
+static void RangeEnc_ShiftLow(19,364
+static void RangeEnc_Encode(36,785
+static void RangeEnc_EncodeBit_0(47,1037
+static void RangeEnc_EncodeBit_1(57,1244
+void Ppmd7z_RangeEnc_FlushData(69,1506
+#define MASK(77,1638
+void Ppmd7_EncodeSymbol(79,1690
+
+extern_backup/7z/C/tmp/LzmaLib.c,64
+MY_STDAPI LzmaCompress(9,173
+MY_STDAPI LzmaUncompress(35,1025
+
+extern_backup/7z/C/tmp/Bra.c,109
+SizeT ARM_Convert(8,129
+SizeT ARMT_Convert(35,752
+SizeT PPC_Convert(71,1614
+SizeT SPARC_Convert(101,2384
+
+extern_backup/7z/C/tmp/7zBuf2.c,110
+void DynBuf_Construct(10,144
+void DynBuf_SeekToBeg(17,234
+int DynBuf_Write(22,292
+void DynBuf_Free(45,808
+
+extern_backup/7z/C/tmp/7zAlloc.c,167
+int g_allocCount 18,317
+int g_allocCountTemp 19,340
+void *SzAlloc(SzAlloc23,379
+void SzFree(35,640
+void *SzAllocTemp(SzAllocTemp48,869
+void SzFreeTemp(63,1223
+
+extern_backup/7z/C/tmp/Sort.c,75
+#define HeapSortDown(8,121
+void HeapSort(17,363
+void HeapSort64(63,1122
+
+extern_backup/7z/C/tmp/Bcj2.c,269
+#define CProb 9,166
+#define kTopValue 11,190
+#define kNumModelBits 12,227
+#define kBitModelTotal 13,253
+#define kNumMoveBits 14,298
+#define _IF_BIT_0 16,324
+#define _UPDATE_0 17,420
+#define _UPDATE_1 18,522
+void Bcj2Dec_Init(20,626
+SRes Bcj2Dec_Decode(33,886
+
+extern_backup/7z/C/tmp/Lzma86Dec.c,61
+SRes Lzma86_GetUnpackSize(12,207
+SRes Lzma86_Decode(23,523
+
+extern_backup/7z/C/tmp/7zDec.c,945
+#define k_Copy 23,391
+#define k_Delta 24,409
+#define k_LZMA2 25,428
+#define k_LZMA 26,450
+#define k_BCJ 27,475
+#define k_BCJ2 28,502
+#define k_PPC 29,529
+#define k_IA64 30,556
+#define k_ARM 31,583
+#define k_ARMT 32,610
+#define k_SPARC 33,637
+#define k_PPMD 38,698
+  IByteIn p;42,743
+  const Byte *cur;cur43,757
+  const Byte *end;end44,777
+  const Byte *begin;begin45,797
+  UInt64 processed;46,819
+  Bool extra;47,840
+  SRes res;48,855
+  ILookInStream *inStream;inStream49,868
+} CByteInToLook;50,896
+static Byte ReadByte(52,916
+static SRes SzDecodePpmd(73,1434
+static SRes SzDecodeLzma(134,3023
+static SRes SzDecodeLzma2(194,4590
+static SRes SzDecodeCopy(253,6103
+static Bool IS_MAIN_METHOD(272,6619
+static Bool IS_SUPPORTED_CODER(289,6888
+#define IS_BCJ2(297,7084
+static SRes CheckSupportedFolder(299,7156
+#define CASE_BRA_CONV(368,8953
+static SRes SzFolder_Decode2(370,9049
+SRes SzAr_DecodeFolder(549,14433
+
+extern_backup/7z/C/tmp/XzEnc.c,2039
+#define XzBlock_ClearFlags(22,338
+#define XzBlock_SetNumFilters(23,391
+#define XzBlock_SetHasPackSize(24,453
+#define XzBlock_SetHasUnpackSize(25,521
+static SRes WriteBytes(27,593
+static SRes WriteBytesAndCrc(32,742
+static SRes Xz_WriteHeader(38,915
+static SRes XzBlock_WriteHeader(51,1351
+static SRes Xz_WriteFooter(81,2213
+static SRes Xz_AddIndexRecord(130,3458
+  ISeqInStream p;163,4374
+  ISeqInStream *realStream;realStream164,4393
+  UInt64 processed;165,4422
+  CXzCheck check;166,4443
+} CSeqCheckInStream;167,4462
+static void SeqCheckInStream_Init(169,4486
+static void SeqCheckInStream_GetDigest(175,4621
+static SRes SeqCheckInStream_Read(180,4742
+  ISeqOutStream p;194,5088
+  ISeqOutStream *realStream;realStream195,5108
+  UInt64 processed;196,5138
+} CSeqSizeOutStream;197,5159
+static size_t MyWrite(199,5183
+#define FILTER_BUF_SIZE 210,5452
+  ISeqInStream p;214,5508
+  ISeqInStream *realStream;realStream215,5527
+  IStateCoder StateCoder;216,5556
+  Byte *buf;buf217,5583
+  size_t curPos;218,5597
+  size_t endPos;219,5615
+  int srcWasFinished;220,5633
+} CSeqInFilter;221,5656
+static SRes SeqInFilter_Read(223,5675
+static void SeqInFilter_Construct(255,6542
+static void SeqInFilter_Free(261,6653
+static SRes SeqInFilter_Init(272,6882
+  ISeqInStream p;295,7459
+  ISeqInStream *inStream;inStream296,7478
+  CSbEnc enc;297,7505
+} CSbEncInStream;298,7520
+static SRes SbEncInStream_Read(300,7541
+void SbEncInStream_Construct(329,8298
+SRes SbEncInStream_Init(335,8443
+void SbEncInStream_Free(340,8526
+  CLzma2EncHandle lzma2;350,8633
+  CSbEncInStream sb;352,8682
+  CSeqInFilter filter;354,8714
+  ISzAlloc *alloc;alloc355,8738
+  ISzAlloc *bigAlloc;bigAlloc356,8758
+} CLzma2WithFilters;357,8781
+static void Lzma2WithFilters_Construct(360,8807
+static SRes Lzma2WithFilters_Create(371,9096
+static void Lzma2WithFilters_Free(379,9278
+void XzProps_Init(393,9524
+void XzFilterProps_Init(400,9647
+static SRes Xz_Compress(409,9771
+SRes Xz_Encode(511,12708
+SRes Xz_EncodeEmpty(528,13197
+
+extern_backup/7z/C/tmp/XzCrc64.c,388
+#define kCrc64Poly 9,152
+  #define CRC_NUM_TABLES 12,225
+  #define CRC_NUM_TABLES 14,260
+  #define CRC_UINT64_SWAP(15,288
+typedef UInt64 (MY_FAST_CALL *CRC_FUNC)CRC_FUNC32,874
+static CRC_FUNC g_Crc64Update;34,980
+UInt64 g_Crc64Table[g_Crc64Table35,1012
+UInt64 MY_FAST_CALL Crc64Update(37,1058
+UInt64 MY_FAST_CALL Crc64Calc(42,1194
+void MY_FAST_CALL Crc64GenerateTable(47,1348
+
+extern_backup/7z/C/tmp/Ppmd7Dec.c,306
+#define kTopValue 9,198
+Bool Ppmd7z_RangeDec_Init(11,229
+static UInt32 Range_GetThreshold(23,538
+static void Range_Normalize(29,696
+static void Range_Decode(43,1020
+static UInt32 Range_DecodeBit(51,1216
+void Ppmd7z_RangeDec_CreateVTable(71,1602
+#define MASK(79,1779
+int Ppmd7_DecodeSymbol(81,1831
+
+extern_backup/7z/C/tmp/AesOpt.c,469
+#define USE_INTEL_AES10,173
+void MY_FAST_CALL AesCbc_Encode_Intel(18,264
+#define NUM_WAYS 41,833
+#define AES_OP_W(43,855
+#define AES_DEC(50,993
+#define AES_DEC_LAST(51,1043
+#define AES_ENC(52,1102
+#define AES_ENC_LAST(53,1152
+void MY_FAST_CALL AesCbc_Decode_Intel(55,1213
+void MY_FAST_CALL AesCtr_Code_Intel(110,2584
+void MY_FAST_CALL AesCbc_Encode_Intel(169,4236
+void MY_FAST_CALL AesCbc_Decode_Intel(174,4362
+void MY_FAST_CALL AesCtr_Code_Intel(179,4488
+
+extern_backup/7z/C/tmp/Lzma2Dec.c,1052
+#define LZMA2_CONTROL_LZMA 30,592
+#define LZMA2_CONTROL_COPY_NO_RESET 31,629
+#define LZMA2_CONTROL_COPY_RESET_DIC 32,668
+#define LZMA2_CONTROL_EOF 33,708
+#define LZMA2_IS_UNCOMPRESSED_STATE(35,739
+#define LZMA2_GET_LZMA_MODE(37,824
+#define LZMA2_IS_THERE_PROP(38,882
+#define LZMA2_LCLP_MAX 40,933
+#define LZMA2_DIC_SIZE_FROM_PROP(41,959
+#define PRF(44,1066
+#define PRF(46,1091
+  LZMA2_STATE_CONTROL,51,1134
+  LZMA2_STATE_UNPACK0,52,1158
+  LZMA2_STATE_UNPACK1,53,1182
+  LZMA2_STATE_PACK0,54,1206
+  LZMA2_STATE_PACK1,55,1228
+  LZMA2_STATE_PROP,56,1250
+  LZMA2_STATE_DATA,57,1271
+  LZMA2_STATE_DATA_CONT,58,1292
+  LZMA2_STATE_FINISHED,59,1318
+  LZMA2_STATE_ERROR60,1343
+} ELzma2State;61,1364
+static SRes Lzma2Dec_GetOldProps(63,1382
+SRes Lzma2Dec_AllocateProbs(77,1786
+SRes Lzma2Dec_Allocate(84,2019
+void Lzma2Dec_Init(91,2242
+static ELzma2State Lzma2Dec_UpdateState(100,2430
+static void LzmaDec_UpdateWithUncompressed(161,4208
+SRes Lzma2Dec_DecodeToDic(172,4592
+SRes Lzma2Dec_DecodeToBuf(319,8797
+SRes Lzma2Decode(358,9970
+
+extern_backup/7z/C/tmp/7zFile.c,652
+#define kChunkSizeMax 26,663
+void File_Construct(30,708
+static WRes File_Open(40,905
+WRes InFile_Open(60,1454
+WRes OutFile_Open(61,1536
+static WRes File_OpenW(65,1654
+WRes InFile_OpenW(74,1997
+WRes OutFile_OpenW(75,2082
+WRes File_Close(78,2178
+WRes File_Read(99,2554
+WRes File_Write(134,3319
+WRes File_Seek(169,4093
+WRes File_GetLength(212,5244
+static SRes FileSeqInStream_Read(241,5817
+void FileSeqInStream_CreateVTable(247,6014
+static SRes FileInStream_Read(255,6161
+static SRes FileInStream_Seek(261,6351
+void FileInStream_CreateVTable(267,6515
+static size_t FileOutStream_Write(276,6688
+void FileOutStream_CreateVTable(283,6871
+
+extern_backup/7z/C/tmp/Aes.c,948
+static UInt32 T[T9,154
+static const Byte Sbox[Sbox10,181
+AES_CODE_FUNC g_AesCbc_Encode;36,2293
+AES_CODE_FUNC g_AesCbc_Decode;37,2325
+AES_CODE_FUNC g_AesCtr_Code;38,2357
+static UInt32 D[D40,2389
+static Byte InvS[InvS41,2416
+static const Byte Rcon[Rcon43,2442
+#define xtime(45,2544
+#define Ui32(47,2619
+#define gb0(49,2734
+#define gb1(50,2773
+#define gb2(51,2812
+#define gb3(52,2851
+void AesGenTables(54,2892
+#define HT(102,4076
+#define HT4(104,4139
+#define HT16(110,4266
+#define FT(116,4389
+#define FT4(117,4437
+#define HD(120,4520
+#define HD4(122,4583
+#define HD16(128,4711
+#define FD(134,4834
+#define FD4(135,4882
+void MY_FAST_CALL Aes_SetKey_Enc(137,4963
+void MY_FAST_CALL Aes_SetKey_Dec(160,5587
+static void Aes_Encode(181,6173
+static void Aes_Decode(204,6601
+void AesCbc_Init(225,7024
+void MY_FAST_CALL AesCbc_Encode(232,7152
+void MY_FAST_CALL AesCbc_Decode(250,7598
+void MY_FAST_CALL AesCtr_Code(274,8182
+
+extern_backup/7z/C/tmp/Lzma2Enc.c,1464
+#define NUM_MT_CODER_THREADS_MAX 16,250
+#define LZMA2_CONTROL_LZMA 19,296
+#define LZMA2_CONTROL_COPY_NO_RESET 20,333
+#define LZMA2_CONTROL_COPY_RESET_DIC 21,372
+#define LZMA2_CONTROL_EOF 22,412
+#define LZMA2_LCLP_MAX 24,443
+#define LZMA2_DIC_SIZE_FROM_PROP(26,471
+#define LZMA2_PACK_SIZE_MAX 28,554
+#define LZMA2_COPY_CHUNK_SIZE 29,593
+#define LZMA2_UNPACK_SIZE_MAX 30,644
+#define LZMA2_KEEP_WINDOW_SIZE 31,685
+#define LZMA2_CHUNK_SIZE_COMPRESSED_MAX 33,741
+#define PRF(36,803
+  CLzmaEncHandle enc;42,892
+  UInt64 srcPos;43,915
+  Byte props;44,933
+  Bool needInitState;45,948
+  Bool needInitProp;46,971
+} CLzma2EncInt;47,993
+static SRes Lzma2EncInt_Init(49,1012
+static SRes Lzma2EncInt_EncodeSubblock(74,2026
+void Lzma2EncProps_Init(176,4923
+void Lzma2EncProps_Normalize(184,5089
+static SRes Progress(265,6843
+  Byte propEncoded;275,7071
+  CLzma2EncProps props;276,7092
+  Byte *outBuf;outBuf278,7121
+  ISzAlloc *alloc;alloc280,7140
+  ISzAlloc *allocBig;allocBig281,7160
+  CLzma2EncInt coders[coders283,7185
+  CMtCoder mtCoder;286,7257
+} CLzma2Enc;289,7290
+static SRes Lzma2Enc_EncodeMt1(294,7354
+  IMtCoderCallback funcTable;342,8529
+  CLzma2Enc *lzma2Enc;lzma2Enc343,8560
+} CMtCallbackImp;344,8584
+static SRes MtCallbackImp_Code(346,8605
+CLzma2EncHandle Lzma2Enc_Create(406,10057
+void Lzma2Enc_Destroy(429,10566
+SRes Lzma2Enc_SetProps(451,11005
+Byte Lzma2Enc_WriteProperties(463,11366
+SRes Lzma2Enc_Encode(474,11652
+
+extern_backup/7z/C/tmp/LzmaDec.c,2789
+#define kNumTopBits 10,148
+#define kTopValue 11,172
+#define kNumBitModelTotalBits 13,220
+#define kBitModelTotal 14,254
+#define kNumMoveBits 15,307
+#define RC_INIT_SIZE 17,333
+#define NORMALIZE 19,359
+#define IF_BIT_0(21,451
+#define UPDATE_0(22,561
+#define UPDATE_1(23,665
+#define GET_BIT2(24,766
+#define GET_BIT(27,897
+#define TREE_GET_BIT(29,944
+#define TREE_DECODE(30,1005
+#define TREE_6_DECODE(36,1178
+#define TREE_6_DECODE(38,1250
+#define NORMAL_LITER_DEC 49,1499
+#define MATCHED_LITER_DEC 50,1556
+#define NORMALIZE_CHECK 56,1739
+#define IF_BIT_0_CHECK(58,1878
+#define UPDATE_0_CHECK 59,2000
+#define UPDATE_1_CHECK 60,2039
+#define GET_BIT2_CHECK(61,2094
+#define GET_BIT_CHECK(64,2243
+#define TREE_DECODE_CHECK(65,2300
+#define kNumPosBitsMax 69,2430
+#define kNumPosStatesMax 70,2456
+#define kLenNumLowBits 72,2506
+#define kLenNumLowSymbols 73,2532
+#define kLenNumMidBits 74,2581
+#define kLenNumMidSymbols 75,2607
+#define kLenNumHighBits 76,2656
+#define kLenNumHighSymbols 77,2683
+#define LenChoice 79,2736
+#define LenChoice2 80,2757
+#define LenLow 81,2793
+#define LenMid 82,2826
+#define LenHigh 83,2890
+#define kNumLenProbs 84,2955
+#define kNumStates 87,3012
+#define kNumLitStates 88,3035
+#define kStartPosModelIndex 90,3062
+#define kEndPosModelIndex 91,3093
+#define kNumFullDistances 92,3123
+#define kNumPosSlotBits 94,3184
+#define kNumLenToPosStates 95,3211
+#define kNumAlignBits 97,3243
+#define kAlignTableSize 98,3268
+#define kMatchMinLen 100,3316
+#define kMatchSpecLenStart 101,3340
+#define IsMatch 103,3446
+#define IsRep 104,3465
+#define IsRepG0 105,3523
+#define IsRepG1 106,3561
+#define IsRepG2 107,3601
+#define IsRep0Long 108,3641
+#define PosSlot 109,3684
+#define SpecPos 110,3747
+#define Align 111,3816
+#define LenCoder 112,3881
+#define RepLenCoder 113,3925
+#define Literal 114,3972
+#define LZMA_BASE_SIZE 116,4020
+#define LZMA_LIT_SIZE 117,4049
+#define LzmaProps_GetNumProbs(123,4142
+#define LZMA_DIC_MIN 125,4237
+static int MY_FAST_CALL LzmaDec_DecodeReal(140,4692
+static void MY_FAST_CALL LzmaDec_WriteRem(515,14808
+static int MY_FAST_CALL LzmaDec_DecodeReal2(543,15598
+  DUMMY_ERROR,572,16332
+  DUMMY_LIT,573,16385
+  DUMMY_MATCH,574,16399
+  DUMMY_REP575,16415
+} ELzmaDummy;576,16428
+static ELzmaDummy LzmaDec_TryDummy(578,16445
+void LzmaDec_InitDicAndState(769,21613
+void LzmaDec_Init(785,21911
+static void LzmaDec_InitStateReal(791,22012
+SRes LzmaDec_DecodeToDic(803,22336
+SRes LzmaDec_DecodeToBuf(938,26444
+void LzmaDec_FreeProbs(978,27554
+static void LzmaDec_FreeDict(984,27669
+void LzmaDec_Free(990,27786
+SRes LzmaProps_Decode(996,27906
+static SRes LzmaDec_AllocateProbs2(1022,28444
+SRes LzmaDec_AllocateProbs(1036,28861
+SRes LzmaDec_Allocate(1045,29138
+SRes LzmaDecode(1077,30063
+
+extern_backup/7z/C/tmp/Alloc.c,519
+int g_allocCount 18,339
+int g_allocCountMid 19,362
+int g_allocCountBig 20,388
+void *MyAlloc(MyAlloc23,424
+void MyFree(38,722
+void *MidAlloc(MidAlloc49,944
+void MidFree(59,1197
+#undef _7ZIP_LARGE_PAGES71,1460
+SIZE_T g_LargePageSize 75,1522
+typedef SIZE_T (WINAPI *GetLargePageMinimumP)GetLargePageMinimumP76,1551
+void SetLargePageSize(79,1611
+void *BigAlloc(BigAlloc95,2016
+void BigFree(115,2587
+static void *SzBigAlloc(SzBigAlloc134,3055
+static void SzBigFree(135,3144
+ISzAlloc g_BigAlloc 136,3228
+
+extern_backup/7z/C/tmp/BraIA64.c,78
+static const Byte kBranchTable[kBranchTable8,133
+SizeT IA64_Convert(16,287
+
+extern_backup/7z/C/tmp/Threads.c,584
+static WRes GetError(12,185
+WRes HandleToWRes(18,283
+WRes BOOLToWRes(19,350
+WRes HandlePtr_Close(21,408
+WRes Handle_WaitObject(30,548
+WRes Thread_Create(32,635
+WRes Event_Create(52,1143
+WRes Event_Set(58,1314
+WRes Event_Reset(59,1378
+WRes ManualResetEvent_Create(61,1448
+WRes AutoResetEvent_Create(62,1558
+WRes ManualResetEvent_CreateNotSignaled(63,1665
+WRes AutoResetEvent_CreateNotSignaled(64,1770
+WRes Semaphore_Create(67,1873
+static WRes Semaphore_Release(73,2052
+WRes Semaphore_ReleaseN(75,2215
+WRes Semaphore_Release1(77,2320
+WRes CriticalSection_Init(79,2399
+
+extern_backup/7z/C/tmp/Sha256.c,758
+#define _SHA256_UNROLL15,329
+#define _SHA256_UNROLL216,353
+void Sha256_Init(21,421
+#define S0(34,708
+#define S1(35,778
+#define s0(36,848
+#define s1(37,910
+#define blk0(39,975
+#define blk2(40,999
+#define Ch(42,1083
+#define Maj(43,1116
+#define R(47,1182
+#define RX_8(52,1333
+#define RX_16 62,1589
+#define a(66,1634
+#define b(67,1661
+#define c(68,1688
+#define d(69,1715
+#define e(70,1742
+#define f(71,1769
+#define g(72,1796
+#define h(73,1823
+#define R(75,1852
+#define RX_8(82,2049
+#define RX_16 83,2131
+#define RX_16 87,2176
+static const UInt32 K[K93,2261
+static void Sha256_WriteByteBlock(112,3113
+#undef S0173,4173
+#undef S1174,4184
+#undef s0175,4195
+#undef s1176,4206
+void Sha256_Update(178,4219
+void Sha256_Final(215,4845
+
+extern_backup/7z/C/tmp/7zStream.c,652
+SRes SeqInStream_Read2(10,156
+SRes SeqInStream_Read(24,499
+SRes SeqInStream_ReadByte(29,644
+SRes LookInStream_SeekTo(36,843
+SRes LookInStream_LookRead(42,985
+SRes LookInStream_Read2(52,1250
+SRes LookInStream_Read(66,1595
+static SRes LookToRead_Look_Lookahead(71,1743
+static SRes LookToRead_Look_Exact(89,2190
+static SRes LookToRead_Skip(108,2679
+static SRes LookToRead_Read(115,2818
+static SRes LookToRead_Seek(129,3166
+void LookToRead_CreateVTable(136,3364
+void LookToRead_Init(146,3621
+static SRes SecToLook_Read(151,3692
+void SecToLook_CreateVTable(157,3859
+static SRes SecToRead_Read(162,3942
+void SecToRead_CreateVTable(168,4107
+
+extern_backup/7z/C/tmp/7zCrcOpt.c,277
+#define CRC_UPDATE_BYTE_2(10,152
+UInt32 MY_FAST_CALL CrcUpdateT4(12,234
+UInt32 MY_FAST_CALL CrcUpdateT8(31,825
+#define CRC_UINT32_SWAP(62,1683
+#define CRC_UPDATE_BYTE_2_BE(64,1783
+UInt32 MY_FAST_CALL CrcUpdateT1_BeT4(66,1869
+UInt32 MY_FAST_CALL CrcUpdateT1_BeT8(87,2534
+
+extern_backup/7z/C/tmp/LzFind.c,2270
+#define kEmptyHashValue 11,185
+#define kMaxValForNormalize 12,212
+#define kNormalizeStepMin 13,262
+#define kNormalizeMask 14,327
+#define kMaxHistorySize 15,386
+#define kStartMaxLen 17,431
+static void LzInWindow_Free(19,457
+static int LzInWindow_Create(30,700
+Byte *MatchFinder_GetPointerToCurrentPos(MatchFinder_GetPointerToCurrentPos47,1180
+UInt32 MatchFinder_GetNumAvailableBytes(49,1263
+void MatchFinder_ReduceOffsets(51,1357
+static void MatchFinder_ReadBlock(58,1511
+void MatchFinder_MoveBlock(98,2508
+int MatchFinder_NeedMove(106,2736
+void MatchFinder_ReadIfRequired(114,2956
+static void MatchFinder_CheckAndMoveAndRead(122,3139
+static void MatchFinder_SetDefaultSettings(129,3301
+#define kCrcPoly 137,3452
+void MatchFinder_Construct(139,3483
+static void MatchFinder_FreeThisClassMemory(157,3831
+void MatchFinder_Free(163,3969
+static CLzRef* AllocRefs(169,4110
+int MatchFinder_Create(177,4343
+static void MatchFinder_SetLimits(266,6840
+void MatchFinder_Init_2(295,7462
+void MatchFinder_Init(315,7906
+static UInt32 MatchFinder_GetSubValue(320,7988
+void MatchFinder_Normalize3(325,8110
+static void MatchFinder_Normalize(339,8402
+static void MatchFinder_CheckLimits(346,8612
+static UInt32 * Hc_GetMatchesSpec(357,8969
+UInt32 * GetMatchesSpec1(388,9907
+static void SkipMatchesSpec(443,11426
+#define MOVE_POS 493,12724
+#define MOVE_POS_RET 498,12851
+static void MatchFinder_MovePos(500,12899
+#define GET_MATCHES_HEADER2(502,12965
+#define GET_MATCHES_HEADER(507,13192
+#define SKIP_HEADER(508,13266
+#define MF_PARAMS(510,13342
+#define GET_MATCHES_FOOTER(512,13446
+#define SKIP_FOOTER 516,13626
+#define UPDATE_maxLen 519,13715
+static UInt32 Bt2_MatchFinder_GetMatches(526,13959
+UInt32 Bt3Zip_MatchFinder_GetMatches(537,14203
+static UInt32 Bt3_MatchFinder_GetMatches(548,14446
+static UInt32 Bt4_MatchFinder_GetMatches(585,15150
+static UInt32 Hc4_MatchFinder_GetMatches(717,17896
+UInt32 Hc3Zip_MatchFinder_GetMatches(853,20823
+static void Bt2_MatchFinder_Skip(865,21144
+void Bt3Zip_MatchFinder_Skip(878,21364
+static void Bt3_MatchFinder_Skip(891,21583
+static void Bt4_MatchFinder_Skip(908,21901
+static void Hc4_MatchFinder_Skip(947,22685
+void Hc3Zip_MatchFinder_Skip(988,23554
+void MatchFinder_CreateVTable(1002,23814
+
+extern_backup/7z/C/tmp/Delta.c,104
+void Delta_Init(8,124
+static void MyMemCpy(15,238
+void Delta_Encode(22,380
+void Delta_Decode(45,876
+
+extern_backup/7z/C/tmp/7zArcIn.c,3836
+#define MY_ALLOC(13,211
+#define MY_ALLOC_ZE(16,344
+#define MY_ALLOC_AND_CPY(18,450
+#define MY_ALLOC_ZE_AND_CPY(21,567
+#define k7zMajorVersion 24,706
+enum EIdEnum26,735
+  k7zIdEnd,28,752
+  k7zIdHeader,29,765
+  k7zIdArchiveProperties,30,781
+  k7zIdAdditionalStreamsInfo,31,808
+  k7zIdMainStreamsInfo,32,839
+  k7zIdFilesInfo,33,864
+  k7zIdPackInfo,34,883
+  k7zIdUnpackInfo,35,901
+  k7zIdSubStreamsInfo,36,921
+  k7zIdSize,37,945
+  k7zIdCRC,38,959
+  k7zIdFolder,39,972
+  k7zIdCodersUnpackSize,40,988
+  k7zIdNumUnpackStream,41,1014
+  k7zIdEmptyStream,42,1039
+  k7zIdEmptyFile,43,1060
+  k7zIdAnti,44,1079
+  k7zIdName,45,1093
+  k7zIdCTime,46,1107
+  k7zIdATime,47,1122
+  k7zIdMTime,48,1137
+  k7zIdWinAttrib,49,1152
+  k7zIdComment,50,1171
+  k7zIdEncodedHeader,51,1188
+  k7zIdStartPos,52,1211
+  k7zIdDummy53,1229
+const Byte k7zSignature[k7zSignature59,1301
+#define SzBitUi32s_Init(61,1384
+static SRes SzBitUi32s_Alloc(63,1454
+void SzBitUi32s_Free(78,1738
+#define SzBitUi64s_Init(84,1897
+void SzBitUi64s_Free(86,1967
+static void SzAr_Init(93,2128
+static void SzAr_Free(110,2485
+void SzArEx_Init(127,2929
+void SzArEx_Free(150,3368
+static int TestSignatureCandidate(172,3916
+#define SzData_Clear(181,4111
+#define SZ_READ_BYTE_SD(183,4175
+#define SZ_READ_BYTE(184,4300
+#define SZ_READ_BYTE_2(185,4354
+#define SKIP_DATA(187,4459
+#define SKIP_DATA2(188,4548
+#define SZ_READ_32(190,4638
+static MY_NO_INLINE SRes ReadNumber(193,4758
+static MY_NO_INLINE SRes SzReadNumber32(231,5535
+#define ReadID(254,6107
+static SRes SkipData(256,6158
+static SRes WaitId(266,6345
+static SRes RememberBitVector(280,6595
+static UInt32 CountDefinedBits(290,6843
+static MY_NO_INLINE SRes ReadBitVector(308,7136
+static MY_NO_INLINE SRes ReadUi32s(336,7878
+static SRes ReadBitUi32s(357,8339
+static SRes SkipBitUi32s(364,8579
+static SRes ReadPackInfo(383,9082
+#define k_NumCodersStreams_in_Folder_MAX 430,10156
+SRes SzGetNextFolderItem(432,10265
+static MY_NO_INLINE SRes SkipNumbers(599,14572
+#define k_Scan_NumCoders_MAX 630,15201
+#define k_Scan_NumCodersStreams_in_Folder_MAX 631,15234
+static SRes ReadUnpackInfo(634,15288
+UInt64 SzAr_GetFolderUnpackSize(843,21073
+  UInt32 NumTotalSubStreams;851,21282
+  UInt32 NumSubDigests;852,21312
+  CSzData sdNumSubStreams;853,21337
+  CSzData sdSizes;854,21365
+  CSzData sdCRCs;855,21385
+} CSubStreamInfo;856,21404
+static SRes ReadSubStreamsInfo(859,21427
+static SRes SzReadStreamsInfo(932,23402
+static SRes SzReadAndDecodePackedStreams(972,24367
+static SRes SzReadFileNames(1014,25491
+static MY_NO_INLINE SRes ReadTime(1043,26206
+#define NUM_ADDITIONAL_STREAMS_MAX 1091,27252
+static SRes SzReadHeader2(1094,27294
+  UInt32 numFiles 1164,28778
+  UInt32 numEmptyStreams 1165,28802
+  const Byte *emptyStreams emptyStreams1166,28833
+  const Byte *emptyFiles emptyFiles1167,28869
+  p->NumFiles NumFiles1170,28948
+    UInt64 type;1174,28994
+    UInt64 size;1175,29012
+    UInt64 type;1282,32082
+    UInt32 i;1290,32210
+    UInt32 emptyFileIndex 1291,32225
+    UInt32 folderIndex 1292,32257
+    UInt32 remSubStreams 1293,32286
+    UInt32 numSubStreams 1294,32317
+    UInt64 unpackPos 1295,32348
+    const Byte *digestsDefs digestsDefs1296,32375
+    const Byte *digestsVals digestsVals1297,32412
+    UInt32 digestsValsIndex 1298,32449
+    UInt32 digestIndex;1299,32483
+    Byte allDigestsDefined 1300,32508
+    Byte isDirMask 1301,32541
+    Byte crcMask 1302,32566
+    Byte mask 1303,32589
+    digestIndex 1325,33314
+    for (i = 0; i < numFiles;1327,33342
+    p->UnpackPositions[UnpackPositions1437,36615
+      p->FolderToFile[FolderToFile1444,36741
+static SRes SzReadHeader(1471,37449
+static SRes SzArEx_Open2(1501,38069
+SRes SzArEx_Open(1625,41507
+SRes SzArEx_Extract(1635,41750
+size_t SzArEx_GetFileNameUtf16(1712,43808
+
+extern_backup/7z/C/tmp/MtCoder.c,1021
+void LoopThread_Construct(8,131
+void LoopThread_Close(15,290
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE LoopThreadFunc(22,433
+WRes LoopThread_Create(37,794
+WRes LoopThread_StopAndWait(45,1037
+WRes LoopThread_StartSubThread(53,1209
+WRes LoopThread_WaitSubThread(54,1295
+static SRes Progress(56,1386
+static void MtProgress_Init(61,1556
+static void MtProgress_Reinit(71,1831
+#define UPDATE_PROGRESS(77,1955
+SRes MtProgress_Set(80,2076
+static void MtProgress_SetError(93,2502
+static void MtCoder_SetError(101,2680
+void CMtThread_Construct(111,2892
+#define RINOK_THREAD(121,3123
+static void CMtThread_CloseEvents(123,3192
+static void CMtThread_Destruct(129,3308
+#define MY_BUF_ALLOC(148,3710
+static SRes CMtThread_Prepare(154,3956
+static SRes FullRead(167,4345
+#define GET_NEXT_THREAD(185,4755
+static SRes MtThread_Process(187,4866
+static THREAD_FUNC_RET_TYPE THREAD_FUNC_CALL_TYPE ThreadFunc(226,6014
+void MtCoder_Construct(249,6577
+void MtCoder_Destruct(263,6878
+SRes MtCoder_Code(272,7109
+
+extern_backup/7z/C/tmp/Lzma86Enc.c,59
+#define SZE_OUT_OVERFLOW 14,230
+int Lzma86_Encode(16,273
+
+extern_backup/7z/C/tmp/XzDec.c,1556
+#define XZ_CHECK_SIZE_MAX 29,428
+#define CODER_BUF_SIZE 31,460
+unsigned Xz_ReadVarInt(33,496
+#define BRA_BUF_SIZE 51,889
+  size_t bufPos;55,942
+  size_t bufConv;56,960
+  size_t bufTotal;57,979
+  UInt32 methodId;59,1001
+  int encodeMode;60,1021
+  UInt32 delta;61,1040
+  UInt32 ip;62,1057
+  UInt32 x86State;63,1071
+  Byte deltaState[deltaState64,1091
+  Byte buf[buf66,1131
+} CBraState;67,1158
+static void BraState_Free(69,1174
+static SRes BraState_SetProps(74,1263
+static void BraState_Init(115,2217
+#define CASE_BRA_CONV(124,2445
+static SRes BraState_Code(126,2575
+SRes BraState_SetFromMethod(200,4654
+static void SbState_Free(229,5410
+static SRes SbState_SetProps(236,5545
+static void SbState_Init(244,5767
+static SRes SbState_Code(249,5840
+SRes SbState_SetFromMethod(267,6389
+static void Lzma2State_Free(287,6854
+static SRes Lzma2State_SetProps(293,6987
+static void Lzma2State_Init(300,7210
+static SRes Lzma2State_Code(305,7292
+static SRes Lzma2State_SetFromMethod(316,7820
+void MixCoder_Construct(331,8221
+void MixCoder_Free(341,8438
+void MixCoder_Init(358,8778
+SRes MixCoder_SetFromMethod(374,9082
+SRes MixCoder_Code(390,9577
+SRes Xz_ParseHeader(497,12135
+static Bool Xz_CheckFooter(506,12468
+#define READ_VARINT_AND_CHECK(515,12781
+SRes XzBlock_Parse(520,12954
+SRes XzDec_Init(573,14437
+void XzUnpacker_Init(609,15315
+void XzUnpacker_Construct(619,15518
+void XzUnpacker_Free(625,15652
+SRes XzUnpacker_Code(630,15729
+Bool XzUnpacker_IsStreamWasFinished(900,23178
+UInt64 XzUnpacker_GetExtraSize(905,23323
+
+extern_backup/7z/C/LzmaDec.c,2789
+#define kNumTopBits 10,148
+#define kTopValue 11,172
+#define kNumBitModelTotalBits 13,220
+#define kBitModelTotal 14,254
+#define kNumMoveBits 15,307
+#define RC_INIT_SIZE 17,333
+#define NORMALIZE 19,359
+#define IF_BIT_0(21,451
+#define UPDATE_0(22,561
+#define UPDATE_1(23,665
+#define GET_BIT2(24,766
+#define GET_BIT(27,897
+#define TREE_GET_BIT(29,944
+#define TREE_DECODE(30,1005
+#define TREE_6_DECODE(36,1178
+#define TREE_6_DECODE(38,1250
+#define NORMAL_LITER_DEC 49,1499
+#define MATCHED_LITER_DEC 50,1556
+#define NORMALIZE_CHECK 56,1739
+#define IF_BIT_0_CHECK(58,1878
+#define UPDATE_0_CHECK 59,2000
+#define UPDATE_1_CHECK 60,2039
+#define GET_BIT2_CHECK(61,2094
+#define GET_BIT_CHECK(64,2243
+#define TREE_DECODE_CHECK(65,2300
+#define kNumPosBitsMax 69,2430
+#define kNumPosStatesMax 70,2456
+#define kLenNumLowBits 72,2506
+#define kLenNumLowSymbols 73,2532
+#define kLenNumMidBits 74,2581
+#define kLenNumMidSymbols 75,2607
+#define kLenNumHighBits 76,2656
+#define kLenNumHighSymbols 77,2683
+#define LenChoice 79,2736
+#define LenChoice2 80,2757
+#define LenLow 81,2793
+#define LenMid 82,2826
+#define LenHigh 83,2890
+#define kNumLenProbs 84,2955
+#define kNumStates 87,3012
+#define kNumLitStates 88,3035
+#define kStartPosModelIndex 90,3062
+#define kEndPosModelIndex 91,3093
+#define kNumFullDistances 92,3123
+#define kNumPosSlotBits 94,3184
+#define kNumLenToPosStates 95,3211
+#define kNumAlignBits 97,3243
+#define kAlignTableSize 98,3268
+#define kMatchMinLen 100,3316
+#define kMatchSpecLenStart 101,3340
+#define IsMatch 103,3446
+#define IsRep 104,3465
+#define IsRepG0 105,3523
+#define IsRepG1 106,3561
+#define IsRepG2 107,3601
+#define IsRep0Long 108,3641
+#define PosSlot 109,3684
+#define SpecPos 110,3747
+#define Align 111,3816
+#define LenCoder 112,3881
+#define RepLenCoder 113,3925
+#define Literal 114,3972
+#define LZMA_BASE_SIZE 116,4020
+#define LZMA_LIT_SIZE 117,4049
+#define LzmaProps_GetNumProbs(123,4142
+#define LZMA_DIC_MIN 125,4237
+static int MY_FAST_CALL LzmaDec_DecodeReal(140,4692
+static void MY_FAST_CALL LzmaDec_WriteRem(515,14808
+static int MY_FAST_CALL LzmaDec_DecodeReal2(543,15598
+  DUMMY_ERROR,572,16332
+  DUMMY_LIT,573,16385
+  DUMMY_MATCH,574,16399
+  DUMMY_REP575,16415
+} ELzmaDummy;576,16428
+static ELzmaDummy LzmaDec_TryDummy(578,16445
+void LzmaDec_InitDicAndState(769,21613
+void LzmaDec_Init(785,21911
+static void LzmaDec_InitStateReal(791,22012
+SRes LzmaDec_DecodeToDic(803,22336
+SRes LzmaDec_DecodeToBuf(938,26444
+void LzmaDec_FreeProbs(978,27554
+static void LzmaDec_FreeDict(984,27669
+void LzmaDec_Free(990,27786
+SRes LzmaProps_Decode(996,27906
+static SRes LzmaDec_AllocateProbs2(1022,28444
+SRes LzmaDec_AllocateProbs(1036,28861
+SRes LzmaDec_Allocate(1045,29138
+SRes LzmaDecode(1077,30063
+
+extern_backup/7z/C/Alloc.c,519
+int g_allocCount 18,339
+int g_allocCountMid 19,362
+int g_allocCountBig 20,388
+void *MyAlloc(MyAlloc23,424
+void MyFree(38,722
+void *MidAlloc(MidAlloc49,944
+void MidFree(59,1197
+#undef _7ZIP_LARGE_PAGES71,1460
+SIZE_T g_LargePageSize 75,1522
+typedef SIZE_T (WINAPI *GetLargePageMinimumP)GetLargePageMinimumP76,1551
+void SetLargePageSize(79,1611
+void *BigAlloc(BigAlloc95,2016
+void BigFree(115,2587
+static void *SzBigAlloc(SzBigAlloc134,3055
+static void SzBigFree(135,3144
+ISzAlloc g_BigAlloc 136,3228
+
+extern_backup/7z/C/LzFind.c,2270
+#define kEmptyHashValue 11,185
+#define kMaxValForNormalize 12,212
+#define kNormalizeStepMin 13,262
+#define kNormalizeMask 14,327
+#define kMaxHistorySize 15,386
+#define kStartMaxLen 17,431
+static void LzInWindow_Free(19,457
+static int LzInWindow_Create(30,700
+Byte *MatchFinder_GetPointerToCurrentPos(MatchFinder_GetPointerToCurrentPos47,1180
+UInt32 MatchFinder_GetNumAvailableBytes(49,1263
+void MatchFinder_ReduceOffsets(51,1357
+static void MatchFinder_ReadBlock(58,1511
+void MatchFinder_MoveBlock(98,2508
+int MatchFinder_NeedMove(106,2736
+void MatchFinder_ReadIfRequired(114,2956
+static void MatchFinder_CheckAndMoveAndRead(122,3139
+static void MatchFinder_SetDefaultSettings(129,3301
+#define kCrcPoly 137,3452
+void MatchFinder_Construct(139,3483
+static void MatchFinder_FreeThisClassMemory(157,3831
+void MatchFinder_Free(163,3969
+static CLzRef* AllocRefs(169,4110
+int MatchFinder_Create(177,4343
+static void MatchFinder_SetLimits(266,6840
+void MatchFinder_Init_2(295,7462
+void MatchFinder_Init(315,7906
+static UInt32 MatchFinder_GetSubValue(320,7988
+void MatchFinder_Normalize3(325,8110
+static void MatchFinder_Normalize(339,8402
+static void MatchFinder_CheckLimits(346,8612
+static UInt32 * Hc_GetMatchesSpec(357,8969
+UInt32 * GetMatchesSpec1(388,9907
+static void SkipMatchesSpec(443,11426
+#define MOVE_POS 493,12724
+#define MOVE_POS_RET 498,12851
+static void MatchFinder_MovePos(500,12899
+#define GET_MATCHES_HEADER2(502,12965
+#define GET_MATCHES_HEADER(507,13192
+#define SKIP_HEADER(508,13266
+#define MF_PARAMS(510,13342
+#define GET_MATCHES_FOOTER(512,13446
+#define SKIP_FOOTER 516,13626
+#define UPDATE_maxLen 519,13715
+static UInt32 Bt2_MatchFinder_GetMatches(526,13959
+UInt32 Bt3Zip_MatchFinder_GetMatches(537,14203
+static UInt32 Bt3_MatchFinder_GetMatches(548,14446
+static UInt32 Bt4_MatchFinder_GetMatches(585,15150
+static UInt32 Hc4_MatchFinder_GetMatches(717,17896
+UInt32 Hc3Zip_MatchFinder_GetMatches(853,20823
+static void Bt2_MatchFinder_Skip(865,21144
+void Bt3Zip_MatchFinder_Skip(878,21364
+static void Bt3_MatchFinder_Skip(891,21583
+static void Bt4_MatchFinder_Skip(908,21901
+static void Hc4_MatchFinder_Skip(947,22685
+void Hc3Zip_MatchFinder_Skip(988,23554
+void MatchFinder_CreateVTable(1002,23814
