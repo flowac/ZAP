@@ -42,8 +42,8 @@ int in_stream_read(void *p, void *buf, size_t *size);
  * 0 - failure
  */
 int compress_file(const char *in_path,
-                  const char *out_path,
-                  CLzmaEncProps *args);
+                  const char *out_path = NULL,
+                  const CLzmaEncProps *args = &default_props);
 
 /* decompress a compressed file, barely modified from lzmautil
  * thank @flowing water for rushing me
@@ -68,7 +68,8 @@ int decompress_file(const char *in_path,
  * OUTPUT:
  * not implemented yet
  */
-int compress_data_incr(FILE *input, FILE *output, CLzmaEncProps *args);
+int compress_data_incr(FILE *input, FILE *output,
+                       const CLzmaEncProps *args = &default_props);
 
 /* decompress data incrementally, reads file size and then calculates
  * how much more is left to read based on how much data has alrdy been

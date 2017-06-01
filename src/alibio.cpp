@@ -111,8 +111,14 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     fclose(fp);
     free(buf);
     
-    CLzmaEncProps compress_args = default_props;
-    compress_file(tmp, tmp7z, &compress_args);
+    /* to customize vals you can edit default prop
+     * struct or do:
+     * CLzmaEncProps myprop = default_prop;
+     * then customize the structs vals, see lzmalib.h for
+     * more info. Then pass your struct as the third arg
+     * to compressfile
+     */
+    compress_file(tmp);
     
     return NULL;
 }
@@ -245,8 +251,7 @@ bool chainCompactor(chain *ch, uint8_t parts)
 chain *chainExtractor(char *inFile)
 {
     char tmp[] = "temp.file\0";
-    CLzmaEncProps compress_args = default_props;
-    compress_file(tmp, "tmp.file.mycomp", &compress_args);
+    compress_file(tmp);
     
     FILE *fp = fopen(tmp, "r");
     chain *ch = text2Chainz(fp);
