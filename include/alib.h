@@ -54,15 +54,7 @@ chain *newChain(void);
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch);
 
-uint32_t deletePack(pack *target);
-
-uint32_t deleteBlock(block *target);
-
 uint32_t deleteChain(chain *target);
-
-//bool chainToText(chain *ch, FILE *fp);
-
-bool chainCompactor(chain *ch, uint8_t parts = 1);
 
 #endif//_ALIB_H
 
