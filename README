@@ -8,3 +8,5 @@ If any user contributed code that is not in the form of an external library and 
 You need: BOOST and libssl to compile
 
 Don't valgrind the 7z library, it's really slow
+
+Hi guys :) 
