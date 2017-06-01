@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <linux/limits.h>
 /* include */
 #include "lzma_wrapper.h"
 #include "log.h"
@@ -131,20 +132,71 @@ static unsigned long get_header(FILE *fd, unsigned char *props_header, size_t le
     return rt;
 }
 
-static void assign_prop_vals(CLzmaEncProps *rt, CLzmaEncProps *in)
+static void assign_prop_vals(CLzmaEncProps *prop_info, const CLzmaEncProps *args)
 {
-    
+    prop_info->level = args->level;
+    prop_info->dictSize = args->dictSize;
+    prop_info->reduceSize = args->reduceSize;
+    prop_info->lc = args->lc;
+    prop_info->lp = args->lp;
+    prop_info->pb = args->pb;
+    prop_info->algo = args->algo;
+    prop_info->fb = args->fb;
+    prop_info->btMode = args->btMode;
+    prop_info->numHashBytes = args->numHashBytes;
+    prop_info->mc = args->mc;
+    prop_info->writeEndMark = args->writeEndMark;
+    prop_info->numThreads = args->numThreads;
+}
+
+/* set the outputs file name by concatting .7z to
+ * input name, this is for compression only
+ */
+static void set_comp_out_file_name(const char *in_path,
+                              const char *out_path,
+                              char *out_path_local)
+{
+    if (out_path == NULL)
+        snprintf(out_path_local, PATH_MAX,
+                 "%s.7z", in_path);
+    else
+        snprintf(out_path_local, PATH_MAX,
+                 "%s", out_path);
+}
+
+static void set_decomp_out_file_name(const char *in_path,
+                              const char *out_path,
+                              char *out_path_local)
+{
+    if (out_path == NULL) {
+        snprintf(out_path_local, PATH_MAX,
+                 "%s", in_path);
+        char * tmp = strstr(out_path_local,".7z");
+        tmp[0] = '\0';
+    }
+    else {
+        snprintf(out_path_local, PATH_MAX,
+                 "%s", out_path);
+    }
 }
 
 /* work in progress, wrapper fn for compression call */
 int compress_file(const char *in_path,
                   const char *out_path,
-                  CLzmaEncProps *args)
+                  const CLzmaEncProps *args)
 {
-    printf("compressing %s\n", in_path);
+    if (in_path == NULL) {
+        log_msg("Invalid args to compress_file");
+        return 0;
+    }
+    char out_path_local[PATH_MAX];
+    set_comp_out_file_name(in_path, out_path,
+                           out_path_local);
+
     FILE *fd[2]; /* i/o file descriptors */
+    printf("compressing %s\n", in_path);
     /* open i/o files, return fail if this failes */
-    if (!open_io_files(in_path, out_path, fd))
+    if (!open_io_files(in_path, out_path_local, fd))
         return 0;
     compress_data_incr(fd[0], fd[1], args);
 
@@ -158,8 +210,16 @@ int compress_file(const char *in_path,
 int decompress_file(const char *in_path,
                     const char *out_path)
 {
-    printf("decompressing %s\n", out_path);
+    if (in_path == NULL) {
+        log_msg("Invalid args to decompress_file");
+        return 0;
+    }
+    char out_path_local[PATH_MAX];
+    set_decomp_out_file_name(in_path, out_path,
+                             out_path_local);
+
     FILE *fd[2]; /* i/o file descriptors */
+    printf("decompressing %s\n", in_path);
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path, fd))
         return 0;
@@ -173,7 +233,7 @@ int decompress_file(const char *in_path,
     return 1;
 }
 
-int compress_data_incr(FILE *input, FILE *output, CLzmaEncProps *args)
+int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 {
     int rt = 1;
     /* iseqinstream and iseqoutstream objects */
@@ -192,19 +252,7 @@ int compress_data_incr(FILE *input, FILE *output, CLzmaEncProps *args)
     CLzmaEncProps prop_info; // info for prop, control vals for comp
     /* note the prop is the header of the compressed file */
     LzmaEncProps_Init(&prop_info);
-    prop_info.level = args->level;
-    prop_info.dictSize = args->dictSize;
-    prop_info.reduceSize = args->reduceSize;
-    prop_info.lc = args->lc;
-    prop_info.lp = args->lp;
-    prop_info.pb = args->pb;
-    prop_info.algo = args->algo;
-    prop_info.fb = args->fb;
-    prop_info.btMode = args->btMode;
-    prop_info.numHashBytes = args->numHashBytes;
-    prop_info.mc = args->mc;
-    prop_info.writeEndMark = args->writeEndMark;
-    prop_info.numThreads = args->numThreads;
+    assign_prop_vals(&prop_info, args);
     rt = LzmaEnc_SetProps(enc_hand, &prop_info);
     if (rt != SZ_OK)
         goto end;
@@ -240,13 +288,16 @@ int decompress_data_incr(FILE *input, FILE *output)
     CLzmaDec state; // view in LzmaDec.h
 
     file_size = get_header(input, props_header, LZMA_PROPS_SIZE_FILESIZE);
-    if (file_size == 0)
+    if (file_size == 0) {
+        log_msg("Failed to get file size");
         return 0; // failed
+    }
     LzmaDec_Construct(&state);
     rt = LzmaDec_Allocate(&state, props_header, LZMA_PROPS_SIZE, &g_Alloc);
-    if (rt != SZ_OK)
-        /*goto error */
-        ;
+    if (rt != SZ_OK) {
+        log_msg("Failed call to LzmaDec_Allocate: %d", rt);
+        return 0;
+    }
     unsigned char in_buff[buffer_cread_size];
     unsigned char out_buff[buffer_cread_size];
     unsigned long out_pos = 0, in_read_size = 0, in_pos = 0;
@@ -282,12 +333,12 @@ int decompress_data_incr(FILE *input, FILE *output)
             if ((rt != SZ_OK) || (file_size == 0))
                 break;
             if ((in_processed == 0) && (out_processed == 0)) {
-                log_msg("ERROR OCCURRED ECOMPRESS\n");
+                log_msg("ERROR OCCURRED DECOMPRESS\n");
                 break;
             }
         }
     }
     LzmaDec_Free(&state, &g_Alloc);
-    return rt;
+    return 1;
     
 }
