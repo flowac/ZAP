@@ -2,9 +2,8 @@ More * = more priority
 
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
 |-> transmission 
-**  Move file io related function from alib to alibio.cpp
 *   Clean up compression implementation
-*   Comment alib.h
+*   Comment alib.h alibio.h
 *   Test magnet link structure
 *   Test RAM usage
     Create a simple search engine (or just copy pasta some google's open source code)
@@ -13,3 +12,5 @@ More * = more priority
 FOR DALJIT:
 *** FIX OUR log.c, also find the gnu macro that gets the current functions name and file and
 udate all the calls to log_msg accordingly so they print the fn name and file
+**  Get KF2
+*   Stop slacking
