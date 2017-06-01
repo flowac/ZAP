@@ -9,3 +9,7 @@ More * = more priority
 *   Test RAM usage
     Create a simple search engine (or just copy pasta some google's open source code)
     Add AGPL v3 headers to everything including external libraries when possible
+
+FOR DALJIT:
+*** FIX OUR log.c, also find the gnu macro that gets the current functions name and file and
+udate all the calls to log_msg accordingly so they print the fn name and file
