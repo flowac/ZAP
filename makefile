@@ -5,6 +5,11 @@ PRG = test
 all: extern torrent
 clean: c
 c: c3
+ARGS_EXTERN = all
+debug: ARGS_EXTERN = debug
+debug: FLAGS += -g
+debug: all
+
 
 .PHONY: extern cleanExtern
 CC = g++
@@ -36,7 +41,7 @@ torrent: $(OBJ)
 
 # compile 7zip
 extern:
-	$(MAKE) -C extern/7z all
+	$(MAKE) -C extern/7z $(ARGS_EXTERN)
 
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE) $(INCLUDE_EXTERN)
