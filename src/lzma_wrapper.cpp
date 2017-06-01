@@ -185,6 +185,7 @@ int compress_data_incr(FILE *input, FILE *output, void *args)
     CLzmaEncProps prop_info; // info for prop, control vals for comp
     /* note the prop is the header of the compressed file */
     LzmaEncProps_Init(&prop_info);
+    prop_info.level = 1;
     prop_info.algo = 0;
     prop_info.dictSize = 1 << 16;
     prop_info.fb = 128;
