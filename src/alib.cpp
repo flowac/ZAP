@@ -6,8 +6,25 @@
 #include <pthread.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "lzma_wrapper.h"
+#include "C/LzmaEnc.h"
 
 namespace pt = boost::posix_time;
+
+const CLzmaEncProps default_props = {
+    5, // level
+        1 << 16, // dictSize
+        0xffffffff, // reduceSize
+        4, // lc
+        0, // lp
+        2, // pb
+        0, // algo
+        128, // fb
+        0, // btMode
+        4, // numHashbytes
+        16, // mc
+        0, // writeEndmark
+        2 // numThreads
+};
 
 time_t sNow()
 {
@@ -284,7 +301,8 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     fclose(fp);
     free(buf);
     
-    compress_file(tmp, tmp7z, NULL);
+    CLzmaEncProps compress_args = default_props;
+    compress_file(tmp, tmp7z, &compress_args);
     
     return NULL;
 }
@@ -417,7 +435,8 @@ bool chainCompactor(chain *ch, uint8_t parts)
 chain *chainExtractor(char *inFile)
 {
     char tmp[] = "temp.file\0";
-    compress_file(tmp, "tmp.file.mycomp", NULL);
+    CLzmaEncProps compress_args = default_props;
+    compress_file(tmp, "tmp.file.mycomp", &compress_args);
     
     FILE *fp = fopen(tmp, "r");
     chain *ch = text2Chainz(fp);

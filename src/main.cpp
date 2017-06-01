@@ -105,7 +105,7 @@ void uncompress_test() {
         char buff1[64], buff2 [64];
         sprintf(buff1,"temp%d.7z", i);
         sprintf(buff2, "temp%d.unc",i);
-        decompress_file(buff1, buff2, NULL);
+        decompress_file(buff1, buff2);
     }
 }
 

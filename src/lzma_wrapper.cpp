@@ -131,11 +131,17 @@ static unsigned long get_header(FILE *fd, unsigned char *props_header, size_t le
     return rt;
 }
 
+static void assign_prop_vals(CLzmaEncProps *rt, CLzmaEncProps *in)
+{
+    
+}
+
 /* work in progress, wrapper fn for compression call */
 int compress_file(const char *in_path,
                   const char *out_path,
-                  void *args)
+                  CLzmaEncProps *args)
 {
+    printf("compressing %s\n", in_path);
     FILE *fd[2]; /* i/o file descriptors */
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path, fd))
@@ -150,14 +156,15 @@ int compress_file(const char *in_path,
 }
 
 int decompress_file(const char *in_path,
-                    const char *out_path,
-                    void *args)
+                    const char *out_path)
 {
+    printf("decompressing %s\n", out_path);
     FILE *fd[2]; /* i/o file descriptors */
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path, fd))
         return 0;
-    decompress_data_incr(fd[0], fd[1]);
+    if (!decompress_data_incr(fd[0], fd[1]))
+        log_msg("Failed to decompress\n");
 
     if (fd[0] != NULL)
         fclose(fd[0]);
@@ -166,7 +173,7 @@ int decompress_file(const char *in_path,
     return 1;
 }
 
-int compress_data_incr(FILE *input, FILE *output, void *args)
+int compress_data_incr(FILE *input, FILE *output, CLzmaEncProps *args)
 {
     int rt = 1;
     /* iseqinstream and iseqoutstream objects */
@@ -185,14 +192,20 @@ int compress_data_incr(FILE *input, FILE *output, void *args)
     CLzmaEncProps prop_info; // info for prop, control vals for comp
     /* note the prop is the header of the compressed file */
     LzmaEncProps_Init(&prop_info);
-    prop_info.level = 1;
-    prop_info.algo = 0;
-    prop_info.dictSize = 1 << 16;
-    prop_info.fb = 128;
+    prop_info.level = args->level;
+    prop_info.dictSize = args->dictSize;
+    prop_info.reduceSize = args->reduceSize;
+    prop_info.lc = args->lc;
+    prop_info.lp = args->lp;
+    prop_info.pb = args->pb;
+    prop_info.algo = args->algo;
+    prop_info.fb = args->fb;
+    prop_info.btMode = args->btMode;
+    prop_info.numHashBytes = args->numHashBytes;
+    prop_info.mc = args->mc;
+    prop_info.writeEndMark = args->writeEndMark;
+    prop_info.numThreads = args->numThreads;
     rt = LzmaEnc_SetProps(enc_hand, &prop_info);
-    printf("algo:%d\n"
-           "dict:%ld\n"
-           "thread:%d\n", prop_info.algo, prop_info.dictSize, prop_info.numThreads);
     if (rt != SZ_OK)
         goto end;
     

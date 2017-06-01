@@ -40,7 +40,7 @@ int log_msg(char const * msg, ...)
     vsnprintf(buffer_msg, sizeof(buffer_msg),
               msg, msg_formatted);
 
-    fprintf(fd, "%s %s\n", buffer_time, buffer_msg);
+    fprintf(fd, "%s %s", buffer_time, buffer_msg);
 
     if (fd)
         fclose(fd);

@@ -3,8 +3,15 @@
 
 #include <string>
 #include "C/7zTypes.h"
+#include "C/LzmaEnc.h"
 
 #define buffer_cread_size 65536 // 1 < 16
+
+/* default values that we are using for the prop
+ * in the lzma library, look at lzmalib.h for more info
+ * on what each value does, see our definition in alib.cpp
+ */
+extern const CLzmaEncProps default_props;
 
 /* ISeqInstream struct implementation */
 struct seq_in_stream{
@@ -36,7 +43,7 @@ int in_stream_read(void *p, void *buf, size_t *size);
  */
 int compress_file(const char *in_path,
                   const char *out_path,
-                  void *args);
+                  CLzmaEncProps *args);
 
 /* decompress a compressed file, barely modified from lzmautil
  * thank @flowing water for rushing me
@@ -47,8 +54,7 @@ int compress_file(const char *in_path,
  * void *args available parameters, see CLzmaDec in LzmaDec.h
  */
 int decompress_file(const char *in_path,
-                    const char *out_path,
-                    void *args);
+                    const char *out_path);
 
 /* compress data incrementally, it works using fn
  * callbacks that are implemented as static functions.
@@ -62,7 +68,7 @@ int decompress_file(const char *in_path,
  * OUTPUT:
  * not implemented yet
  */
-int compress_data_incr(FILE *input, FILE *output, void *args);
+int compress_data_incr(FILE *input, FILE *output, CLzmaEncProps *args);
 
 /* decompress data incrementally, reads file size and then calculates
  * how much more is left to read based on how much data has alrdy been
