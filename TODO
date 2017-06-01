@@ -1,8 +1,7 @@
 More * = more priority
 
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
-**  Implement Incremental compression
-**  Implement Incremental decompression
+*   clean up compression implementation
 *   Comment alib.h
 *   Test magnet link structure
 *   Test RAM usage
