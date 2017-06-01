@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
+
+#define N_THREADS 6
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -101,13 +104,28 @@ chain *chain_gen(uint64_t size)
     free(dn);
     return ch;
 }
+
+typedef struct{
+    char in7z[64];
+    char outf[64];
+}decompParams;
+
+void *decompress_wrap(void *args) {
+    decompParams *dp = (decompParams *)args;
+    decompress_file(dp->in7z, dp->outf);
+    return NULL;
+}
+
 void uncompress_test() {
-    for (int i = 1; i < 6; i++) {
-        char buff1[64], buff2 [64];
-        sprintf(buff1,"temp%d.7z", i);
-        sprintf(buff2, "temp%d.unc",i);
-        decompress_file(buff1, buff2);
+    pthread_t threads[N_THREADS];
+    decompParams dp[N_THREADS];
+
+    for (int i = 1; i <= N_THREADS; i++) {
+        sprintf(dp[i].in7z,"temp%d.7z", i);
+        sprintf(dp[i].outf, "temp%d.unc",i);
+        pthread_create(&threads[i], NULL, &decompress_wrap, (void *)&dp[i]);
     }
+    for (int i = 1; i <= N_THREADS; i++) pthread_join(threads[i], NULL);
 }
 
 int main()
@@ -122,7 +140,7 @@ int main()
     printf("Compressing\n");
     struct timespec tmp1,tmp2;
     clock_gettime(CLOCK_MONOTONIC, &tmp1);
-    chainCompactor(ch, 5);
+    chainCompactor(ch, N_THREADS);
     clock_gettime(CLOCK_MONOTONIC, &tmp2);
     uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
     printf("Took %d milliseconds\n", tmp);
@@ -135,4 +153,3 @@ int main()
     uncompress_test();
     return 0;
 }
-
