@@ -118,10 +118,12 @@ int main()
     chain *ch = chain_gen(3000);
     
     printf("Compressing\n");
-    uint32_t dur = (uint32_t)sNow();
+    struct timespec tmp1,tmp2;
+    clock_gettime(CLOCK_MONOTONIC, &tmp1);
     chainCompactor(ch, 5);
-    dur = (uint32_t)sNow() - dur;
-    printf("Took %u seconds\n", dur);
+    clock_gettime(CLOCK_MONOTONIC, &tmp2);
+    uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
+    printf("Took %d milliseconds\n", tmp);
     
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
