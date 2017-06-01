@@ -1,7 +1,8 @@
 More * = more priority
 
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
-*   clean up compression implementation
+**  Move file io related function from alib to alibio.cpp
+*   Clean up compression implementation
 *   Comment alib.h
 *   Test magnet link structure
 *   Test RAM usage
