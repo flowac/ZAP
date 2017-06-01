@@ -16,7 +16,6 @@ OBJS = \
   LzFind.o \
   LzmaDec.o \
   LzmaLib.o \
-  LzFind.o \
   LzmaEnc.o \
 
 all: $(PROG)
@@ -35,9 +34,6 @@ LzmaDec.o: C/LzmaDec.c
 
 LzmaLib.o: C/LzmaLib.c
 	$(CXX_C) $(CFLAGS) C/LzmaLib.c
-
-LzFind.o: C/LzFind.c
-	$(CXX_C) $(CFLAGS) C/LzFind.c
 
 LzmaEnc.o: C/LzmaEnc.c
 	$(CXX_C) $(CFLAGS) C/LzmaEnc.c
