@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -124,6 +125,7 @@ int main()
     clock_gettime(CLOCK_MONOTONIC, &tmp2);
     uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
     printf("Took %d milliseconds\n", tmp);
+    
     
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);

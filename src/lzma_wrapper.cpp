@@ -180,7 +180,7 @@ int compress_data_incr(FILE *input, FILE *output, void *args)
     }
     /* 5 bytes for lzma prop + 8 bytes for filesize */
     unsigned char props_header[LZMA_PROPS_SIZE_FILESIZE];
-    unsigned int props_size = LZMA_PROPS_SIZE; // size of prop
+    SizeT props_size = LZMA_PROPS_SIZE; // size of prop
     unsigned long file_size = get_file_size_c(input); // filesize
     CLzmaEncProps prop_info; // info for prop, control vals for comp
     /* note the prop is the header of the compressed file */
@@ -236,7 +236,7 @@ int decompress_data_incr(FILE *input, FILE *output)
     unsigned char in_buff[buffer_cread_size];
     unsigned char out_buff[buffer_cread_size];
     unsigned long out_pos = 0, in_read_size = 0, in_pos = 0;
-    unsigned int in_processed = 0, out_processed = 0;
+    SizeT in_processed = 0, out_processed = 0;
     ELzmaFinishMode fin_mode = LZMA_FINISH_ANY;
     ELzmaStatus status;
     LzmaDec_Init(&state);
@@ -245,8 +245,8 @@ int decompress_data_incr(FILE *input, FILE *output)
             in_read_size = my_read_data(input, in_buff, buffer_cread_size);
             in_pos = 0;
         } else {
-            in_processed = (unsigned int)(in_read_size - in_pos);
-            out_processed = (unsigned int)(buffer_cread_size - out_pos);
+            in_processed = (SizeT)(in_read_size - in_pos);
+            out_processed = (SizeT)(buffer_cread_size - out_pos);
             if (out_processed > file_size) {
                 out_processed = (unsigned int)file_size;
                 fin_mode = LZMA_FINISH_END;

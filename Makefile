@@ -22,6 +22,7 @@ INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 FLAGS += -Wall -I$(IDIR) -I/usr/include/openssl -I$(IDIR_EXTERN)
+# remove lrt later my work pc is retarded
 LIBS = -L/usr/include/boost/ -lssl -lcrypto -lpthread -lrt
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
