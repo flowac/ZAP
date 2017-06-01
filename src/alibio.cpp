@@ -4,12 +4,11 @@
 #include <pthread.h>
 #include <stdio.h>
 
+#include "alib.h"
 #include "alibio.h"
 #include "lzma_wrapper.h"
 #include "alib.h"
 #include "C/LzmaEnc.h"
-
-namespace pt = boost::posix_time;
 
 const CLzmaEncProps default_props = {
     5, // level

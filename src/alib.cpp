@@ -7,6 +7,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "lzma_wrapper.h"
 
+namespace pt = boost::posix_time;
+
 time_t sNow()
 {
     time_t raw;

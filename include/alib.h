@@ -54,6 +54,7 @@ chain *newChain(void);
 //! return 1 on success
 bool insertBlock(block *bx, chain *ch);
 
+uint32_t deletePack(pack *target);
 uint32_t deleteChain(chain *target);
 
 #endif//_ALIB_H
