@@ -21,7 +21,7 @@ unsigned char *create_sha1sum(const char *dst)
     p_dst = fopen(dst, "r");
     if (!p_dst) {
         /* we gonna have a log fn? */
-        log_msg("%s %s\n", get_loc_time(), strerror(errno));
+        log_msg("%s %s File: %s Function: %s \n", get_loc_time(), strerror(errno),__FILE__,__PRETTY_FUNCTION__);
         goto end;
     }
 
