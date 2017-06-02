@@ -35,7 +35,7 @@ void sha1_test()
  */
 void log_test()
 {
-    log_msg("fewf %s\n", "wfean");
+    log_msg("fewf %s FileName: %s Function name: %s \n", "wfean",__FILE__,__PRETTY_FUNCTION__);
 }
 
 void chain_test()
