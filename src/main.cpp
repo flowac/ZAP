@@ -120,12 +120,12 @@ void uncompress_test() {
     pthread_t threads[N_THREADS];
     decompParams dp[N_THREADS];
 
-    for (int i = 1; i <= N_THREADS; i++) {
-        sprintf(dp[i].in7z,"temp%d.7z", i);
-        sprintf(dp[i].outf, "temp%d.unc",i);
+    for (int i = 0; i < N_THREADS; i++) {
+        sprintf(dp[i].in7z,"temp%d.file.7z", i+1);
+        sprintf(dp[i].outf, "temp%d.unc",i+1);
         pthread_create(&threads[i], NULL, &decompress_wrap, (void *)&dp[i]);
     }
-    for (int i = 1; i <= N_THREADS; i++) pthread_join(threads[i], NULL);
+    for (int i = 0; i < N_THREADS; i++) pthread_join(threads[i], NULL);
 }
 
 int main()
