@@ -13,6 +13,7 @@
 #include <pthread.h>
 
 #define N_THREADS 6
+#define N_TEST_BLOCKS 5000
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -105,18 +106,21 @@ chain *chain_gen(uint64_t size)
     return ch;
 }
 
-typedef struct{
+typedef struct
+{
     char in7z[64];
     char outf[64];
 }decompParams;
 
-void *decompress_wrap(void *args) {
+void *decompress_wrap(void *args)
+{
     decompParams *dp = (decompParams *)args;
     decompress_file(dp->in7z, dp->outf);
     return NULL;
 }
 
-void uncompress_test() {
+void uncompress_test()
+{
     pthread_t threads[N_THREADS];
     decompParams dp[N_THREADS];
 
@@ -128,14 +132,10 @@ void uncompress_test() {
     for (int i = 0; i < N_THREADS; i++) pthread_join(threads[i], NULL);
 }
 
-int main()
+void chain_test2()
 {
-//    sha1_test();
-//    log_test();
-//    chain_test();
-//    zip_test();
     printf("\nGenerating\n");
-    chain *ch = chain_gen(3000);
+    chain *ch = chain_gen(N_TEST_BLOCKS);
     
     printf("Compressing\n");
     struct timespec tmp1,tmp2;
@@ -145,12 +145,21 @@ int main()
     uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
     printf("Took %d milliseconds\n", tmp);
     
-    
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
     
-    //std::cout.imbue(std::locale());
     uncompress_test();
+}
+
+int main()
+{
+//    sha1_test();
+//    log_test();
+//    chain_test();
+//    zip_test();
+    chain_test2();
+
+    //std::cout.imbue(std::locale());
     return 0;
 }
 
