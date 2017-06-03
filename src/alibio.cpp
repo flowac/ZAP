@@ -5,11 +5,19 @@
 #include <stdio.h>
 
 #include "alib.h"
+#include "log.h"
 #include "alibio.h"
 #include "lzma_wrapper.h"
 #include "alib.h"
 #include "C/LzmaEnc.h"
 
+/* to customize vals you can edit default prop
+ * struct or do:
+ * CLzmaEncProps myprop = default_prop;
+ * then customize the structs vals, see lzmalib.h for
+ * more info. Then pass your struct as the third arg
+ * to compressfile
+ */
 const CLzmaEncProps default_props = {
     5, // level
     1 << 16, // dictSize
@@ -29,6 +37,7 @@ const CLzmaEncProps default_props = {
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
     //2 tabs
+    /* @FLOWING WATER WHAT THE FUCK U SAID I HAD TO COMPARE WITH NULL WHAT THE FUCK */
     if (!pk || !fp || !buf) return;
     snprintf(buf, len, "\t{P\
 \n\t\tPinfo: %s,\
@@ -44,7 +53,9 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
 void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
     //2 tabs
-    if (!tx || !fp || !buf) return;
+    /* @FLOWING WATER WHAT THE FUCK U SAID I HAD TO COMPARE WITH NULL WHAT THE FUCK */
+    if (!tx || !fp || !buf)
+        return;
     snprintf(buf, len, "\t{T\
 \n\t\tTtime: %d,\
 \n\t\tTid  : %d,\
@@ -71,8 +82,12 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 
     fwrite(buf, 1, strlen(buf), fp);
     
-    for (i = 0; i < bx->nPack; i++) {packToText(bx->packs[i], fp, buf, len);}
-    for (i = 0; i < bx->nTran; i++) {tranToText(bx->trans[i], fp, buf, len);}
+    for (i = 0; i < bx->nPack; i++) {
+        packToText(bx->packs[i], fp, buf, len);
+    }
+    for (i = 0; i < bx->nTran; i++) {
+        tranToText(bx->trans[i], fp, buf, len);
+    }
     
     strcpy(buf, "},\n");
     fwrite(buf, 1, strlen(buf), fp);
@@ -94,8 +109,10 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     uint32_t i;
     int len = 3000;
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
-    if (buf == NULL || fp == NULL)
+    if (buf == NULL || fp == NULL) {
+        log_msg("Error opening file/allocating mem");
         return NULL;
+    }
     
     snprintf(buf, len, "Ctime: %u,\nCsize: %u,\n", part, target);
     
@@ -111,13 +128,6 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     fclose(fp);
     free(buf);
     
-    /* to customize vals you can edit default prop
-     * struct or do:
-     * CLzmaEncProps myprop = default_prop;
-     * then customize the structs vals, see lzmalib.h for
-     * more info. Then pass your struct as the third arg
-     * to compressfile
-     */
     compress_file(tmp);
     
     return NULL;
