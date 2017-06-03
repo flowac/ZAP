@@ -10,7 +10,6 @@ debug: ARGS_EXTERN = debug
 debug: FLAGS += -g
 debug: all
 
-
 .PHONY: extern cleanExtern
 CC = g++
 # directory structure
@@ -47,11 +46,14 @@ extern:
 $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE) $(INCLUDE_EXTERN)
 	$(CC) -c -o $@ $< $(FLAGS)
 
+wrap:
+	gcc -o wrap $(SDIR)/arg_wrap.c $(SDIR)/arg_test.c -I$(IDIR)
+
 cf:
 	rm -f log temp*.file temp*.unc t*.7z
 
 c1:
-	rm -f $(PRG) $(ODIR)/*.o
+	rm -f $(PRG) $(ODIR)/*.o wrap
 
 c2: c1
 	$(MAKE) -C extern/7z clean
