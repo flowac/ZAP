@@ -157,6 +157,8 @@ int main()
 //    log_test();
 //    chain_test();
 //    zip_test();
+    printf("%s, %s, %d, bruh chill",
+            __FILE__, __FUNCTION__, __LINE__);
     chain_test2();
 
     //std::cout.imbue(std::locale());

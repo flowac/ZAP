@@ -17,9 +17,9 @@ OBJS = \
   LzmaDec.o \
   LzmaLib.o \
   LzmaEnc.o \
-  Threads.o \
-  Lzma2Enc.o \
-  MtCoder.o \
+#Threads.o \
+#Lzma2Enc.o \
+#MtCoder.o \
 
 all: $(PROG)
 
@@ -41,14 +41,14 @@ LzmaLib.o: C/LzmaLib.c
 LzmaEnc.o: C/LzmaEnc.c
 	$(CXX_C) $(CFLAGS) C/LzmaEnc.c
 
-Threads.o: C/Threads.c
-	$(CXX_C) $(CFLAGS) C/Threads.c
-
-Lzma2Enc.o: C/Lzma2Enc.c
-	$(CXX_C) $(CFLAGS) C/Lzma2Enc.c
-
-MtCoder.o: C/MtCoder.c
-	$(CXX_C) $(CFLAGS) C/MtCoder.c
+#Threads.o: C/Threads.c
+#	$(CXX_C) $(CFLAGS) C/Threads.c
+#
+#Lzma2Enc.o: C/Lzma2Enc.c
+#	$(CXX_C) $(CFLAGS) C/Lzma2Enc.c
+#
+#MtCoder.o: C/MtCoder.c
+#	$(CXX_C) $(CFLAGS) C/MtCoder.c
 
 clean:
 	-$(RM) $(OBJS)
