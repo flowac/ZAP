@@ -1,6 +1,8 @@
 Transmission: removed for performance reasons
 ./autogen.sh
-./configure --disable-nls --without-gtk --enable-cli --enable-daemon
+./configure --disable-nls --without-gtk --enable-cli --enable-daemon --prefix=<where you want to download>
+
+can exclude --prefix if u want default installation dirs (installing to /)
 
 When in doubt, download fresh source (ideal) or svn co (not recommanded)
 
