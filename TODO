@@ -10,6 +10,7 @@ More * = more priority
     Add AGPL v3 headers to everything including external libraries when possible
 
 FOR DALJIT:
-******* comment allans functions
+*** comment allans functions
+*** figure out how to compile lzma2enc.c, heres the files http://www.7-zip.org/sdk.html
 **  Get KF2
 *   Stop slacking
