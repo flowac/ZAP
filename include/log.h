@@ -7,6 +7,10 @@
 #include <fstream>
 #include "C/7zTypes.h"
 
+#include <string.h>
+#include <errno.h>
+#define log_msg_default log_msg("%s %s %d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
+
 /* This function will append to the log file
  * INPUT:
  * char *msg - message to be printed, can be formatted with %s etc

@@ -12,6 +12,7 @@
 #include <time.h>
 #include <pthread.h>
 
+
 #define N_THREADS 6
 #define N_TEST_BLOCKS 5000
 
@@ -157,9 +158,8 @@ int main()
 //    log_test();
 //    chain_test();
 //    zip_test();
-    printf("%s, %s, %d, bruh chill",
-            __FILE__, __FUNCTION__, __LINE__);
     chain_test2();
+    log_msg_default;
 
     //std::cout.imbue(std::locale());
     return 0;

@@ -1,11 +1,13 @@
-#include "alib.h"
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
 #include <pthread.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#include "alib.h"
 #include "lzma_wrapper.h"
+#include "log.h"
 
 namespace pt = boost::posix_time;
 
@@ -72,6 +74,7 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
     return px;
     
  cleanup:
+    log_msg_default;
     deletePack(px);
     free(px);
     return NULL;
@@ -115,8 +118,9 @@ block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs)
 chain *newChain(void)
 {
     chain *ch = (chain *)malloc(sizeof(chain));
-    if (!ch) 
+    if (ch == NULL) {
 	return NULL;
+    }
     
     ch->size = 0;
     ch->head = NULL;
