@@ -7,6 +7,29 @@
 
 #define buffer_cread_size 65536 // 1 < 16
 
+/* to customize vals you can edit default prop
+ * struct or do:
+ * CLzmaEncProps myprop = default_prop;
+ * then customize the structs vals, see lzmalib.h for
+ * more info. Then pass your struct as the third arg
+ * to compressfile
+ */
+const CLzmaEncProps default_props = {
+    5, // level
+    1 << 16, // dictSize
+    0xffffffff, // reduceSize
+    4, // lc
+    0, // lp
+    2, // pb
+    0, // algo
+    128, // fb
+    0, // btMode
+    4, // numHashbytes
+    16, // mc
+    0, // writeEndmark
+    2 // numThreads
+};
+
 /* default values that we are using for the prop
  * in the lzma library, look at lzmalib.h for more info
  * on what each value does, see our definition in alib.cpp

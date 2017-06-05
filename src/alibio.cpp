@@ -8,31 +8,8 @@
 #include "log.h"
 #include "alibio.h"
 #include "lzma_wrapper.h"
-#include "alib.h"
 #include "C/LzmaEnc.h"
 
-/* to customize vals you can edit default prop
- * struct or do:
- * CLzmaEncProps myprop = default_prop;
- * then customize the structs vals, see lzmalib.h for
- * more info. Then pass your struct as the third arg
- * to compressfile
- */
-const CLzmaEncProps default_props = {
-    5, // level
-    1 << 16, // dictSize
-    0xffffffff, // reduceSize
-    4, // lc
-    0, // lp
-    2, // pb
-    0, // algo
-    128, // fb
-    0, // btMode
-    4, // numHashbytes
-    16, // mc
-    0, // writeEndmark
-    2 // numThreads
-};
 
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
@@ -108,9 +85,12 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     
     uint32_t i;
     int len = 3000;
+    /* @flowingwater, why are we mallocing this? just declare buff
+     * as a char array...
+     */
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
     if (buf == NULL || fp == NULL) {
-        log_msg("Error opening file/allocating mem");
+        log_msg_default;
         return NULL;
     }
     
@@ -241,16 +221,18 @@ bool chainCompactor(chain *ch, uint8_t parts)
     target = size / parts;
     
     for (i = 0; i < parts; i++) {
-        tp[i].i = i + 1;
-        tp[i].head = ch->head;
+        tp[i].i = i + 1; /* why not just zero index smh */
+        tp[i].head = ch->head; /* why is this in the loop? */
         tp[i].start = done;
         done += target;
-        if (i == 0) done += (size % parts);
+        if (i == 0)
+            done += (size % parts);
         tp[i].end = done;
         
         pthread_create(&threads[i], NULL, &chainToText, (void *)&tp[i]);
     }
-    for (i = 0; i < parts; i++) pthread_join(threads[i], NULL);
+    for (i = 0; i < parts; i++)
+        pthread_join(threads[i], NULL);
 
     return 1;
 }

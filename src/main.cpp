@@ -22,7 +22,7 @@
 void sha1_test()
 {
     unsigned char *tmp = NULL;
-    tmp = create_sha1sum((char *)"sha1.txt");
+    tmp = create_sha1sum((char *)"temp1.file");
     if(tmp != NULL) {
         for (int i = 0; i < 20; i++) {
             printf("%02x",tmp[i]);
@@ -154,12 +154,11 @@ void chain_test2()
 
 int main()
 {
-//    sha1_test();
 //    log_test();
 //    chain_test();
 //    zip_test();
     chain_test2();
-    log_msg_default;
+//    sha1_test();
 
     //std::cout.imbue(std::locale());
     return 0;

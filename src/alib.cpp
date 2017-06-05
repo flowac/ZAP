@@ -119,6 +119,7 @@ chain *newChain(void)
 {
     chain *ch = (chain *)malloc(sizeof(chain));
     if (ch == NULL) {
+        log_msg_default;
 	return NULL;
     }
     
@@ -136,8 +137,10 @@ bool insertBlock(block *bx, chain *ch)
     // if realloc was successfull assign to head
     if (tmp != NULL)
         ch->head = tmp;
-    else
+    else {
+        log_msg_default;
         return 0;
+    }
     
     ch->head[ch->size] = bx;//! Don't free block pointer
     ch->size++;

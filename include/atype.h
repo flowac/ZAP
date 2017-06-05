@@ -76,11 +76,12 @@ typedef struct
     block **head;//expandable
 }chain;
 
+/* @ FLOWING WATER can u comment this hsit when u make it ? */
 typedef struct{
-    uint32_t i;
-    block **head;
-    uint32_t start;
-    uint32_t end;
+    uint32_t i; /* current block num? */
+    block **head; /* head of the block chain */
+    uint32_t start; /* starting block num */
+    uint32_t end; /* ending block num */
 }threadParams;
 
 #endif//_ATYPE_H
