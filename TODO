@@ -2,6 +2,7 @@ More * = more priority
 
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
 |-> transmission 
+**  start working on being able to compile in windows
 *   Clean up compression implementation
 *   Comment alib.h alibio.h
 *   Test magnet link structure
