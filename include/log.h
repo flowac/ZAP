@@ -9,7 +9,14 @@
 
 #include <string.h>
 #include <errno.h>
+
+/* log msg from errno */
 #define log_msg_default log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
+
+/* log string passed from user */
+#define log_msg_custom(msg) log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, msg)
+
+#define log_msg_custom_errno(msg, x) log_msg("%s %s:%d: %s:%d\n", __FILE__, __FUNCTION__, __LINE__, msg, x)
 
 /* This function will append to the log file
  * INPUT:
