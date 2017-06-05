@@ -11,4 +11,4 @@ Don't valgrind the 7z library, it's really slow
 
 Creating etags:
 
-find . -name "*.c*" -or -name "*.h" -print | xargs etags
+find . -name "*.c*" -or -name "*.h" | xargs etags
