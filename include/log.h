@@ -9,7 +9,7 @@
 
 #include <string.h>
 #include <errno.h>
-#define log_msg_default log_msg("%s %s %d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
+#define log_msg_default log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
 
 /* This function will append to the log file
  * INPUT:
