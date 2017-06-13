@@ -14,7 +14,6 @@
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
     //2 tabs
-    /* @FLOWING WATER WHAT THE FUCK U SAID I HAD TO COMPARE WITH NULL WHAT THE FUCK */
     if (!pk || !fp || !buf) return;
     snprintf(buf, len, "\t{P\
 \n\t\tPinfo: %s,\
@@ -30,7 +29,6 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
 void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
     //2 tabs
-    /* @FLOWING WATER WHAT THE FUCK U SAID I HAD TO COMPARE WITH NULL WHAT THE FUCK */
     if (!tx || !fp || !buf)
         return;
     snprintf(buf, len, "\t{T\
@@ -70,7 +68,7 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
     fwrite(buf, 1, strlen(buf), fp);
 }
 
-void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint32_t target)
+void *chainToText(void *args)
 {
     threadParams *tp = (threadParams *)args;
     uint8_t part =      tp->i;
@@ -85,9 +83,7 @@ void *chainToText(void *args)//uint8_t part, block **head, uint32_t start, uint3
     
     uint32_t i;
     int len = 3000;
-    /* @flowingwater, why are we mallocing this? just declare buff
-     * as a char array...
-     */
+
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
     if (buf == NULL || fp == NULL) {
         log_msg_default;
@@ -203,8 +199,6 @@ chain *text2Chainz(FILE *fp)
     return ch;
 }
 
-//! TODO AC
-//! redirect the file stream or something, instead of writing to a file then telling 7z to open it
 //  return 1 for success, 0 for failure
 bool chainCompactor(chain *ch, uint8_t parts)
 {
@@ -221,8 +215,8 @@ bool chainCompactor(chain *ch, uint8_t parts)
     target = size / parts;
     
     for (i = 0; i < parts; i++) {
-        tp[i].i = i + 1; /* why not just zero index smh */
-        tp[i].head = ch->head; /* why is this in the loop? */
+        tp[i].i = i + 1;
+        tp[i].head = ch->head;
         tp[i].start = done;
         done += target;
         if (i == 0)
@@ -237,11 +231,10 @@ bool chainCompactor(chain *ch, uint8_t parts)
     return 1;
 }
 
-//! TODO AC
-//! redirect the file stream or something, instead of writing to a file then telling 7z to open it
 //  return 1 for success, 0 for failure
 chain *chainExtractor(char *inFile)
 {
+    /* very wrong
     char tmp[] = "temp.file\0";
     compress_file(tmp);
     
@@ -251,5 +244,6 @@ chain *chainExtractor(char *inFile)
     
     if (ch == NULL) {printf("\n! Conversion from 7z failed\n");}
     
-    return ch;
+    return ch;*/
+    return NULL;
 }

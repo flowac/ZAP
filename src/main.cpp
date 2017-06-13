@@ -22,7 +22,7 @@
 void sha1_test()
 {
     unsigned char *tmp = NULL;
-    tmp = create_sha1sum((char *)"temp1.file");
+    tmp = create_sha1sum((char *)"shatest.file");
     if(tmp != NULL) {
         for (int i = 0; i < 20; i++) {
             printf("%02x",tmp[i]);
@@ -40,6 +40,8 @@ void log_test()
     log_msg("fewf %s\n", "wfean");
 }
 
+/* Depreciated, use chain_test2()
+ *
 void chain_test()
 {
     chain *ch = newChain();
@@ -67,7 +69,7 @@ void chain_test()
     printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
 
     free(ch);
-}
+}*/
 
 void zip_test()
 {
@@ -140,9 +142,9 @@ void chain_test2()
     
     printf("Compressing\n");
     struct timespec tmp1,tmp2;
-    clock_gettime(CLOCK_MONOTONIC, &tmp1);
+    clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
     chainCompactor(ch, N_THREADS);
-    clock_gettime(CLOCK_MONOTONIC, &tmp2);
+    clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
     uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
     printf("Took %d milliseconds\n", tmp);
     
@@ -155,12 +157,12 @@ void chain_test2()
 int main()
 {
 //    log_test();
-//    chain_test();
+//    chain_test();//Depreciated
 //    zip_test();
     chain_test2();
 //    sha1_test();
 
-    //std::cout.imbue(std::locale());
+    //std::cout.imbue(std::locale());//Might be usefull to remove valgrind false positives
     return 0;
 }
 
