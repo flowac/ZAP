@@ -5,7 +5,13 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+
+#ifndef WINDOWS
 #include <linux/limits.h>
+#else
+#include "wlimits.h"
+#endif
+
 /* include */
 #include "lzma_wrapper.h"
 #include "log.h"

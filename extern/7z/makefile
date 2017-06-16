@@ -1,14 +1,26 @@
 debug: CFLAGS += -g
 debug: all
 PROG = lib7z
-AR = ar rcs
+
+WINDOWS = 1
+ifndef WINDOWS
+AR    = ar rcs
+CXX   = g++
+CXX_C = gcc
+else
+CCDIR = C:\PROGRA~1\MINGW-~1\X86_64~1.0-W\mingw64\bin
+AR    = $(CCDIR)\ar.exe rcs
+CXX   = $(CCDIR)\g++#x86_64-w64-mingw32-g++.exe
+CXX_C = $(CCDIR)\gcc#x86_64-w64-mingw32-gcc.exe
+endif
+
+CXX  += -O2
+CXX_C+= -O2 -Wall -Werror -I$(IDIR)
 
 ODIR = ./obj
 SDIR = ./C
 IDIR = ./C
 
-CXX = g++ -O2
-CXX_C = gcc -O2 -Wall -Werror -I$(IDIR)
 CFLAGS += -c -DDEBUG
 
 OBJS = \
