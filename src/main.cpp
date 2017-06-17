@@ -11,7 +11,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#define N_THREADS 1
+#define N_THREADS 5
 #define N_TEST_BLOCKS 100
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
@@ -37,37 +37,6 @@ void log_test()
 {
     log_msg("fewf %s\n", "wfean");
 }
-
-/* Depreciated, use chain_test2()
- *
-void chain_test()
-{
-    chain *ch = newChain();
-    uint32_t size = 1000;
-
-    for (uint32_t i = 0; i < size; i++) {
-        uint64_t key = 0xFFFF0000FFFF0000 + i;
-        uint32_t len = 4;
-        pack **packs = (pack **)malloc(sizeof(pack *) * len);
-        if (packs == NULL)
-            break;
-        for (uint32_t j = 0; j < len; j++) {
-            packs[j] = newPack((char *)"dn:testtesttesttesttesttesttesttest",
-                               4*1024*1024,
-                               (char *)"xt:testtesttesttesttesttesttesttest",
-                               (char *)"tr:testtesttesttesttesttesttesttest");
-        }
-
-        if (!insertBlock(newBlock(i, key, len, packs), ch))
-            break;
-    }
-    printBlock(ch->head[0]);
-    printBlock(ch->head[size - 1]);
-
-    printf("Free'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
-
-    free(ch);
-}*/
 
 void zip_test()
 {
@@ -133,7 +102,7 @@ void uncompress_test()
     for (int i = 0; i < N_THREADS; i++) pthread_join(threads[i], NULL);
 }
 
-void chain_test2()
+void chain_test()
 {
     printf("\nGenerating\n");
     chain *ch = chain_gen(N_TEST_BLOCKS);
@@ -164,7 +133,7 @@ int main()
 //    log_test();
 //    chain_test();//Depreciated
 //    zip_test();
-    chain_test2();
+    chain_test();
 //    sha1_test();
 
     //std::cout.imbue(std::locale());//Might be usefull to remove valgrind false positives

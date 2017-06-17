@@ -1,6 +1,7 @@
 # executable
 PRG = test
 
+# for windows os
 ifneq ($(OS),Windows_NT)
 RM    = rm -f
 CC    = g++
@@ -24,6 +25,8 @@ clean: c
 c: c3
 
 FLAGS += -O3
+FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
+#FLAGS += std=gnu++11
 ARGS_EXTERN = all
 debug: FLAGS:=$(filter-out -O3,$(FLAGS))
 debug: ARGS_EXTERN = debug
@@ -44,9 +47,9 @@ INCLUDE = $(wildcard $(IDIR)/*.h)
 INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-FLAGS += -Wall -std=gnu++11 -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
 # remove lrt later my work pc is retarded
-LIBS = -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread #-lrt
+LIBS = -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
+LIBS += -lrt
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 
@@ -65,29 +68,31 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(INCLUDE) $(INCLUDE_EXTERN)
 wrap:
 	$(CCX) -o wrap $(SDIR)/arg_wrap.c $(SDIR)/arg_test.c -I$(IDIR)
 
-cf:
+clean_files:
 	$(RM) log
 	$(RM) temp*.*
 
 ifneq ($(OS),Windows_NT)
-cleanC1 = $(ODIR)/*.o
+clean_ODIR = $(ODIR)/*.o
 else
-cleanC1 = $(ODIR)\*.o
+clean_ODIR = $(ODIR)\*.o
 endif
-c1:
+clean_local:
 	$(RM) $(PRG)
-	$(RM) $(cleanC1)
+	$(RM) $(clean_ODIR)
 	$(RM) wrap
 
 ifneq ($(OS),Windows_NT)
-cleanC2a = extern/7z
-cleanC2b = $(LDIR)/*.a
+clean_extern_dir = extern/7z
+clean_lib = $(LDIR)/*.a
 else
-cleanC2a = extern\7z
-cleanC2b = $(LDIR)\*.a
+clean_extern_dir = extern\7z
+clean_lib = $(LDIR)\*.a
 endif
-c2: c1
-	$(MAKE) -C $(cleanC2a) clean
-	$(RM) $(cleanC2b)
+# clean local and extern
+clean: clean_local
+	$(MAKE) -C $(clean_extern_dir) clean
+	$(RM) $(clean_lib)
 
-c3: c2 cf
+# clean local, extern and extra files
+clean_all: c2 clean_files
