@@ -1,7 +1,22 @@
 For all dependencies, older version will probably work but not tested
 
-OpenSSL 1.0.21 or later:
-https://www.openssl.org/source/openssl-1.0.2l.tar.gz
+makefile assumes gcc is at C:/MinGW/bin
+makefile assumes Boost and OpenSSL are under winextern with relative paths
+
 
 Boost 1.63.0 or later:
 https://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.7z?r=http%3A%2F%2Fwww.boost.org%2Fusers%2Fhistory%2Fversion_1_63_0.html&ts=1497640951&use_mirror=superb-sea2
+
+Setup boost dir in main makefile
+
+OpenSSL 1.0.21 or later:
+https://www.openssl.org/source/openssl-1.0.2l.tar.gz
+
+Needs MinGW Msys package and perl to compile OpenSSL
+
+under msys shell:
+perl Configure mingw --prefix=/c/openssl
+make depend #might need to change to -march=native
+make
+make install
+

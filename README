@@ -12,3 +12,15 @@ Don't valgrind the 7z library, it's really slow
 Creating etags:
 
 find . -name "*.c*" -or -name "*.h" | xargs etags
+
+
+
+
+WINDOWS:
+Tested with MinGW
+You need:   MinGW with GCC, G++, and MSYS, 
+            Boost 1.63.0 or later
+            OpenSSL 1.0.21 or later
+            Perl
+makefile assumes gcc is at C:/MinGW/bin
+makefile assumes Boost and OpenSSL are under winextern with relative paths

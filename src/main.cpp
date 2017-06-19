@@ -9,9 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <pthread.h>
-
 
 #define N_THREADS 6
 #define N_TEST_BLOCKS 5000
@@ -141,11 +139,18 @@ void chain_test2()
     chain *ch = chain_gen(N_TEST_BLOCKS);
     
     printf("Compressing\n");
+    uint32_t tmp;
+#ifndef WINDOWS
     struct timespec tmp1,tmp2;
     clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
     chainCompactor(ch, N_THREADS);
     clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
-    uint32_t tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
+    tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
+#else
+    tmp = GetTickCount();
+    chainCompactor(ch, N_THREADS);
+    tmp = GetTickCount() - tmp;
+#endif
     printf("Took %d milliseconds\n", tmp);
     
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));

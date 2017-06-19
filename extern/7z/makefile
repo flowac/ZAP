@@ -2,16 +2,17 @@ debug: CFLAGS += -g
 debug: all
 PROG = lib7z
 
-WINDOWS = 1
-ifndef WINDOWS
+ifneq ($(OS),Windows_NT)
+RM    = rm -f
 AR    = ar rcs
 CXX   = g++
 CXX_C = gcc
 else
-CCDIR = C:\PROGRA~1\MINGW-~1\X86_64~1.0-W\mingw64\bin
-AR    = $(CCDIR)\ar.exe rcs
-CXX   = $(CCDIR)\g++#x86_64-w64-mingw32-g++.exe
-CXX_C = $(CCDIR)\gcc#x86_64-w64-mingw32-gcc.exe
+RM    = del
+CCDIR = C:\MinGW\bin
+AR    = $(CCDIR)\ar rcs
+CXX   = $(CCDIR)\g++
+CXX_C = $(CCDIR)\gcc
 endif
 
 CXX  += -O2
@@ -63,4 +64,11 @@ LzmaEnc.o: C/LzmaEnc.c
 #	$(CXX_C) $(CFLAGS) C/MtCoder.c
 
 clean:
-	-$(RM) $(OBJS)
+	$(RM) Alloc.o
+	$(RM) LzFind.o
+	$(RM) LzmaDec.o
+	$(RM) LzmaLib.o
+	$(RM) LzmaEnc.o
+#	$(RM) Threads.o
+#	$(RM) Lzma2Enc.o
+#	$(RM) MtCoder.o

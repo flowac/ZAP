@@ -8,6 +8,10 @@
 #include <time.h>
 #include <stdio.h>
 
+#ifdef WINDOWS
+#include <Windows.h>
+#endif
+
 //namespace pt = boost::posix_time;
 
 /* Get current time
