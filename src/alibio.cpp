@@ -76,9 +76,8 @@ void *chainToText(void *args)
     uint32_t start =    tp->start;
     uint32_t target =   tp->end;
     //1 tab
-    char tmp[16], tmp7z[16];
+    char tmp[16];
     snprintf(tmp, 15, "temp%u.file", part);
-    snprintf(tmp7z, 15, "temp%u.7z", part);
     FILE *fp = fopen(tmp, "w");
     
     uint32_t i;
@@ -86,7 +85,10 @@ void *chainToText(void *args)
 
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
     if (buf == NULL || fp == NULL) {
-        log_msg_default;
+        char msg[80];
+        snprintf(msg, 79, "\nCreating part [%u] failed, name [%s], pointer [%p][%d]\n",
+                part, tmp, fp, fp);
+        log_msg_custom(msg);
         return NULL;
     }
     

@@ -13,6 +13,7 @@ CCDIR = C:\MinGW\bin
 AR    = $(CCDIR)\ar rcs
 CXX   = $(CCDIR)\g++
 CXX_C = $(CCDIR)\gcc
+CFLAGS += -D_WIN32
 endif
 
 CXX  += -O2

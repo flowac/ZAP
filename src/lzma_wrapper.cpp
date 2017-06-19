@@ -9,7 +9,7 @@
 #ifndef WINDOWS
 #include <linux/limits.h>
 #else
-#include "wlimits.h"
+#include <limits.h>
 #endif
 
 /* include */
@@ -102,7 +102,9 @@ static int open_io_files(const char *in_path, const char*out_path,
 {
     fd[0] = fopen(in_path, "r");
     if (fd[0] == NULL)  {
-        log_msg_default;
+        char msg[60];
+        snprintf(msg, 59, "\nOpening [%s] failed\n", in_path);
+        log_msg_custom(msg);
         goto cleanup;
     }
     fd[1] = fopen(out_path, "w+");

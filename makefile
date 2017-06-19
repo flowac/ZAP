@@ -22,7 +22,10 @@ endif
 all: extern torrent
 clean: c
 c: c3
+
+FLAGS += -O3
 ARGS_EXTERN = all
+debug: FLAGS:=$(filter-out -O3,$(FLAGS))
 debug: ARGS_EXTERN = debug
 debug: FLAGS += -g
 debug: all
@@ -64,9 +67,7 @@ wrap:
 
 cf:
 	$(RM) log
-	$(RM) temp*.file
-	$(RM) temp*.unc
-	$(RM) t*.7z
+	$(RM) temp*.*
 
 ifneq ($(OS),Windows_NT)
 cleanC1 = $(ODIR)/*.o

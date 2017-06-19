@@ -11,8 +11,8 @@
 #include <string.h>
 #include <pthread.h>
 
-#define N_THREADS 6
-#define N_TEST_BLOCKS 5000
+#define N_THREADS 1
+#define N_TEST_BLOCKS 100
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -127,7 +127,7 @@ void uncompress_test()
 
     for (int i = 0; i < N_THREADS; i++) {
         sprintf(dp[i].in7z,"temp%d.file.7z", i+1);
-        sprintf(dp[i].outf, "temp%d.unc",i+1);
+        sprintf(dp[i].outf, "temp%d.1unc",i+1);
         pthread_create(&threads[i], NULL, &decompress_wrap, (void *)&dp[i]);
     }
     for (int i = 0; i < N_THREADS; i++) pthread_join(threads[i], NULL);
