@@ -1,0 +1,6 @@
+#IGNORE everything in this DIR
+#i stole this from stackoverflow
+*
+#except this file
+!.gitignore
+!DEPEND
