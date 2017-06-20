@@ -12,7 +12,7 @@
 #include <pthread.h>
 
 #define N_THREADS 5
-#define N_TEST_BLOCKS 100
+#define N_TEST_BLOCKS 1000
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -128,12 +128,45 @@ void chain_test()
     uncompress_test();
 }
 
+void decompress_test()
+{
+    printf("\nGenerating\n");
+    chain *ch = chain_gen(N_TEST_BLOCKS);
+
+    uint32_t tmp;
+#ifndef WINDOWS
+    struct timespec tmp1,tmp2;
+    clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
+#else
+    tmp = GetTickCount();
+#endif
+
+    chainToText_to_file(ch, 1);
+    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
+    free(ch);
+    FILE * fp = fopen("orig1.file", "r");
+    chain *tmp_chain = text2Chainz(fp);
+    chainToText_to_file(tmp_chain, 2);
+    printf("\nFree'd %lu bytes\n", deleteChain(tmp_chain) + sizeof(chain));
+    free(tmp_chain);
+
+#ifndef WINDOWS
+    clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
+    tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
+#else
+    tmp = GetTickCount() - tmp;
+#endif
+    printf("Took %d milliseconds\n", tmp);
+    
+}
+
 int main()
 {
 //    log_test();
 //    chain_test();//Depreciated
 //    zip_test();
-    chain_test();
+//    chain_test();
+    decompress_test();
 //    sha1_test();
 
     //std::cout.imbue(std::locale());//Might be usefull to remove valgrind false positives

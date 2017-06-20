@@ -6,6 +6,9 @@
 //No comment
 chain *chainExtractor(char *inFile);
 
+void *chainToText_to_file(chain *ch, uint8_t parts);
+chain *text2Chainz(FILE *fp);
+
 /* compact the entire chain into x parts, using x threads
  * INPUT:
  * chain *ch - self explanitory

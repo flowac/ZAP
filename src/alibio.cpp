@@ -84,6 +84,7 @@ void *chainToText(void *args)
     int len = 3000;
 
     char *buf = (char *)malloc(sizeof(char) * (len + 1));
+    // char buf[3001];
     if (buf == NULL || fp == NULL) {
         char msg[80];
         snprintf(msg, 79, "\nCreating part [%u] failed, name [%s], pointer [%p][%d]\n",
@@ -111,6 +112,45 @@ void *chainToText(void *args)
     return NULL;
 }
 
+void *chainToText_to_file(chain *ch, uint8_t parts)
+{
+    uint8_t part =      parts;
+    block **head =      ch->head;
+    uint32_t start =    0;
+    uint32_t target =   ch->size;
+    //1 tab
+    char tmp[16];
+    snprintf(tmp, 15, "orig%u.file", part);
+    FILE *fp = fopen(tmp, "w");
+    
+    uint32_t i;
+    int len = 3000;
+
+    char *buf = (char *)malloc(sizeof(char) * (len + 1));
+    if (buf == NULL || fp == NULL) {
+        char msg[80];
+        snprintf(msg, 79, "\nCreating part [%u] failed, name [%s], pointer [%p][%d]\n",
+                part, tmp, fp, fp);
+        log_msg_custom(msg);
+        return NULL;
+    }
+    
+    snprintf(buf, len, "Ctime: %u,\nCsize: %u,\n", part, target);
+    
+    fwrite(buf, 1, strlen(buf), fp);
+    
+    for (i = start; i < target; i++) {
+        blockToText(head[i], fp, buf, len);
+    }
+    
+    strcpy(buf, "EOF\n");
+    fwrite(buf, 1, strlen(buf), fp);
+    
+    fclose(fp);
+    free(buf);
+    
+    return NULL;
+}
 pack *text2Pac(FILE *fp)
 {
     char s[MAX_U8 + 1];
@@ -185,7 +225,8 @@ chain *text2Chainz(FILE *fp)
     
     while (fgets(s, MAX_U8, fp) != NULL) {
         if (strstr(s, (char *)"{B") != NULL) {
-            if (!insertBlock(text2Block(fp), ch))   printf("insertBlock failed");
+            if (!insertBlock(text2Block(fp), ch))
+                log_msg_custom("Failed to insert block");
         } else {
             char *data = strstr(s, (char *)"C");
             int len = strlen(data);
@@ -204,7 +245,9 @@ chain *text2Chainz(FILE *fp)
 //  return 1 for success, 0 for failure
 bool chainCompactor(chain *ch, uint8_t parts)
 {
-    uint32_t size = ch->size, target, done;
+    uint32_t size = ch->size,
+        target, // # of blocks each thread will compresss
+        done; // # of blocks assigned to threads
     uint8_t i;
     
     if (parts == 0 || parts > MAX_U8) {
@@ -234,18 +277,7 @@ bool chainCompactor(chain *ch, uint8_t parts)
 }
 
 //  return 1 for success, 0 for failure
-chain *chainExtractor(char *inFile)
+chain *chainExtractor(char *inFile, uint8_t parts)
 {
-    /* very wrong
-    char tmp[] = "temp.file\0";
-    compress_file(tmp);
-    
-    FILE *fp = fopen(tmp, "r");
-    chain *ch = text2Chainz(fp);
-    fclose(fp);
-    
-    if (ch == NULL) {printf("\n! Conversion from 7z failed\n");}
-    
-    return ch;*/
     return NULL;
 }
