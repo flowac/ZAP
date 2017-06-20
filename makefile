@@ -21,8 +21,6 @@ endif
 
 # default rule and rule shortcuts
 all: extern torrent
-clean: c
-c: c3
 
 FLAGS += -O3
 FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
@@ -95,4 +93,4 @@ clean: clean_local
 	$(RM) $(clean_lib)
 
 # clean local, extern and extra files
-clean_all: c2 clean_files
+clean_all: clean clean_files
