@@ -94,3 +94,5 @@ clean: clean_local
 
 # clean local, extern and extra files
 clean_all: clean clean_files
+cf: clean_files
+c: clean_all
