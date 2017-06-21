@@ -55,7 +55,9 @@ pack *newPack(char *dn, uint64_t xl, char *xt, char *tr)
         return NULL; // maloc failed
 
     px->xl = xl;
-    for (i = 0; i < 6; i++) {px->info[i] = 0;}//prevent valgrind errors
+    for (i = 0; i < 6; i++) {
+        px->info[i] = 0; // prevent valgrind errors
+    }
     strncpy(px->info, dn, 5);
     
     px->dn = (char *)malloc(sizeof(char) * ndn);
@@ -89,8 +91,10 @@ tran *newTran()
 block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs)
 {
     block *bx = (block *)malloc(sizeof(block));
-    if (bx == NULL) 
+    if (bx == NULL) {
 	return NULL;
+        log_msg_default;
+    }
 
     bx->time = (uint32_t)sNow();
     bx->crc = 0;
@@ -113,6 +117,36 @@ block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs)
     if (LOG) 
 	printTime(sNow());
 
+    return bx;
+}
+
+block *restore_block(uint32_t time, uint32_t crc, uint16_t n_pack,
+                     uint16_t n_tran, uint32_t n, uint64_t key,
+                     pack **packs)
+{
+    block *bx = (block *)malloc(sizeof(block));
+    if (bx == NULL){
+        log_msg_default;
+        return NULL;
+    }
+    bx->time = time;
+    bx->crc = crc;
+    bx->nPack = n_pack;
+    bx->nTran = n_tran;
+    bx->n = n;
+    bx->key = key;
+    if (n_pack < MAX_U16) {
+        bx->nPack = n_pack;
+        bx->packs = packs;
+    } else {
+        bx->nPack = MAX_U16;
+        for (uint32_t i = MAX_U16; i < n_pack; i++) {
+            free(packs[i]);
+        }
+        bx->packs = (pack **)realloc(packs, sizeof(pack *) * MAX_U16);
+    }
+    bx->nTran = 0;
+    bx->trans = NULL;
     return bx;
 }
 

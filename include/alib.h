@@ -20,6 +20,10 @@
  */
 inline time_t sNow();
 
+block *restore_block(uint32_t time, uint32_t crc, uint16_t n_pack,
+                     uint16_t n_tran, uint32_t n, uint64_t key,
+                     pack **packs);
+
 inline void printTime(time_t time);
 
 /* This function will print the relative information of a block

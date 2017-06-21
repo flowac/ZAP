@@ -18,10 +18,10 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
     snprintf(buf, len, "\t{P\
 \n\t\tPinfo: %s,\
 \n\t\tPdn  : %s,\
-\n\t\tPlen : %ld,\
+\n\t\tPlen : %lld,\
 \n\t\tPxt  : %s,\
 \n\t\tPtr  : %s,\
-\n\t},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+\n\tP},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
 
     fwrite(buf, 1, strlen(buf), fp);
 }
@@ -64,7 +64,7 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
         tranToText(bx->trans[i], fp, buf, len);
     }
     
-    strcpy(buf, "},\n");
+    strcpy(buf, "B},\n");
     fwrite(buf, 1, strlen(buf), fp);
 }
 
@@ -151,22 +151,67 @@ void *chainToText_to_file(chain *ch, uint8_t parts)
     
     return NULL;
 }
+
+char *indexes_of(char *haystack, char *needle_start,
+                 char *needle_end)
+{
+    char *ptr_start = strstr(haystack, needle_start) + 2;
+    char *ptr_end = strstr(haystack, needle_end);
+    int len = ptr_end - ptr_start;
+    char *dest = (char *)malloc(sizeof(char)* len + 1); 
+    dest[len] = '\0';
+    memcpy(dest, ptr_start, len);
+    return dest;
+}
+
 pack *text2Pac(FILE *fp)
 {
-    char s[MAX_U8 + 1];
+    char s[MAX_U8 + 1],
+        *dn = NULL,
+        *xt = NULL,
+        *p_xl = NULL,
+        *tr = NULL;
+    uint64_t xl;
+    char test[512];
+
     pack *px = NULL;
 
     while (fgets(s, MAX_U8, fp) != NULL) {
+        int len = 0;
         char *data = strstr(s, (char *)"P");
-        int len = strlen(data);
+        if (data){
+            len = strlen(data);
+        }
         if (len > 1) {
             switch (data[1]) {
-                case 'i':   break;
-                case 'd':   break;
-                case 'l':   break;
-                case 'x':   break;
-                case 't':   break;
-                default :   break;
+            case 'i': // pack->info
+                break;
+            case 'd': // pack->dn
+                dn = indexes_of(data, ": ", ",");
+                break;
+            case 'l': // pack->xl
+                p_xl = indexes_of(data, ": ", ",");
+                xl = atof(p_xl);
+                break;
+            case 'x': // pack->xt
+                xt = indexes_of(data, ": ", ",");
+                break;
+            case 't': // pack->tr
+                tr = indexes_of(data, ": ", ",");
+                break;
+            case '}': // end of pack
+                px = newPack(dn, xl, xt, tr);
+                if (dn)
+                    free(dn);
+                if (p_xl)
+                    free(p_xl);
+                if (xt)
+                    free(xt);
+                if (tr)
+                    free(tr);
+                return px;
+            default :
+                break;
             }
         }
     }
@@ -181,65 +226,128 @@ tran *text2Tran(FILE *fp)
 block *text2Block(FILE *fp)
 {
     char s[MAX_U8 + 1];
-    uint32_t nPack = 0;
-    uint64_t key = 0;
     pack **packs = NULL;
+    char * tmp;
+    uint32_t time = 0;
+    uint32_t crc = 0;
+    uint16_t n_pack = 0;
+    uint16_t n_tran = 0;
+    uint32_t n = 0;
+    uint64_t key = 0;
+    block *new_block = NULL;
+
 
     while (fgets(s, MAX_U8, fp) != NULL) {
         if (strstr(s, (char *)"{P") != NULL) {
             pack *px = text2Pac(fp);
             if (px != NULL) {
-                nPack++;
-                if (nPack > MAX_U16) {
+                n_pack++;
+                if (n_pack > MAX_U16) {
                     deletePack(px);
-                    printf("nPack limit reached\n");
+                    log_msg_custom("nPack limit reached\n");
                     break;
                 }
-                packs = (pack**)realloc(packs, sizeof(pack *) * nPack);
-                packs[nPack - 1] = px;
+                packs = (pack**)realloc(packs, sizeof(pack *) * n_pack);
+                packs[n_pack - 1] = px;
             }
         } else {
+            int len = 0;
             char *data = strstr(s, (char *)"B");
-            int len = strlen(data);
+            if (data)
+                len = strlen(data);
             if (len > 1) {
                 switch (data[1]) {
-                    case 'g':   break;
-                    case 'c':   break;
-                    case 'p':   break;
-                    case 't':   break;
-                    case 'n':   break;
-                    case 'k':   break;
-                    default :   break;
+                case 'g': // block->time
+                    tmp = indexes_of(data, ": ", ",");
+                    time = atol(tmp);
+                    free(tmp);
+                    break;
+                case 'c': // block->crc
+                    tmp = indexes_of(data, ": ", ",");
+                    crc = atol(tmp);
+                    free(tmp);
+                    break;
+                case 'p': // block->nPack
+                    /* n_pack is being counted in the other
+                     * part of the loop
+                     */
+                    //tmp = indexes_of(data, ": ", ",");
+                    //n_pack = atol(tmp);
+                    //free(tmp);
+                    break;
+                case 't': // block->nTran
+                    tmp = indexes_of(data, ": ", ",");
+                    n_tran = atol(tmp);
+                    free(tmp);
+                    break;
+                case 'n': // block->n
+                    tmp = indexes_of(data, ": ", ",");
+                    n = atol(tmp);
+                    free(tmp);
+                    break;
+                case 'k': // block->key
+                    tmp = indexes_of(data, ": ", ",");
+                    key = strtoll(tmp, NULL, 10);
+                    free(tmp);
+                    break;
+                case '}':
+                    new_block = restore_block(time, crc, n_pack,
+                                                  n_tran, n, key,
+                                                  packs);
+                    return new_block;
+                    break;
+                default :
+                    break;
                 }
             }
         }
     }
-    return (block *)newBlock(0, key, nPack, packs);
+    //return (block *)newBlock(0, key, n_pack, packs);
+    return new_block;
 }
 
-chain *text2Chainz(FILE *fp)
+int text2Chainz(FILE *fp, chain *ch)
 {
     char s[MAX_U8 + 1];
-    chain *ch = newChain();
-    if (ch == NULL) return NULL;
+    if (ch == NULL)
+        return 0;
+    char *tmp = NULL;
     
+    /* Parse the text searching for the start of a block
+     *
+     */
     while (fgets(s, MAX_U8, fp) != NULL) {
         if (strstr(s, (char *)"{B") != NULL) {
             if (!insertBlock(text2Block(fp), ch))
                 log_msg_custom("Failed to insert block");
         } else {
+            int len = 0;
             char *data = strstr(s, (char *)"C");
-            int len = strlen(data);
+            if (data)
+                len = strlen(data);
             if (len > 1) {
                 switch (data[1]) {
-                    case 't':   break;
-                    case 's':   break;
-                    default :   break;
+                    case 't':
+                        // Ctime
+                        break;
+                        // Csize
+                    case 's':
+                        break;
+                    default :
+                        break;
                 }
             }
         }
     }
-    return ch;
+    return 1;
+}
+
+chain *file_2_chainz(FILE *fp)
+{
+    chain *ch = newChain();
+    if(!text2Chainz(fp, ch))
+        log_msg_default;
+    return NULL;
 }
 
 //  return 1 for success, 0 for failure

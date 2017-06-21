@@ -22,11 +22,10 @@ endif
 # default rule and rule shortcuts
 all: extern torrent
 
-FLAGS += -O3
-FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
+#FLAGS += -O3
 #FLAGS += std=gnu++11
 ARGS_EXTERN = all
-debug: FLAGS:=$(filter-out -O3,$(FLAGS))
+#debug: FLAGS:=$(filter-out -O3,$(FLAGS))
 debug: ARGS_EXTERN = debug
 debug: FLAGS += -g
 debug: all
@@ -50,6 +49,8 @@ LIBS = -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
 LIBS += -lrt
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
+
+FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
 
 # create executable
 torrent: $(OBJ)
