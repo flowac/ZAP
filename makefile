@@ -3,6 +3,7 @@ PRG = test
 
 # for windows os
 ifneq ($(OS),Windows_NT)
+LIBS += -lrt
 RM    = rm -f
 CC    = g++
 CCX   = gcc
@@ -46,8 +47,7 @@ INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # remove lrt later my work pc is retarded
-LIBS = -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
-LIBS += -lrt
+LIBS += -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 
