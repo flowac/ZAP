@@ -6,9 +6,19 @@
 //No comment
 chain *chainExtractor(char *inFile);
 
+/* convert chain to single file without compressing */
 void *chainToText_to_file(chain *ch, uint8_t parts);
+
 int text2Chainz(FILE *fp, chain *ch);
+
+/* PROTOTYPE converting file2chainz */
 chain *file_2_chainz(FILE *fp);
+
+/* PROTOTYPEget the substring between needle_start and needle_end,
+ * allocate memory, copy contents over, return string
+ */
+char *indexes_of(char *haystack, char *needle_start,
+                 char *needle_end);
 
 /* compact the entire chain into x parts, using x threads
  * INPUT:
