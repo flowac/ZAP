@@ -10,7 +10,6 @@
 #include "lzma_wrapper.h"
 #include "C/LzmaEnc.h"
 
-
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
     //2 tabs
@@ -18,7 +17,7 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
     snprintf(buf, len, "\t{P\
 \n\t\tPinfo: %s,\
 \n\t\tPdn  : %s,\
-\n\t\tPlen : %lld,\
+\n\t\tPlen : %ld,\
 \n\t\tPxt  : %s,\
 \n\t\tPtr  : %s,\
 \n\tP},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
@@ -152,8 +151,8 @@ void *chainToText_to_file(chain *ch, uint8_t parts)
     return NULL;
 }
 
-char *indexes_of(char *haystack, char *needle_start,
-                 char *needle_end)
+char *indexes_of(char *haystack, const char *needle_start,
+                 const char *needle_end)
 {
     char *ptr_start = strstr(haystack, needle_start) + 2;
     char *ptr_end = strstr(haystack, needle_end);
@@ -172,7 +171,6 @@ pack *text2Pac(FILE *fp)
         *p_xl = NULL,
         *tr = NULL;
     uint64_t xl;
-    char test[512];
 
     pack *px = NULL;
 
@@ -311,7 +309,6 @@ int text2Chainz(FILE *fp, chain *ch)
     char s[MAX_U8 + 1];
     if (ch == NULL)
         return 0;
-    char *tmp = NULL;
     
     /* Parse the text searching for the start of a block
      *

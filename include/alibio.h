@@ -17,8 +17,8 @@ chain *file_2_chainz(FILE *fp);
 /* PROTOTYPEget the substring between needle_start and needle_end,
  * allocate memory, copy contents over, return string
  */
-char *indexes_of(char *haystack, char *needle_start,
-                 char *needle_end);
+char *indexes_of(char *haystack, const char *needle_start,
+                 const char *needle_end);
 
 /* compact the entire chain into x parts, using x threads
  * INPUT:
