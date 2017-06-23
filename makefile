@@ -24,7 +24,7 @@ endif
 all: extern torrent
 
 FLAGS += -O3
-FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
+FLAGS += -Wall -Wno-format -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
 #FLAGS += std=gnu++11
 ARGS_EXTERN = all
 #debug: FLAGS:=$(filter-out -O3,$(FLAGS))
