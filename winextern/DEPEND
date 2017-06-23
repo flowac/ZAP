@@ -15,7 +15,7 @@ https://www.openssl.org/source/openssl-1.0.2l.tar.gz
 Needs MinGW Msys package and perl to compile OpenSSL
 
 under msys shell:
-perl Configure mingw --prefix=/c/openssl
+perl Configure mingw --prefix=.
 make depend #might need to change to -march=native
 make
 make install
