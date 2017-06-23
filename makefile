@@ -3,6 +3,7 @@ PRG = test
 
 # for windows os
 ifneq ($(OS),Windows_NT)
+LIBS += -lrt
 RM    = rm -f
 CC    = g++
 CCX   = gcc
@@ -22,7 +23,8 @@ endif
 # default rule and rule shortcuts
 all: extern torrent
 
-#FLAGS += -O3
+FLAGS += -O3
+FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
 #FLAGS += std=gnu++11
 ARGS_EXTERN = all
 #debug: FLAGS:=$(filter-out -O3,$(FLAGS))
@@ -45,12 +47,9 @@ INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 # remove lrt later my work pc is retarded
-LIBS = -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
-LIBS += -lrt
+LIBS += -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
-
-FLAGS += -Wall -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
 
 # create executable
 torrent: $(OBJ)
@@ -95,3 +94,5 @@ clean: clean_local
 
 # clean local, extern and extra files
 clean_all: clean clean_files
+cf: clean_files
+c: clean_all
