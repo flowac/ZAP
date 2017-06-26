@@ -108,7 +108,7 @@ static int open_io_files(const char *in_path, const char*out_path,
         goto cleanup;
     }
     fd[1] = fopen(out_path, "w+");
-    if (fd[0] == NULL)  {
+    if (fd[1] == NULL)  {
         log_msg_default;
         goto cleanup;
     }
