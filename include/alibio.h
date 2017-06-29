@@ -4,7 +4,7 @@
 #include "atype.h"
 
 //No comment
-chain *chainExtractor(char *inFile);
+chain *chain_extractor(const char *inFile, uint8_t parts);
 
 /* convert chain to single file without compressing */
 void *chainToText_to_file(chain *ch, uint8_t parts);

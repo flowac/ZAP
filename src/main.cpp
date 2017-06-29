@@ -12,7 +12,7 @@
 #include <pthread.h>
 
 #define N_THREADS 5
-#define N_TEST_BLOCKS 10000
+#define N_TEST_BLOCKS 1000
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -142,15 +142,18 @@ void decompress_test()
 #endif
 
     chainToText_to_file(ch, 1);
+    chainCompactor(ch, N_THREADS);
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
-    FILE * fp = fopen("orig1.file", "r");
-    chain *tmp_chain = newChain();
-    text2Chainz(fp, tmp_chain);
-    chainToText_to_file(tmp_chain, 2);
-    printf("\nFree'd %lu bytes\n", deleteChain(tmp_chain) + sizeof(chain));
-    free(tmp_chain);
-    fclose(fp);
+    ch = chain_extractor("temp%s.file",5);
+    chainToText_to_file(ch, 2);
+    //FILE * fp = fopen("orig1.file", "r");
+    //chain *tmp_chain = newChain();
+    //text2Chainz(fp, tmp_chain);
+    //chainToText_to_file(tmp_chain, 2);
+    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
+    free(ch);
+    //fclose(fp);
 
 #ifndef WINDOWS
     clock_gettime(CLOCK_MONOTONIC, &tmp2);//End

@@ -17,7 +17,7 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
     snprintf(buf, len, "\t{P\
 \n\t\tPinfo: %s,\
 \n\t\tPdn  : %s,\
-\n\t\tPlen : %ld,\
+\n\t\tPlen : %lld,\
 \n\t\tPxt  : %s,\
 \n\t\tPtr  : %s,\
 \n\tP},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
@@ -106,7 +106,7 @@ void *chainToText(void *args)
     fclose(fp);
     free(buf);
     
-    compress_file(tmp);
+    //compress_file(tmp);
     
     return NULL;
 }
@@ -382,7 +382,21 @@ bool chainCompactor(chain *ch, uint8_t parts)
 }
 
 //  return 1 for success, 0 for failure
-chain *chainExtractor(char *inFile, uint8_t parts)
+/* Right now dont worry about compressing/decompressing
+ */
+chain *chain_extractor(const char *inFile, uint8_t parts)
 {
-    return NULL;
+    char buffy[69];
+    chain *ch = newChain();
+    FILE *fp = NULL;
+    for (int i = 1; i <= parts; i++){
+        sprintf(buffy,"temp%d.file",i);
+        fp = fopen(buffy, "r");
+        if (fp == NULL){
+            log_msg_default;
+            continue;
+        }
+        text2Chainz(fp, ch);
+    }
+    return ch;
 }

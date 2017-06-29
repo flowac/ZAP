@@ -69,6 +69,7 @@ wrap:
 clean_files:
 	$(RM) log
 	$(RM) temp*.*
+	$(RM) orig*.*
 
 ifneq ($(OS),Windows_NT)
 clean_ODIR = $(ODIR)/*.o
