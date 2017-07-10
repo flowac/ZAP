@@ -100,14 +100,14 @@ static size_t write_data(void *p, const void *data, size_t data_len)
 static int open_io_files(const char *in_path, const char*out_path,
                          FILE *fd[])
 {
-    fd[0] = fopen(in_path, "r");
+    fd[0] = fopen(in_path, "rb");
     if (fd[0] == NULL)  {
         char msg[60];
         snprintf(msg, 59, "\nOpening [%s] failed\n", in_path);
         log_msg_custom(msg);
         goto cleanup;
     }
-    fd[1] = fopen(out_path, "w+");
+    fd[1] = fopen(out_path, "wb+");
     if (fd[1] == NULL)  {
         log_msg_default;
         goto cleanup;
