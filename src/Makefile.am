@@ -39,4 +39,4 @@ main.cpp \
 ssl_fn.cpp \
 time_fn.cpp
 
-test_LDADD = $(top_srcdir)/lib/lib7z.a
+test_LDADD = ../extern/7z/lib7z.a

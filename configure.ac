@@ -22,14 +22,10 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lcrypto':
-AC_CHECK_LIB([crypto], [SHA1_Final], echo "Error: Requires library crypto 1.0.0 or later" && exit 1)
-# FIXME: Replace `main' with a function in `-lssl':
-AC_CHECK_LIB([ssl], [SHA1_Final], echo "Error: Requires library ssl 1.0.0 or later && exit 1)
-# FIXME: Replace `main' with a function in `-lpthread':
-AC_CHECK_LIB([pthread], [pthread_create], echo "Error: Requires library pthread 2.15 or later" && exit 1)
-# FIXME: Replace `main' with a function in `-lrt':
-AC_CHECK_LIB([rt], [pthread_create], echo "Error: Requires library rt 2.15 or later" && exit 1)
+AC_CHECK_LIB([crypto], [SHA1_Final], [], [AC_MSG_ERROR([Error: Requires library crypto 1.0.0 or later])])
+AC_CHECK_LIB([ssl], [SHA1_Final], [], [AC_MSG_ERROR([Error: Requires library ssl 1.0.0 or later])])
+AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([Error: Requires library pthread 2.15 or later])])
+AC_CHECK_LIB([rt], [pthread_create], [], [AC_MSG_ERROR([Error: Requires library rt 2.15 or later])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stddef.h stdint.h stdlib.h string.h])
