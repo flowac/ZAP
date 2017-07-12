@@ -6,11 +6,14 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#ifndef WINDOWS
-#include <linux/limits.h>
-#else
+#ifdef WINDOWS
 #include <limits.h>
-#endif
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif//PATH_MAX
+#else
+#include <linux/limits.h>
+#endif//WINDOWS
 
 /* include */
 #include "lzma_wrapper.h"
@@ -101,23 +104,19 @@ static int open_io_files(const char *in_path, const char*out_path,
                          FILE *fd[])
 {
     fd[0] = fopen(in_path, "rb");
-    if (fd[0] == NULL)  {
-        char msg[60];
-        snprintf(msg, 59, "\nOpening [%s] failed\n", in_path);
-        log_msg_custom(msg);
-        goto cleanup;
-    }
     fd[1] = fopen(out_path, "wb+");
-    if (fd[1] == NULL)  {
-        log_msg_default;
+    if (!fd[0] || !fd[1])  {
+        char msg[60];
+        snprintf(msg, 59, "\nOpening [%s] failed\n", fd[0] ? out_path : in_path);
+        log_msg_custom(msg);
         goto cleanup;
     }
     return 1;
 
  cleanup:
-    if (fd[0] != NULL)
+    if (fd[0])
         fclose(fd[0]);
-    if (fd[1] != NULL)
+    if (fd[1])
         fclose(fd[1]);
     return 0;
 }

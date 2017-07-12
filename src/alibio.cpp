@@ -106,7 +106,7 @@ void *chainToText(void *args)
     fclose(fp);
     free(buf);
     
-    //compress_file(tmp);
+    compress_file(tmp);
     
     return NULL;
 }
@@ -170,7 +170,7 @@ pack *text2Pac(FILE *fp)
         *xt = NULL,
         *p_xl = NULL,
         *tr = NULL;
-    uint64_t xl;
+    uint64_t xl = 0;
 
     pack *px = NULL;
 
