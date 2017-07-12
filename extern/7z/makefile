@@ -2,17 +2,14 @@ debug: CFLAGS += -g -DDEBUG
 debug: all
 PROG = lib7z
 
-ifneq ($(OS),Windows_NT)
-RM    = rm -f
 AR    = ar rcs
 CXX   = g++
 CXX_C = gcc
+
+ifneq ($(OS),Windows_NT)
+RM    = rm -f
 else
 RM    = del
-CCDIR = C:\MinGW\bin
-AR    = $(CCDIR)\ar rcs
-CXX   = $(CCDIR)\g++
-CXX_C = $(CCDIR)\gcc
 CFLAGS += -D_WIN32
 endif
 
