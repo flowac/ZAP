@@ -6,11 +6,14 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#ifndef WINDOWS
-#include <linux/limits.h>
-#else
+#ifdef WINDOWS
 #include <limits.h>
-#endif
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif//PATH_MAX
+#else
+#include <linux/limits.h>
+#endif//WINDOWS
 
 /* include */
 #include "lzma_wrapper.h"
@@ -100,24 +103,20 @@ static size_t write_data(void *p, const void *data, size_t data_len)
 static int open_io_files(const char *in_path, const char*out_path,
                          FILE *fd[])
 {
-    fd[0] = fopen(in_path, "r");
-    if (fd[0] == NULL)  {
+    fd[0] = fopen(in_path, "rb");
+    fd[1] = fopen(out_path, "wb+");
+    if (!fd[0] || !fd[1])  {
         char msg[60];
-        snprintf(msg, 59, "\nOpening [%s] failed\n", in_path);
+        snprintf(msg, 59, "\nOpening [%s] failed\n", fd[0] ? out_path : in_path);
         log_msg_custom(msg);
-        goto cleanup;
-    }
-    fd[1] = fopen(out_path, "w+");
-    if (fd[1] == NULL)  {
-        log_msg_default;
         goto cleanup;
     }
     return 1;
 
  cleanup:
-    if (fd[0] != NULL)
+    if (fd[0])
         fclose(fd[0]);
-    if (fd[1] != NULL)
+    if (fd[1])
         fclose(fd[1]);
     return 0;
 }
@@ -204,7 +203,10 @@ int compress_file(const char *in_path,
                            out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("compressing %s -> %s\n", in_path, out_path_local);
+    char msg[200];
+    snprintf(msg, 199, "  compressing %s -> %s\n", in_path, out_path_local);
+    std::cout << msg;
+    
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;
@@ -229,7 +231,10 @@ int decompress_file(const char *in_path,
                              out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("decompressing %s -> %s\n", in_path, out_path_local);
+    char msg[200];
+    snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
+    std::cout << msg;
+    
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;

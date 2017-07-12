@@ -170,8 +170,8 @@ int main()
 //    log_test();
 //    chain_test();//Depreciated
 //    zip_test();
-//    chain_test();
-    decompress_test();
+    chain_test();
+//    decompress_test();
 //    sha1_test();
 
     //std::cout.imbue(std::locale());//Might be usefull to remove valgrind false positives
