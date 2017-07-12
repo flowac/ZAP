@@ -203,7 +203,10 @@ int compress_file(const char *in_path,
                            out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("compressing %s -> %s\n", in_path, out_path_local);
+    char msg[200];
+    snprintf(msg, 199, "  compressing %s -> %s\n", in_path, out_path_local);
+    std::cout << msg;
+    
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;
@@ -228,7 +231,10 @@ int decompress_file(const char *in_path,
                              out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    printf("decompressing %s -> %s\n", in_path, out_path_local);
+    char msg[200];
+    snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
+    std::cout << msg;
+    
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;

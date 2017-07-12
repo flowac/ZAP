@@ -1,4 +1,4 @@
-debug: CFLAGS += -g
+debug: CFLAGS += -g -DDEBUG
 debug: all
 PROG = lib7z
 
@@ -23,7 +23,7 @@ ODIR = ./obj
 SDIR = ./C
 IDIR = ./C
 
-CFLAGS += -c -DDEBUG
+CFLAGS += -c
 
 OBJS = \
   Alloc.o \
