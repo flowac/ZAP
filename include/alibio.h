@@ -1,3 +1,7 @@
+/**
+ * @file alibio.h
+ * @brief Functions that deal with i/o of the chain
+ */
 #ifndef _ALIBIO_H
 #define _ALIBIO_
 
@@ -6,48 +10,79 @@
 //No comment
 chain *chain_extractor(const char *inFile, uint8_t parts);
 
-/* convert chain to single file without compressing */
-void *chainToText_to_file(chain *ch, uint8_t parts);
+/**
+ * @brief Convert chain to single file without compressing
+ *
+ * ChainToText writes to file and compresses this function will not.
+ * This fn is probably just a temp addition will be removed later
+ */
+void *chainToText_to_file(chain *ch, //!< chain to be printed
+                          uint8_t parts //!< number of files to split into
+                          );
 
-int text2Chainz(FILE *fp, chain *ch);
+/**
+ * @brief Read from a file and convert to a chain struct
+ */
+int text2Chainz(FILE *fp, //!< FP to the file to read in
+                chain *ch /**< Destination of the chain, must be a
+                             valid pointer*/
+                );
 
-/* PROTOTYPE converting file2chainz */
+/**
+ * @brief PROTOTYPE converting file2chainz
+ */
 chain *file_2_chainz(FILE *fp);
 
-/* PROTOTYPEget the substring between needle_start and needle_end,
+/**
+ * @brief PROTOTYPE get a substring
+ *
+ * Find the substring between needle_start and needle_end,
  * allocate memory, copy contents over, return string
  */
-char *indexes_of(char *haystack, const char *needle_start,
-                 const char *needle_end);
+char *indexes_of(char       *haystack, //!< The string to search through
+                 const char *needle_start, //!< Starting needle
+                 const char *needle_end //!< Ending needle
+                 );
 
-/* compact the entire chain into x parts, using x threads
- * INPUT:
- * chain *ch - self explanitory
- * uint8_t parts - number of threads to use and
- * also the number of files to split the info into
+/**
+ * @brief compact the entire chain into x parts, using x threads
+ * 
  */
-bool chainCompactor(chain *ch, uint8_t parts = 1);
+bool chainCompactor(chain *ch, //!< Chain to be compacted
+                    uint8_t parts = 1 /**< Number of threads to use 
+                                         also the number of files to
+                                         split the info into */
+                    );
 
-/* convert struct block to text, each block begins with {B and ends
- * with }.
- * INPUT:
- * block *bx - the block to be printed
- * FILE *fp - file pointer to text file (change this to
+/**
+ * @brief convert struct block to text
+ *
+ * Each block begins with {B and ends with }.
+ * 
+ * @param fp - file pointer to text file (change this to
  * a stream in the future ?)
- * char *buf - a buffer that will be used to hold data
- * int len - length of the buffer
  */
-void blockToText(block *bx, FILE *fp, char *buf, int len);
+void blockToText(block *bx, //!< The block to be printed
+                 FILE *fp, //!< File pointer to destination
+                 char *buf, //!< Buffer to hold data
+                 int len //!< Length of the buffer
+                 );
 
-/* convert a struct tran to to text, each text tran will begin
- * with {t and end with }
+/**
+ * @brief convert a struct tran to to text
+ *
+ * Each text tran will begin with {t and end with }
  * INPUT:
  * train *tx - the struct tran to be printed
  * FILE *fp - file pointer to text file to write to
  * char *buf - buffer that will be used to put the tran data
  * int len - length of buf
  */
-void tranToText(tran *tx, FILE *fp, char *buf, int len);
+void tranToText(tran *tx, //!<
+                FILE *fp, //!<
+                char *buf, //!<
+                int len //!<
+                );
 
 /* convert a struct pack to text, each text pack will begin
  * with {p and end with }
