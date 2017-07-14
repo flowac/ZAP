@@ -7,8 +7,19 @@
 
 #include "atype.h"
 
-//No comment
-chain *chain_extractor(const char *inFile, uint8_t parts);
+/**
+ * @brief Extract a chain from a text file(s)
+ *
+ * Currently doesnt support decompression, not that much effort to
+ * add that in though.
+ *
+ * This function will take a string argument that will be the base for
+ * the files, i.e temp\%d.file, it will substitute parts in to make
+ * temp1.file, temp2.file etc... Should improve this in the future.
+ */
+chain *chain_extractor(const char *inFile, //!< String to filename (not working rn)
+                       uint8_t parts //!< Number of files
+                       );
 
 /**
  * @brief Convert chain to single file without compressing
@@ -72,33 +83,31 @@ void blockToText(block *bx, //!< The block to be printed
  * @brief convert a struct tran to to text
  *
  * Each text tran will begin with {t and end with }
- * INPUT:
- * train *tx - the struct tran to be printed
- * FILE *fp - file pointer to text file to write to
- * char *buf - buffer that will be used to put the tran data
- * int len - length of buf
  */
-void tranToText(tran *tx, //!<
-                FILE *fp, //!<
-                char *buf, //!<
-                int len //!<
+void tranToText(tran *tx, //!< Struct tran to be printed
+                FILE *fp, //!< Fp to destination
+                char *buf, //!< Buffer used to print data
+                int len //!< Length of buf
                 );
 
-/* convert a struct pack to text, each text pack will begin
- * with {p and end with }
- * INPUT:
- * pack *pk - struct pack to be printed
- * FILE *fp - file pointer to text file to write to
- * char *buf - buffer that will be used to put the pack data
- * int len - length of the buffer
+/**
+ * @brief Convert a struct pack to text
+ *
+ * Each text pack will begin with {p and end with }
  */
-void packToText(pack *pk, FILE *fp, char *buf, int len);
+void packToText(pack *pk, //!< Struct pack to be printed
+                FILE *fp, //!< Fp to destination
+                char *buf, //!< Buffer used to print data
+                int len //!< Length of buffer
+                );
 
-/* A thread start routing that will convert x number of blocks
- * to text, it will print the blocks from struct
- * threadParams.start to struct threadparams.end
- * INPUT:
- * void *args - usually will be struct threadparams
+/**
+ * @brief A thread start routine
+ *
+ * This fn will convert x number of blocks to text, it will
+ * print the blocks from struct threadParams.start to struct
+ * threadparams.end
  */
-void *chainToText(void *args);
+void *chainToText(void *args //!< Arguments to pass the thread fn
+                  );
 #endif//_ALIBIO_H

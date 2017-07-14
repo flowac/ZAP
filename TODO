@@ -16,4 +16,5 @@ FUTURE GOALS
     Add AGPL v3 headers to everything including external libraries when possible
 
 FOR DALJIT:
-********* move comments over to doxygen
+**Make log macros thread safe  (strerror_s ?)
+*Move comments over to doxygen
