@@ -14,8 +14,8 @@ lib7z_a_SOURCES=\
 C/7zTypes.h \
 C/Alloc.c \
 C/Alloc.h \
-C/lzFind.c \
-C/lzFind.h \
+C/LzFind.c \
+C/LzFind.h \
 C/LzmaDec.c \
 C/LzmaDec.h \
 C/LzmaEnc.c \

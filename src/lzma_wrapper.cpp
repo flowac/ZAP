@@ -1,3 +1,7 @@
+/**
+ * @file lzma_wrapper.cpp
+ * @brief Implementation of lzma Library wrapper
+ */
 #include <iostream>
 #include <fstream>
 #include <ios>
@@ -25,48 +29,62 @@
 #include "C/LzmaEnc.h"
 #include "C/LzmaDec.h"
 
-#define LZMA_PROPS_SIZE_FILESIZE LZMA_PROPS_SIZE + 8
-
-/* function implementation for struct ISzAlloc 
+/**
+ * @brief Function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
+ *
+ * @return Returns a ptr allocated space
  */
-
-static void *SzAlloc(void *p, size_t size)
+static void *SzAlloc(void *p, //!< Not implemented
+                     size_t size //!< Amount to malloc
+                     )
 {
     (void)p; // silence unused var warning
     return MyAlloc(size); // just a malloc call...
 }
 
-/* function implementation for struct ISzAlloc 
+/**
+ * @brief Function implementation for struct ISzAlloc 
  * see examples in LzmaUtil.c and C/alloc.c
  */
-static void SzFree(void *p, void *address)
+static void SzFree(void *p, //!< Not implemented
+                   void *address //!< Ptr to where we will call free
+                   )
 {
     (void)p; // silence unused var warning
     MyFree(address); // just a free call ... 
 }
 
+/** @brief Struct implementation */
 ISzAlloc g_Alloc = {SzAlloc, SzFree};
 
-/* Read raw data from a filedescriptor
+/**
+ * @brief Read raw data from a filedescriptor
  * INPUT:
- * FILE *fd - file descriptor
- * unsigned char *data - buffer that will hold the read
- * data
- * size_t *data_len - the size of the read data, this will
- * also indicate when we have reached the end of the file
- * OUTPUT:
- * size of data read
+ * @return
+ * Size of data read\n
+ * @p data Will contain the information read from fd
  */
-static size_t my_read_data(FILE *fd, void *data, size_t data_len)
+static size_t my_read_data(FILE *fd, //!< Fd to input
+                           void *data, //!< Buf to hold data
+                           size_t data_len //!< Size to read, also indicates if the file is done being read
+                           )
 {
     if (data_len == 0)
         return 0;
     return fread(data, sizeof(unsigned char), data_len, fd);
 }
 
-/* implementation of ISeqoutstream->read */
-static int read_data(void *p, void *data, size_t *data_len)
+/** @brief Implementation of ISeqoutstream->read
+ *
+ * @return
+ * Currently only @c SZ_OK will change later, for valule see 7zTypes.h
+ * @p data Will contain the information read from @p p->fd
+ */
+static int read_data(void *p, /**< Ptr to a seq_in_stream*/
+                     void *data, /**< Buffer for data*/
+                     size_t *data_len /**< Amount of data to be read*/
+                     )
 {
     if (*data_len == 0)
         return SZ_OK;
@@ -74,34 +92,44 @@ static int read_data(void *p, void *data, size_t *data_len)
         return SZ_OK;
 }
 
-/* write raw data to a filedescriptor
- * INPUT:
- * FILE *fd - file descriptor
- * unsigned char *data - buffer holds the data
- * size_t *data_len - the size of the data buffer
- * OUTPUT:
- * number of bytes written
+/** @brief Write raw data to a filedescriptor
+ * 
+ * @return
+ * Number of bytes written
  */
-static size_t my_write_data(FILE *fd, const void *data, size_t data_len)
+static size_t my_write_data(FILE *fd, //!< Fp to dest
+                            const void *data, //!< Data to write
+                            size_t data_len //!< Size of @p data 
+                            ) 
 {
     if (data_len == 0)
         return 0;
     return fwrite(data, sizeof(unsigned char), data_len, fd);
 }
 
-/* implementation of ISeqinstream->write */
-static size_t write_data(void *p, const void *data, size_t data_len)
+/** @brief implementation of ISeqinstream->write
+ *
+ * @return
+ * Number of bytes written
+ */
+static size_t write_data(void *p, //!< ptr to \link seq_out_stream \endlink
+                         const void *data, //!< Data to write
+                         size_t data_len //!< Size of @p data
+                         )
 {
     return my_write_data(((seq_out_stream *)p)->fd, data, data_len );
 }
 
-/* Open two files, one for input one for output
- * INPUT:
- * const char *in_path - path to input file
- * const char *out_path - path to output file
+/** @brief Open two files, one for input one for output
+ *
+ * @return
+ * 1 - success \n
+ * 0 - failure
  */
-static int open_io_files(const char *in_path, const char*out_path,
-                         FILE *fd[])
+static int open_io_files(const char *in_path, //!< Input path
+                         const char*out_path, //!< Output path
+                         FILE *fd[] //!< Array of FP, should change to individual Fps
+                         )
 {
     fd[0] = fopen(in_path, "rb");
     fd[1] = fopen(out_path, "wb+");
@@ -121,10 +149,20 @@ static int open_io_files(const char *in_path, const char*out_path,
     return 0;
 }
 
-/* read the prop, the following 8 bits hold the file
- * uncompressed size, get those in little endian form
+/** @brief Get params of the 7z file
+ *
+ * Read the prop of the 7z file and then read the following 8 bits that
+ * hold the file uncompressed size, these are stored in little endian
+ *
+ * @return
+ * @p props_header Will contain the prop\n
+ * Will return the size of the file\n
+ * 0 - on failure (not implemented)
  */
-static unsigned long get_header(FILE *fd, unsigned char *props_header, size_t len)
+static unsigned long get_header(FILE *fd, //!< Fp to 7z file
+                                unsigned char *props_header, //!< Buf to hold the prop
+                                size_t len //*< Size of the prop
+                                )
 {
     unsigned long rt = 0; // return val (file size)
     if (len != my_read_data(fd, props_header, len))
@@ -137,8 +175,10 @@ static unsigned long get_header(FILE *fd, unsigned char *props_header, size_t le
     return rt;
 }
 
-/* update the props values with what was passed */
-static void assign_prop_vals(CLzmaEncProps *prop_info, const CLzmaEncProps *args)
+/** @brief update the props values with what was passed */
+static void assign_prop_vals(CLzmaEncProps *prop_info, //!< Prop to update
+                             const CLzmaEncProps *args //!< Prop with updated vals
+                             )
 {
     prop_info->level = args->level;
     prop_info->dictSize = args->dictSize;
@@ -155,12 +195,18 @@ static void assign_prop_vals(CLzmaEncProps *prop_info, const CLzmaEncProps *args
     prop_info->numThreads = args->numThreads;
 }
 
-/* set the outputs file name by concatting .7z to
+/** @brief Set the outputs file name for compression
+ *
+ * If out_path is null it will set the output name by concatting .7z to
  * input name, this is for compression only
+ *
+ * @return
+ * @p out_path_local will hold the correct out_path
  */
-static void set_comp_out_file_name(const char *in_path,
-                              const char *out_path,
-                              char *out_path_local)
+static void set_comp_out_file_name(const char *in_path, //!< Input path
+                                   const char *out_path, //!< Output path
+                                   char *out_path_local //!< Output path after fn call
+                                   )
 {
     if (out_path == NULL)
         snprintf(out_path_local, PATH_MAX,
@@ -170,12 +216,18 @@ static void set_comp_out_file_name(const char *in_path,
                  "%s", out_path);
 }
 
-/* set the outputs file name by putting a string
+/** @brief Set the output filename for decompression
+ *
+ * If out_path is null set the output file name by putting a string
  * terminator where .7z is
+ *
+ * @return
+ * @p out_path_local will hold the correct output path
  */
-static void set_decomp_out_file_name(const char *in_path,
-                              const char *out_path,
-                              char *out_path_local)
+static void set_decomp_out_file_name(const char *in_path, //!< Input path
+                                     const char *out_path, //!< Output path
+                                     char *out_path_local //!< Output path after fn call
+                                     )
 {
     if (out_path == NULL) {
         snprintf(out_path_local, PATH_MAX,

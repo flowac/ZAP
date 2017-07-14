@@ -1,0 +1,16 @@
+The documentation only covers code that we have written, libtorrent has
+its own documentation and lzma has comments in the library.
+
+To compile the documentation you need:
+doxygen
+
+To compile:
+doxygen Doxyfile
+
+This will create a dir tree:
+docs
+  |->html
+      |-> *.html
+
+To create man pages/latex see https://www.stack.nl/~dimitri/doxygen/manual/starting.html for more details.
+

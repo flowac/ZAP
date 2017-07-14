@@ -1,46 +1,56 @@
+/**
+ * @file atype.h
+ * @brief File containing some struct definitions for the coin
+ *
+ * The structs in this file mainly relate to the alib functions,
+ * they also define the coin's structure.
+ */
+
 #ifndef _ATYPE_H
 #define _ATYPE_H
 
-//#include <boost/cstdint.hpp>
+                     //#include <boost/cstdint.hpp>
 #include <stdint.h>
 
-#define LOG     0
-#define MAX_U8  255U//max size of unsigned 8 bit int
-#define MAX_U16 65535U
-#define MAX_U32 4294967295UL
+#define LOG 0                   //!< not sure
 
-/*typedef unsigned char     uint8_t;
-typedef unsigned short    uint16_t;
-typedef unsigned int      uint32_t;
-typedef unsigned long int uint64_t;*/
+#define MAX_U8   255U           //!< max size of an u8 bit int
+#define MAX_U16  65535U         //!< max size of u16 int
+#define MAX_U32  4294967295UL   //!< maz size of a u32 int
 
+/*
+ * typedef unsigned char     uint8_t;
+ * typedef unsigned short    uint16_t;
+ * typedef unsigned int      uint32_t;
+ * typedef unsigned long int uint64_t;*/
+
+/**
+ * @brief not sure
+ */
 enum Link
 {
-    DN = 0,//display name
-    XL,    //exact length
-    XT,    //exact topic
-    TR,    //address tracker
-    MLEN//number of total parameters, must be last
+    DN = 0,          //!< display name
+    XL,              //!< exact length
+    XT,              //!< exact topic
+    TR,              //!< address tracker
+    MLEN             //!< number of total parameters, must be last
 };
 
-/* This struct will hold the information on the parameters of
- * the magnet link
- * PARAMETERS:
- * info - 
- * dn - (display name) i.e. file name
- * xl - (exact length) size of file in bytez
- * xt - (exact topic) URN with the hash of the file
- * tr - tracker url, google "tracker url" for more info
+/**
+ * @brief Holds information about the parameters of the magnet link
  */
 typedef struct
 {
-    char info[6];//first 5 characters of name, null terminated
-    char *dn; // display name
-    uint64_t xl; // exact length
-    char *xt; // exact topic
-    char *tr; // address tracker
+    char info[6];    //!< first 5 characters of name, null terminated
+    char *dn;        //!< display name, filename
+    uint64_t xl;     //!< exact length, size of file in bytez
+    char *xt;        //!< exact topic, URN with hash of file
+    char *tr;        //!< address tracker, tracker url
 }pack;
 
+/**
+ * @brief Holds information about a transaction
+ */
 typedef struct
 {
     uint32_t time;
@@ -51,37 +61,39 @@ typedef struct
     uint64_t key;
 }tran;
 
-typedef struct
-{
-    uint32_t time;//epoch seconds
-    uint32_t crc;//checksum
-    uint16_t nPack;//number of payloads, 255 per block max
-    uint16_t nTran;//number of transactions
-    uint32_t n;//block number
-    uint64_t key;//gen next
-    pack **packs;//variable size
-    tran **trans;
-}block;
-
-/* The blockchain structure
- * PARAMETERS:
- * uint32_t time - time of the last update
- * uint32_t size - number of blocks
- * block **head - dynamic array of blocks
+/**
+ * @brief Holds information about a block
  */
 typedef struct
 {
-    uint32_t time;//time of last update
-    uint32_t size;//4 billion should be more than enough
-    block **head;//expandable
+    uint32_t time;  //!< epoch seconds
+    uint32_t crc;   //!< checksum
+    uint16_t nPack; //!< number of payloads, 255 per block max
+    uint16_t nTran; //!< number of transactions
+    uint32_t n;     //!< block number
+    uint64_t key;   //!< gen next
+    pack **packs;   //!< variable size
+    tran **trans;
+}block;
+
+/**
+ * @brief The blockchain structure
+ */
+typedef struct
+{
+    uint32_t time;  //!< time of last update
+    uint32_t size;  //!< Number of blocks, 4 bil max
+    block **head;   //!< expandable, dynamic array of blocks
 }chain;
 
-/* @ FLOWING WATER can u comment this hsit when u make it ? */
+/**
+ * @brief Struct holding values for pthread fn call
+ */
 typedef struct{
-    uint32_t i; /* current block num? */
-    block **head; /* head of the block chain */
-    uint32_t start; /* starting block num */
-    uint32_t end; /* ending block num */
+    uint32_t   i;               //!<  current block num
+    block    **head;            //!<  head of the block chain
+    uint32_t   start;           //!<  starting block num 
+    uint32_t   end;             //!<  ending block num 
 }threadParams;
 
 #endif//_ATYPE_H

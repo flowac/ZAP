@@ -2,17 +2,19 @@ More * = more priority
 
 ****Fix 7z for windows, read DEPEND in winextern for instructions
 
+CURRENT
 *** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
 |-> transmission 
-*   Clean up compression implementation
-*   Comment alib.h alibio.h
+**   Clean up compression implementation
+* move comments over to Doxygen
+* work on configure script
+
+FUTURE GOALS
 *   Test magnet link structure
 *   Test RAM usage
     Create a simple search engine (or just copy pasta some google's open source code)
     Add AGPL v3 headers to everything including external libraries when possible
 
 FOR DALJIT:
-*** comment allans functions
-*** work on compiling for windows
-**  Get KF2
-*   Stop slacking
+**Make log macros thread safe  (strerror_s ?)
+*Move comments over to doxygen

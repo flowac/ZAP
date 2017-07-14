@@ -1,3 +1,10 @@
+/**
+ * @file alib.h
+ * @brief Functions that deal with the initialization of
+ * the block structure
+ *
+ * Essentially just cleanup/init functions
+ */
 #ifndef _ALIB_H
 #define _ALIB_H
 
@@ -14,56 +21,76 @@
 
 //namespace pt = boost::posix_time;
 
-/* Get current time
- * DESCRIPTION:
+/**
+ * @brief Get current time
+ *
  * Get the current time in seconds since Epoch
  */
 inline time_t sNow();
 
-block *restore_block(uint32_t time, uint32_t crc, uint16_t n_pack,
-                     uint16_t n_tran, uint32_t n, uint64_t key,
-                     pack **packs);
+block *restore_block(uint32_t     time,
+                         uint32_t crc,
+                         uint16_t n_pack,
+                         uint16_t n_tran,
+                         uint32_t n,
+                         uint64_t key,
+                         pack **packs
+                         );
 
-inline void printTime(time_t time);
+/**
+ * @brief Print current time
+ */
+inline void printTime(time_t time //!< The time to be printed.
+);
 
-/* This function will print the relative information of a block
- * DESCRIPTION:
+/**
+ * @brief This function will print the relative information of a block
+ * 
  * it will print the:
  *	time (when the block was created)
- *	key (whatever that mean @alien)
+ *	key (Unique identifier)
  *	number of payloads
  */
-void printBlock(block *target);
+void printBlock(block *target //!< The block to be printed
+);
 
-/* Create a new pack (magnet link info)
- * DESCRIPTION:
- * it will allocate a pack struct, and all of its parameters
- * INPUT:
- * char * dn - display name
- * uint64_t xl - exact length (size in bytez)
- * char * xt - exact topic (URN with hash of file)
- * char * tr - tracker url
- * RETURN:
- * NULL - something went wrong :( (malloc failed)
+/**
+ * @brief Create a new pack (magnet link info)
+ * 
+ * This fn will allocate a pack struct, and all of its parameters
+ * @return NULL - something went wrong :( (malloc failed) \n
  * ptr to new pack struct
  */
-pack *newPack(char *dn, uint64_t xl, char *xt, char *tr);
+pack *newPack(char         *dn, //!< Display name
+                  uint64_t  xl, //!< Exact length (size in bytez)
+                  char     *xt, //!< exact topic (URN with hash of file)
+                  char *tr      //!< tracker url
+                  );
 
 tran *newTran();
 
-/* Create a new block
- * DESCRIPTION:
+/**
+ * @brief Create a new block
  * 
  */
-block *newBlock(uint32_t n, uint64_t key, uint32_t nPack, pack **packs);
+block *newBlock(uint32_t n,
+                    uint64_t key,
+                    uint32_t nPack,
+                    pack **packs
+                    );
 
 chain *newChain(void);
 
 //! return 1 on success
-bool insertBlock(block *bx, chain *ch);
+bool insertBlock(block *bx,
+                     chain *ch
+                     );
 
-uint32_t deletePack(pack *target);
-uint32_t deleteChain(chain *target);
+uint32_t deletePack(pack *target
+);
+
+uint32_t deleteChain(chain *target
+);
 
 #endif//_ALIB_H
 
