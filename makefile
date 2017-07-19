@@ -6,8 +6,6 @@ CCX   = gcc -std=c11
 # for windows os
 ifeq ($(OS),Windows_NT)
 RM    = C:\MinGW\msys\1.0\bin\rm.exe -f
-CC   += -DWINDOWS
-CCX  += -DWINDOWS
 SSL   = winextern\openssl
 BOOST = winextern\boost
 else

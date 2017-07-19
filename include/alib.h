@@ -15,7 +15,7 @@
 #include <time.h>
 #include <stdio.h>
 
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <Windows.h>
 #endif
 

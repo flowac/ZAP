@@ -109,16 +109,16 @@ void chain_test()
     
     printf("Compressing\n");
     uint32_t tmp;
-#ifndef WINDOWS
+#ifdef _WIN32
+    tmp = GetTickCount();
+    chainCompactor(ch, N_THREADS);
+    tmp = GetTickCount() - tmp;
+#else
     struct timespec tmp1,tmp2;
     clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
     chainCompactor(ch, N_THREADS);
     clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
     tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
-#else
-    tmp = GetTickCount();
-    chainCompactor(ch, N_THREADS);
-    tmp = GetTickCount() - tmp;
 #endif
     printf("Took %d milliseconds\n", tmp);
     
@@ -134,11 +134,11 @@ void decompress_test()
     chain *ch = chain_gen(N_TEST_BLOCKS);
 
     uint32_t tmp;
-#ifndef WINDOWS
+#ifdef _WIN32
+    tmp = GetTickCount();
+#else
     struct timespec tmp1,tmp2;
     clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
-#else
-    tmp = GetTickCount();
 #endif
 
     chainToText_to_file(ch, 1);
@@ -155,11 +155,11 @@ void decompress_test()
     free(ch);
     //fclose(fp);
 
-#ifndef WINDOWS
+#ifdef _WIN32
+    tmp = GetTickCount() - tmp;
+#else
     clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
     tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
-#else
-    tmp = GetTickCount() - tmp;
 #endif
     printf("Took %d milliseconds\n", tmp);
     

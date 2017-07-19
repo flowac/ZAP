@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <limits.h>
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH

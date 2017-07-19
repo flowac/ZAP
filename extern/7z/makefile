@@ -4,7 +4,6 @@ CC   = gcc -O2 -Wall -Werror -IC -c
 
 ifeq ($(OS),Windows_NT)
 RM   = del
-CC  += -D_WIN32
 else
 RM   = rm -f
 endif
