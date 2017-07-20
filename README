@@ -5,12 +5,10 @@ In case of an external library requiring a different license, only the portions 
 If any user contributed code that is not in the form of an external library and can not be upgraded to AGPL v3, it shall be removed immediately
 
 
-You need: BOOST and libssl to compile
+make: Use the flag -j[150% Number of threads] to compile in parallel
 
-Creating etags:
-
-find . -name "*.c*" -or -name "*.h" | xargs etags
-
+-j6  for 4 Core  4 Threads (i5 scrub)
+-j24 for 8 Core 16 Threads (Ryzen 1700)
 
 
 
@@ -22,3 +20,7 @@ You need:   MinGW with GCC, G++, and MSYS,
 
 * makefile assumes MinGW\bin and MinGW\msys\1.0\bin are added to PATH
 * makefile assumes Boost and OpenSSL are under winextern with relative paths
+
+
+
+Creating etags: find . -name "*.c*" -or -name "*.h" | xargs etags
