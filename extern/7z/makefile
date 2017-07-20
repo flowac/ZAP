@@ -1,12 +1,5 @@
 PROG = lib7z
-
 CC   = gcc -O2 -Wall -Werror -IC -c
-
-ifeq ($(OS),Windows_NT)
-RM   = del
-else
-RM   = rm -f
-endif
 
 all:
 	$(CC) -o f1.o C/Alloc.c
@@ -17,4 +10,4 @@ all:
 	ar rcs ../../lib/$(PROG).a f1.o f2.o f3.o f4.o f5.o
 
 clean:
-	$(RM) *.o
+	rm -f *.o

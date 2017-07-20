@@ -7,8 +7,6 @@ If any user contributed code that is not in the form of an external library and 
 
 You need: BOOST and libssl to compile
 
-Don't valgrind the 7z library, it's really slow
-
 Creating etags:
 
 find . -name "*.c*" -or -name "*.h" | xargs etags
@@ -16,11 +14,11 @@ find . -name "*.c*" -or -name "*.h" | xargs etags
 
 
 
-WINDOWS:
-Tested with MinGW
+WINDOWS:    Tested with MinGW
+
 You need:   MinGW with GCC, G++, and MSYS, 
             Boost 1.63.0 or later
-            OpenSSL 1.0.21 or later
-            Perl
-makefile assumes gcc is at C:/MinGW/bin
-makefile assumes Boost and OpenSSL are under winextern with relative paths
+            OpenSSL 1.0.2L or later
+
+* makefile assumes MinGW\bin and MinGW\msys\1.0\bin are added to PATH
+* makefile assumes Boost and OpenSSL are under winextern with relative paths

@@ -3,14 +3,14 @@ PRG = test
 
 CC    = g++ -std=c++14
 CCX   = gcc -std=c11
+RM    = rm -f
+
 # for windows os
 ifeq ($(OS),Windows_NT)
-RM    = C:\MinGW\msys\1.0\bin\rm.exe -f
 SSL   = winextern\openssl
 BOOST = winextern\boost
 else
 LIBS += -lrt
-RM    = rm -f
 SSL   = /usr/include/openssl
 BOOST = /usr/include/boost
 endif
