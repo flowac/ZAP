@@ -3,6 +3,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "alib.h"
 #include "log.h"
@@ -151,11 +152,58 @@ void *chainToText_to_file(chain *ch, uint8_t parts)
     return NULL;
 }
 
+//returns number of bytes read (always higher than actual buf1 strlen)
+uint32_t read_struct(FILE *fp, char **buf1, char **buf2, uint32_t *len)
+{
+    if (!*len)  *len  = MAX_U8;
+    if (!*buf1) *buf1 = (char *)malloc(*len);
+    if (!*buf2) *buf2 = (char *)malloc(*len), memset(*buf2, 0, *len);
+    
+    memset(*buf1, 0, *len);
+    memcpy(*buf1, *buf2, *len);
+    memset(*buf2, 0, *len);
+    
+    char *buf3;
+    uint32_t lb1 = strlen(*buf1), red = 0;//strlen of buf1, bytes read
+    
+    while ( !(buf3 = strchr(*buf2, '}')) ) {//end brace not found
+        memset(*buf2, 0, *len);
+        if ( !(red = fread(*buf2, MAX_U6, 1, fp)) ) {
+            return lb1;//EOF
+        }
+        
+        if (lb1 + MAX_U6 > *len) {
+            //increase buffer size to prevent overflow
+            *len += MAX_U8;
+            assert(*len < MAX_U16);
+            
+            *buf1 = (char *)realloc(*buf1, *len);
+            *buf2 = (char *)realloc(*buf2, *len);
+        }
+        
+        memcpy(*buf1 + lb1, *buf2, red);
+        lb1 += red;
+    }
+    
+    // previous size + 1 +  buf1 + offset of '}' in buf2
+    buf3 = lb1 - red + 1 + *buf1 - *buf2 + buf3;//location of the ending brace
+    strcpy(*buf2, buf3);
+    *buf1[buf3 - *buf1 + 1] = 0;//terminate the brace
+    
+    return lb1;
+//boost::regex_search(buf,eReg);\
+buf2 = boost::regex_replace(buf2, convertReg2, pad, boost::format_first_only);
+}
+
+//DEPRECIATED
 char *indexes_of(char *haystack, const char *needle_start,
                  const char *needle_end)
 {
     char *ptr_start = strstr(haystack, needle_start) + 2;
     char *ptr_end = strstr(haystack, needle_end);
+    
+    assert(ptr_start && ptr_end);
+    
     int len = ptr_end - ptr_start;
     char *dest = (char *)malloc(sizeof(char)* len + 1); 
     dest[len] = '\0';

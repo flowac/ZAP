@@ -14,9 +14,10 @@
 
 #define LOG 0                   //!< not sure
 
-#define MAX_U8   255U           //!< max size of an u8 bit int
-#define MAX_U16  65535U         //!< max size of u16 int
-#define MAX_U32  4294967295UL   //!< maz size of a u32 int
+#define MAX_U6   63U            //!< max size of a  6 bit int
+#define MAX_U8   255U           //!< max size of an 8 bit int
+#define MAX_U16  65535U         //!< max size of a 16 bit int
+#define MAX_U32  4294967295UL   //!< maz size of a 32 bit int
 
 /*
  * typedef unsigned char     uint8_t;
