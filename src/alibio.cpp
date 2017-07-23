@@ -3,7 +3,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "alib.h"
 #include "log.h"
@@ -124,6 +123,7 @@ void *chainToText(chain *ch, uint8_t parts)
     return blockToText(&tp);
 }
 
+/*temporary not used
 //returns number of bytes read (always higher than actual buf1 strlen)
 uint32_t read_struct(FILE *fp, char **buf1, char **buf2, uint32_t *len)
 {
@@ -163,23 +163,25 @@ uint32_t read_struct(FILE *fp, char **buf1, char **buf2, uint32_t *len)
     *buf1[buf3 - *buf1 + 1] = 0;//terminate the brace
     
     return lb1;
-//boost::regex_search(buf,eReg);\
-buf2 = boost::regex_replace(buf2, convertReg2, pad, boost::format_first_only);
+//boost::regex_search(buf,eReg);
+//buf2 = boost::regex_replace(buf2, convertReg2, pad, boost::format_first_only);
 }
+*/
 
-//DEPRECIATED
+//To be DEPRECIATED
 char *indexes_of(char *haystack, const char *needle_start,
                  const char *needle_end)
 {
-    char *ptr_start = strstr(haystack, needle_start) + 2;
+    char *ptr_start = strstr(haystack, needle_start);
     char *ptr_end = strstr(haystack, needle_end);
     
-    assert(ptr_start && ptr_end);
+    if (! (ptr_start && ptr_end))
+        return NULL;
     
-    int len = ptr_end - ptr_start;
+    int len = ptr_end - ptr_start + 2;
     char *dest = (char *)malloc(sizeof(char)* len + 1); 
     dest[len] = '\0';
-    memcpy(dest, ptr_start, len);
+    memcpy(dest, ptr_start + 2, len);
     return dest;
 }
 
@@ -278,12 +280,12 @@ block *text2Block(FILE *fp)
                 case 'g': // block->time
                     tmp = indexes_of(data, ": ", ",");
                     time = atol(tmp);
-                    free(tmp);
+                    if (tmp) free(tmp);
                     break;
                 case 'c': // block->crc
                     tmp = indexes_of(data, ": ", ",");
                     crc = atol(tmp);
-                    free(tmp);
+                    if (tmp) free(tmp);
                     break;
                 case 'p': // block->nPack
                     /* n_pack is being counted in the other
@@ -291,22 +293,22 @@ block *text2Block(FILE *fp)
                      */
                     //tmp = indexes_of(data, ": ", ",");
                     //n_pack = atol(tmp);
-                    //free(tmp);
+                    //if (tmp) free(tmp);
                     break;
                 case 't': // block->nTran
                     tmp = indexes_of(data, ": ", ",");
                     n_tran = atol(tmp);
-                    free(tmp);
+                    if (tmp) free(tmp);
                     break;
                 case 'n': // block->n
                     tmp = indexes_of(data, ": ", ",");
                     n = atol(tmp);
-                    free(tmp);
+                    if (tmp) free(tmp);
                     break;
                 case 'k': // block->key
                     tmp = indexes_of(data, ": ", ",");
                     key = strtoll(tmp, NULL, 10);
-                    free(tmp);
+                    if (tmp) free(tmp);
                     break;
                 case '}':
                     new_block = restore_block(time, crc, n_pack,
