@@ -27,6 +27,7 @@ debug: FLAGS += -g
 debug: all
 
 .PHONY: extern
+
 # directory structure
 IDIR = include
 IDIR_EXTERN = extern/7z

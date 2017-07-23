@@ -11,8 +11,8 @@
 #include <string.h>
 #include <pthread.h>
 
-#define N_THREADS 5
-#define N_TEST_BLOCKS 1000
+#define N_THREADS 16
+#define N_TEST_BLOCKS 9000
 
 /* Test if ssl_fn.c create_sha1sum is working correctly
  *
@@ -43,8 +43,12 @@ void zip_test()
     compress_file("t2","t2.my7z", NULL);
 }
 
-chain *chain_gen(uint64_t size)
+chain *chain_gen(uint64_t size, bool trueRandom = false)
 {
+    if (!trueRandom)
+    {
+#define rand() (33)
+    }
     uint64_t i;
     uint16_t j, k, nPack;
     const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
@@ -128,6 +132,8 @@ void chain_test()
     uncompress_test();
 }
 
+//Obsolete
+/*
 void decompress_test()
 {
     printf("\nGenerating\n");
@@ -141,16 +147,16 @@ void decompress_test()
     clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
 #endif
 
-    chainToText_to_file(ch, 1);
+    chainToText(ch, 1);
     chainCompactor(ch, N_THREADS);
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
     ch = chain_extractor("temp%s.file",5);
-    chainToText_to_file(ch, 2);
+    chainToText(ch, 2);
     //FILE * fp = fopen("orig1.file", "r");
     //chain *tmp_chain = newChain();
     //text2Chainz(fp, tmp_chain);
-    //chainToText_to_file(tmp_chain, 2);
+    //chainToText(tmp_chain, 2);
     printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
     free(ch);
     //fclose(fp);
@@ -163,7 +169,7 @@ void decompress_test()
 #endif
     printf("Took %d milliseconds\n", tmp);
     
-}
+}*/
 
 int main()
 {

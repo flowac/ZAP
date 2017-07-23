@@ -68,7 +68,7 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
     fwrite(buf, 1, strlen(buf), fp);
 }
 
-void *chainToText(void *args)
+void *blockToText(void *args)
 {
     threadParams *tp = (threadParams *)args;
     uint8_t part =      tp->i;
@@ -112,44 +112,16 @@ void *chainToText(void *args)
     return NULL;
 }
 
-void *chainToText_to_file(chain *ch, uint8_t parts)
+//! fix the function name
+void *chainToText(chain *ch, uint8_t parts)
 {
-    uint8_t part =      parts;
-    block **head =      ch->head;
-    uint32_t start =    0;
-    uint32_t target =   ch->size;
-    //1 tab
-    char tmp[16];
-    snprintf(tmp, 15, "orig%u.file", part);
-    FILE *fp = fopen(tmp, "w");
-    
-    uint32_t i;
-    int len = 3000;
+    threadParams tp;
+    tp.i = parts;
+    tp.head = ch->head;
+    tp.start = 0;
+    tp.end = ch->size;
 
-    char *buf = (char *)malloc(sizeof(char) * (len + 1));
-    if (buf == NULL || fp == NULL) {
-        char msg[80];
-        snprintf(msg, 79, "\nCreating part [%u] failed, name [%s], pointer [%p][%d]\n",
-                part, tmp, fp, fp);
-        log_msg_custom(msg);
-        return NULL;
-    }
-    
-    snprintf(buf, len, "Ctime: %u,\nCsize: %u,\n", part, target);
-    
-    fwrite(buf, 1, strlen(buf), fp);
-    
-    for (i = start; i < target; i++) {
-        blockToText(head[i], fp, buf, len);
-    }
-    
-    strcpy(buf, "EOF\n");
-    fwrite(buf, 1, strlen(buf), fp);
-    
-    fclose(fp);
-    free(buf);
-    
-    return NULL;
+    return blockToText(&tp);
 }
 
 //returns number of bytes read (always higher than actual buf1 strlen)
@@ -421,7 +393,13 @@ bool chainCompactor(chain *ch, uint8_t parts)
             done += (size % parts);
         tp[i].end = done;
         
-        pthread_create(&threads[i], NULL, &chainToText, (void *)&tp[i]);
+        if(pthread_create(&threads[i], NULL, blockToText, (void *)&tp[i]))
+        {
+            //temporary fix
+            printf("\nFailing to create threads, falling back to single thread\n");
+            chainToText(ch, 1);
+            return 1;
+        }
     }
     for (i = 0; i < parts; i++)
         pthread_join(threads[i], NULL);
