@@ -9,6 +9,8 @@ RM    = rm -f
 ifeq ($(OS),Windows_NT)
 SSL   = winextern\openssl
 BOOST = winextern\boost
+#temporary not used flag
+FLAGS+= -DBOOST_REGEX
 else
 LIBS += -lrt
 SSL   = /usr/include/openssl
