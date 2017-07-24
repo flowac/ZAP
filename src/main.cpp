@@ -11,7 +11,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#define N_THREADS 16
+#define N_THREADS 5
 #define N_TEST_BLOCKS 9000
 
 /* Test if ssl_fn.c create_sha1sum is working correctly

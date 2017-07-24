@@ -132,10 +132,14 @@ static int open_io_files(const char *in_path, //!< Input path
                          )
 {
     fd[0] = fopen(in_path, "rb");
+    if (!fd[0]) {
+        log_msg_default;
+        goto cleanup;
+    }
     fd[1] = fopen(out_path, "wb+");
-    if (!fd[0] || !fd[1])  {
+    if (!fd[1])  {
         char msg[60];
-        snprintf(msg, 59, "\nOpening [%s] failed\n", fd[0] ? out_path : in_path);
+        snprintf(msg, 59, "\nOpening [%s] failed\n", out_path);
         log_msg_custom(msg);
         goto cleanup;
     }
@@ -283,19 +287,19 @@ int decompress_file(const char *in_path,
                              out_path_local);
 
     FILE *fd[2]; /* i/o file descriptors */
-    char msg[200];
-    snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
-    std::cout << msg;
     
     /* open i/o files, return fail if this failes */
     if (!open_io_files(in_path, out_path_local, fd))
         return 0;
+    char msg[200];
+    snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
+    std::cout << msg;
     if (!decompress_data_incr(fd[0], fd[1]))
         log_msg("Failed to decompress\n");
 
-    if (fd[0] != NULL)
+    if (fd[0])
         fclose(fd[0]);
-    if (fd[1] != NULL)
+    if (fd[1])
         fclose(fd[1]);
     return 1;
 }
