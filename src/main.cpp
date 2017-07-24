@@ -43,12 +43,9 @@ void zip_test()
     compress_file("t2","t2.my7z", NULL);
 }
 
-chain *chain_gen(uint64_t size, bool trueRandom = false)
+chain *chain_gen(uint64_t size)
 {
-    if (!trueRandom)
-    {
-#define rand() (33)
-    }
+//#define rand() (33)
     uint64_t i;
     uint16_t j, k, nPack;
     const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
@@ -174,13 +171,13 @@ void decompress_test()
 int main()
 {
 //    log_test();
-//    chain_test();//Depreciated
+//    chain_test();
 //    zip_test();
     chain_test();
 //    decompress_test();
 //    sha1_test();
 
-    //std::cout.imbue(std::locale());//Might be usefull to remove valgrind false positives
+    //std::cout.imbue(std::locale());//Might be useful to remove valgrind false positives
     return 0;
 }
 
