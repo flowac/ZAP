@@ -1,9 +1,4 @@
-Licensed under AGPL v3 only
-All licenses used in this project must be upgraded to AGPL v3 unless it is an external library that is incompatible with AGPL v3
-In case of an external library requiring a different license, only the portions of the code that directly interacts with said external library can be used with another license
-
-If any user contributed code that is not in the form of an external library and can not be upgraded to AGPL v3, it shall be removed immediately
-
+Now licensed under Public Domain.
 
 make: Use the flag -j[150% Number of threads] to compile in parallel
 
