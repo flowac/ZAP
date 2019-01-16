@@ -1,20 +1,14 @@
-More * = more priority
-
-****Fix 7z for windows, read DEPEND in winextern for instructions
-
 CURRENT
-*** Copy pasta some (AS LITTLE FILES AS POSSIBLE) bit torrent source code (check license)
-|-> transmission 
-**   Clean up compression implementation
-* move comments over to Doxygen
-* work on configure script
+***  Remove BOOST dependency
+***  Remove argument processing library
+**   Rename project
+*    Update OpenSSL dependency (need SHA3 support)
+*    Clean up compression implementation
 
 FUTURE GOALS
-*   Test magnet link structure
+**  Fix 7z for windows, read DEPEND in winextern for instructions
 *   Test RAM usage
     Create a simple search engine (or just copy pasta some google's open source code)
-    Add AGPL v3 headers to everything including external libraries when possible
+    Make log macros thread safe  (strerror_s ?)
+    Move comments over to doxygen
 
-FOR DALJIT:
-**Make log macros thread safe  (strerror_s ?)
-*Move comments over to doxygen

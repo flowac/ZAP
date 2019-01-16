@@ -1,11 +1,10 @@
-Now licensed under Public Domain.
+# ZAP's ASIC Proof
+
+This will be an attempt to create a new crypto-currency from scratch with Public Domain licensing.
+
+Project will be no longer be related to torrents (for now).
 
 make: Use the flag -j[150% Number of threads] to compile in parallel
-
--j6  for 4 Core  4 Threads (i5 scrub)
--j24 for 8 Core 16 Threads (Ryzen 1700)
-
-
 
 WINDOWS:    Tested with MinGW
 
@@ -15,7 +14,5 @@ You need:   MinGW with GCC, G++, and MSYS,
 
 * makefile assumes MinGW\bin and MinGW\msys\1.0\bin are added to PATH
 * makefile assumes Boost and OpenSSL are under winextern with relative paths
-
-
 
 Creating etags: find . -name "*.c*" -or -name "*.h" | xargs etags

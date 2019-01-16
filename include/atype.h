@@ -9,7 +9,6 @@
 #ifndef _ATYPE_H
 #define _ATYPE_H
 
-                     //#include <boost/cstdint.hpp>
 #include <stdint.h>
 
 #define LOG 0                   //!< not sure
@@ -18,12 +17,12 @@
 #define MAX_U8   255U           //!< max size of an 8 bit int
 #define MAX_U16  65535U         //!< max size of a 16 bit int
 #define MAX_U32  4294967295UL   //!< maz size of a 32 bit int
-
 /*
- * typedef unsigned char     uint8_t;
- * typedef unsigned short    uint16_t;
- * typedef unsigned int      uint32_t;
- * typedef unsigned long int uint64_t;*/
+#define MAX_U6   0x3FU          //!< max size of a  6 bit int
+#define MAX_U8   0xFFU          //!< max size of an 8 bit int
+#define MAX_U16  0xFFFFU        //!< max size of a 16 bit int
+#define MAX_U32  0xFFFFFFFFUL   //!< maz size of a 32 bit int
+*/
 
 /**
  * @brief not sure
