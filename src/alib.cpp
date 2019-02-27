@@ -4,13 +4,9 @@
 #include <string.h>
 #include <pthread.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "alib.h"
 #include "lzma_wrapper.h"
 #include "log.h"
-
-namespace pt = boost::posix_time;
 
 time_t sNow()
 {
@@ -21,8 +17,8 @@ time_t sNow()
 
 void printTime(time_t time)
 {
-    pt::ptime tout = pt::from_time_t(time);
-    std::cout << tout << std::endl;
+	char buf[256];
+	strftime(buf, 256, "%g %B %d  %H:%M:%S", localtime(&time));
 }
 
 void printBlock(block *target)
@@ -240,3 +236,4 @@ uint32_t deleteChain(chain *target)
     free(target->head);
     return bytesFreed;
 }
+

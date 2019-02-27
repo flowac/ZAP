@@ -2,17 +2,6 @@
 
 This will be an attempt to create a new crypto-currency from scratch with Public Domain licensing.
 
-Project will be no longer be related to torrents (for now).
+You need:   C compiler
+            OpenSSL
 
-make: Use the flag -j[150% Number of threads] to compile in parallel
-
-WINDOWS:    Tested with MinGW
-
-You need:   MinGW with GCC, G++, and MSYS, 
-            Boost 1.63.0 or later
-            OpenSSL 1.0.2L or later
-
-* makefile assumes MinGW\bin and MinGW\msys\1.0\bin are added to PATH
-* makefile assumes Boost and OpenSSL are under winextern with relative paths
-
-Creating etags: find . -name "*.c*" -or -name "*.h" | xargs etags

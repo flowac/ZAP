@@ -8,20 +8,16 @@ RM    = rm -f
 # for windows os
 ifeq ($(OS),Windows_NT)
 SSL   = winextern\openssl
-BOOST = winextern\boost
-#temporary not used flag
-FLAGS+= -DBOOST_REGEX
 else
 LIBS += -lrt
 SSL   = /usr/include/openssl
-BOOST = /usr/include/boost
 endif
 
 # default rule and rule shortcuts
 all: extern torrent
 
 FLAGS += -O3
-FLAGS += -Wall -Wno-format -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN) -I$(BOOST)
+FLAGS += -Wall -Wno-format -I$(IDIR) -I$(SSL)/include -I$(IDIR_EXTERN)
 ARGS_EXTERN = all
 
 debug: ARGS_EXTERN = debug
@@ -43,7 +39,7 @@ INCLUDE = $(wildcard $(IDIR)/*.h)
 INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-LIBS += -L$(BOOST) -L$(SSL)/lib -lssl -lcrypto -lpthread
+LIBS += -L$(SSL)/lib -lssl -lcrypto -lpthread
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 
@@ -75,3 +71,4 @@ clean_files:
 c:  clean
 cl: clean_local
 cf: clean_files
+
