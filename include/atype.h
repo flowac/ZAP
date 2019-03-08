@@ -11,18 +11,15 @@
 
 #include <stdint.h>
 
-#define LOG 0                   //!< not sure
+#define LOG 0                //!< not sure
 
-#define MAX_U6   63U            //!< max size of a  6 bit int
-#define MAX_U8   255U           //!< max size of an 8 bit int
-#define MAX_U16  65535U         //!< max size of a 16 bit int
-#define MAX_U32  4294967295UL   //!< maz size of a 32 bit int
-/*
-#define MAX_U6   0x3FU          //!< max size of a  6 bit int
-#define MAX_U8   0xFFU          //!< max size of an 8 bit int
-#define MAX_U16  0xFFFFU        //!< max size of a 16 bit int
-#define MAX_U32  0xFFFFFFFFUL   //!< maz size of a 32 bit int
-*/
+#define MAX_U6  0x3FU        //!< max size of a  6 bit int
+#define MAX_U8  0xFFU        //!< max size of an 8 bit int
+#define MAX_U16 0xFFFFU      //!< max size of a 16 bit int
+#define MAX_U32 0xFFFFFFFFUL //!< max size of a 32 bit int
+#define B_OLD   1000         //!< size of older blocks
+#define B_NEW   1000         //!< size of newly mined blocks
+#define B_SUM   (B_OLD+B_NEW)//!< total size
 
 /**
  * @brief not sure
@@ -79,11 +76,28 @@ typedef struct
 /**
  * @brief The blockchain structure
  */
-typedef struct
+/*typedef struct
 {
     uint32_t time;  //!< time of last update
     uint32_t size;  //!< Number of blocks, 4 bil max
     block **head;   //!< expandable, dynamic array of blocks
+}chain;*/
+
+typedef struct
+{
+	uint8_t address[512];	//!< SHA3-512 checksum
+	//If balance is less than 1, the entry shall be trimmed
+	uint64_t id;		//SHAKE-128(64) of SHA3-512 checksum (for sorting)
+	uint64_t deci;		//Decimal value
+	uint64_t frac;		//Floating point value
+}balance;
+
+typedef struct
+{
+	uint64_t n_bal;
+	uint64_t n_blk;
+	balance *bal;
+	block *blk[B_SUM];
 }chain;
 
 /**

@@ -17,8 +17,8 @@ time_t sNow()
 
 void printTime(time_t time)
 {
-	char buf[256];
-	strftime(buf, 256, "%g %B %d  %H:%M:%S", localtime(&time));
+	char buf[MAX_U8];
+	strftime(buf, MAX_U8, "%g %B %d  %H:%M:%S", localtime(&time));
 }
 
 void printBlock(block *target)
@@ -154,86 +154,63 @@ chain *newChain(void)
 	return NULL;
     }
     
-    ch->size = 0;
-    ch->head = NULL;
+    ch->n_bal = 0;
+    ch->n_blk = 0;
+    ch->bal  = 0;
+    memset(ch->blk, 0, sizeof(block *) * 2000);
     return ch;
 }
 
 //! return 1 on success
+//TODO: compact blocks once full
 bool insertBlock(block *bx, chain *ch)
 {
-    if (bx == NULL) return 0;
-    block **tmp = (block **)realloc(ch->head, sizeof(block *) * (ch->size + 1));
+    if (bx == 0 || ch == 0) return 0;
 
-    // if realloc was successfull assign to head
-    if (tmp != NULL)
-        ch->head = tmp;
-    else {
+    if (ch->n_blk < B_SUM) {
+        ch->blk[ch->n_blk] = bx;
+	ch->n_blk++;
+    } else {
         log_msg_default;
         return 0;
     }
-    
-    ch->head[ch->size] = bx;//! Don't free block pointer
-    ch->size++;
-    ch->time = (uint32_t)sNow();
     return true;
 }
 
-uint32_t deletePack(pack *target)
+void deletePack(pack *target)
 {
-    uint32_t bytesFreed = sizeof(pack);
-    
-    if (target->dn != NULL) {
-        bytesFreed += strlen(target->dn) + 1;
-        free(target->dn);
-    }
-    
-    if (target->xt != NULL) {
-        bytesFreed += strlen(target->xt) + 1;
-        free(target->xt);
-    }
-    
-    if (target->tr != NULL) {
-        bytesFreed += strlen(target->tr) + 1;
-        free(target->tr);
-    }
-    
-    return bytesFreed;
+    if (target->dn != NULL) free(target->dn);
+    if (target->xt != NULL) free(target->xt);
+    if (target->tr != NULL) free(target->tr);
 }
 
-uint32_t deleteBlock(block *target)
+void deleteBlock(block *target)
 {
-    uint32_t i, bytesFreed = sizeof(block);
+    uint32_t i;
+    if (target == 0) return;
     if (target->packs != NULL && target->nPack > 0) {
         for (i = 0; i < target->nPack; i++) {
-            bytesFreed += deletePack(target->packs[i]) + sizeof(pack *);
+            deletePack(target->packs[i]);
             free(target->packs[i]);
         }
         free(target->packs);
     }
 
     if (target->trans != NULL && target->nTran > 0) {
-        for (i = 0; i < target->nTran; i++) {
-            if (target->trans[i] != NULL) {
-                bytesFreed += sizeof(tran *);
+        for (i = 0; i < target->nTran; i++)
+            if (target->trans[i] != NULL)
                 free(target->trans[i]);
-            }
-        }
         free(target->trans);
     }
-
-    return bytesFreed;
 }
 
-uint32_t deleteChain(chain *target)
+void deleteChain(chain *target)
 {
-    uint32_t bytesFreed = 0;
-    for (uint32_t i = 0; i < target->size; i++) {
-        bytesFreed += deleteBlock(target->head[i]) + sizeof(block *);
-        free(target->head[i]);
+    uint32_t i;
+    for (i = 0; i < B_SUM; i++) {
+        deleteBlock(target->blk[i]);
+        free(target->blk[i]);
     }
-    
-    free(target->head);
-    return bytesFreed;
+    free(target->bal);
 }
 

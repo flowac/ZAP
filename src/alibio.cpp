@@ -112,13 +112,14 @@ void *blockToText(void *args)
 }
 
 //! fix the function name
+//TODO: multithread this, or simplify
 void *chainToText(chain *ch, uint8_t parts)
 {
     threadParams tp;
     tp.i = parts;
-    tp.head = ch->head;
+    tp.head = ch->blk;
     tp.start = 0;
-    tp.end = ch->size;
+    tp.end = ch->n_blk;
 
     return blockToText(&tp);
 }
@@ -369,10 +370,12 @@ chain *file_2_chainz(FILE *fp)
     return NULL;
 }
 
+//TODO: this is no longer needed
+//TODO: compact the first 1000 blocks once theres 2000 blocks in total
 //  return 1 for success, 0 for failure
 bool chainCompactor(chain *ch, uint8_t parts)
 {
-    uint32_t size = ch->size,
+    uint32_t size = ch->n_blk,
         target, // # of blocks each thread will compresss
         done; // # of blocks assigned to threads
     uint8_t i;
@@ -388,7 +391,7 @@ bool chainCompactor(chain *ch, uint8_t parts)
     
     for (i = 0; i < parts; i++) {
         tp[i].i = i + 1;
-        tp[i].head = ch->head;
+        tp[i].head = ch->blk;
         tp[i].start = done;
         done += target;
         if (i == 0)

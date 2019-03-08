@@ -86,10 +86,10 @@ bool insertBlock(block *bx,
                      chain *ch
                      );
 
-uint32_t deletePack(pack *target
+void deletePack(pack *target
 );
 
-uint32_t deleteChain(chain *target
+void deleteChain(chain *target
 );
 
 #endif//_ALIB_H

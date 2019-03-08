@@ -54,7 +54,7 @@ chain *chain_gen(uint64_t size)
     chain *ch = newChain();
     char *dn = (char *)malloc(sizeof(char) * 121);
     
-    for (i = 0; i < size && i < MAX_U32; i++) {
+    for (i = 0; i < size && i < B_SUM; i++) {
         nPack  = rand() % 50 + 50;
         pack **packs = (pack **)malloc(sizeof(pack *) * nPack);
         
@@ -123,7 +123,8 @@ void chain_test()
 #endif
     printf("Took %d milliseconds\n", tmp);
     
-    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
+    deleteChain(ch);
+    printf("\nMemory free'd");
     free(ch);
     
     uncompress_test();
