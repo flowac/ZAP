@@ -52,15 +52,15 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 \n\tBpack: %d,\
 \n\tBtran: %d,\
 \n\tBn   : %d,\
-\n\tBkey : %ld,\n", bx->time, bx->crc, bx->nPack, bx->nTran, bx->n, bx->key);
+\n\tBkey : %ld,\n", bx->time, bx->crc, bx->n_packs, bx->n_trans, bx->n, bx->key);
 
     fwrite(buf, 1, strlen(buf), fp);
     
-    for (i = 0; i < bx->nPack; i++) {
-        packToText(bx->packs[i], fp, buf, len);
+    for (i = 0; i < bx->n_packs; i++) {
+        packToText(&(bx->packs[i]), fp, buf, len);
     }
-    for (i = 0; i < bx->nTran; i++) {
-        tranToText(bx->trans[i], fp, buf, len);
+    for (i = 0; i < bx->n_trans; i++) {
+        tranToText(&(bx->trans[i]), fp, buf, len);
     }
     
     strcpy(buf, "B},\n");
@@ -71,7 +71,7 @@ void *blockToText(void *args)
 {
     threadParams *tp = (threadParams *)args;
     uint8_t part =      tp->i;
-    block **head =      tp->head;
+    block  *head =      tp->head;
     uint32_t start =    tp->start;
     uint32_t target =   tp->end;
     //1 tab
@@ -97,7 +97,7 @@ void *blockToText(void *args)
     fwrite(buf, 1, strlen(buf), fp);
     
     for (i = start; i < target; i++) {
-        blockToText(head[i], fp, buf, len);
+        blockToText(&head[i], fp, buf, len);
     }
     
     strcpy(buf, "EOF\n");
@@ -186,16 +186,15 @@ char *indexes_of(char *haystack, const char *needle_start,
     return dest;
 }
 
-pack *text2Pac(FILE *fp)
+bool text2Pac(pack *px, FILE *fp)
 {
+    bool ret = 1;
     char s[MAX_U8 + 1],
         *dn = NULL,
         *xt = NULL,
         *p_xl = NULL,
         *tr = NULL;
     uint64_t xl = 0;
-
-    pack *px = NULL;
 
     while (fgets(s, MAX_U8, fp) != NULL) {
         int len = 0;
@@ -221,7 +220,7 @@ pack *text2Pac(FILE *fp)
                 tr = indexes_of(data, ": ", ",");
                 break;
             case '}': // end of pack
-                px = newPack(dn, xl, xt, tr);
+                ret = newPack(px, dn, xl, xt, tr);
                 if (dn)
                     free(dn);
                 if (p_xl)
@@ -230,13 +229,12 @@ pack *text2Pac(FILE *fp)
                     free(xt);
                 if (tr)
                     free(tr);
-                return px;
             default :
                 break;
             }
         }
     }
-    return px;
+    return ret;
 }
 
 tran *text2Tran(FILE *fp)
@@ -244,31 +242,28 @@ tran *text2Tran(FILE *fp)
     return NULL;
 }
 
-block *text2Block(FILE *fp)
+void text2Block(FILE *fp, block *bx)
 {
     char s[MAX_U8 + 1];
-    pack **packs = NULL;
-    char * tmp;
+    pack *packs = 0, px;
+    char *tmp;
     uint32_t time = 0;
     uint32_t crc = 0;
     uint16_t n_pack = 0;
     uint16_t n_tran = 0;
     uint32_t n = 0;
     uint64_t key = 0;
-    block *new_block = NULL;
-
 
     while (fgets(s, MAX_U8, fp) != NULL) {
         if (strstr(s, (char *)"{P") != NULL) {
-            pack *px = text2Pac(fp);
-            if (px != NULL) {
+            if (!text2Pac(&px, fp)) {
                 n_pack++;
                 if (n_pack > MAX_U16) {
-                    deletePack(px);
+                    deletePack(&px);
                     log_msg_custom("nPack limit reached\n");
                     break;
                 }
-                packs = (pack**)realloc(packs, sizeof(pack *) * n_pack);
+                packs = (pack *)realloc(packs, sizeof(pack) * n_pack);
                 packs[n_pack - 1] = px;
             }
         } else {
@@ -312,10 +307,9 @@ block *text2Block(FILE *fp)
                     if (tmp) free(tmp);
                     break;
                 case '}':
-                    new_block = restore_block(time, crc, n_pack,
+                    restore_block(bx, time, crc, &n_pack,
                                                   n_tran, n, key,
-                                                  packs);
-                    return new_block;
+                                                  &packs);
                     break;
                 default :
                     break;
@@ -323,12 +317,11 @@ block *text2Block(FILE *fp)
             }
         }
     }
-    //return (block *)newBlock(0, key, n_pack, packs);
-    return new_block;
 }
 
 int text2Chainz(FILE *fp, chain *ch)
 {
+    block bx;
     char s[MAX_U8 + 1];
     if (ch == NULL)
         return 0;
@@ -338,7 +331,8 @@ int text2Chainz(FILE *fp, chain *ch)
      */
     while (fgets(s, MAX_U8, fp) != NULL) {
         if (strstr(s, (char *)"{B") != NULL) {
-            if (!insertBlock(text2Block(fp), ch))
+            text2Block(fp, &bx);
+            if (!insertBlock(&bx, ch))
                 log_msg_custom("Failed to insert block");
         } else {
             int len = 0;
@@ -370,8 +364,7 @@ chain *file_2_chainz(FILE *fp)
     return NULL;
 }
 
-//TODO: this is no longer needed
-//TODO: compact the first 1000 blocks once theres 2000 blocks in total
+//TODO: multi-threading is no longer needed
 //  return 1 for success, 0 for failure
 bool chainCompactor(chain *ch, uint8_t parts)
 {

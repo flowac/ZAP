@@ -17,8 +17,8 @@
 #define MAX_U8  0xFFU        //!< max size of an 8 bit int
 #define MAX_U16 0xFFFFU      //!< max size of a 16 bit int
 #define MAX_U32 0xFFFFFFFFUL //!< max size of a 32 bit int
-#define B_OLD   1000         //!< size of older blocks
-#define B_NEW   1000         //!< size of newly mined blocks
+#define B_OLD   600          //!< size of older blocks
+#define B_NEW   1800         //!< size of newly mined blocks
 #define B_SUM   (B_OLD+B_NEW)//!< total size
 
 /**
@@ -65,12 +65,12 @@ typedef struct
 {
     uint32_t time;  //!< epoch seconds
     uint32_t crc;   //!< checksum
-    uint16_t nPack; //!< number of payloads, 255 per block max
-    uint16_t nTran; //!< number of transactions
+    uint16_t n_packs; //!< number of payloads, 255 per block max
+    uint16_t n_trans; //!< number of transactions
     uint32_t n;     //!< block number
     uint64_t key;   //!< gen next
-    pack **packs;   //!< variable size
-    tran **trans;
+    pack *packs;   //!< variable size
+    tran *trans;
 }block;
 
 /**
@@ -97,7 +97,7 @@ typedef struct
 	uint64_t n_bal;
 	uint64_t n_blk;
 	balance *bal;
-	block *blk[B_SUM];
+	block blk[B_SUM];
 }chain;
 
 /**
@@ -105,7 +105,7 @@ typedef struct
  */
 typedef struct{
     uint32_t   i;               //!<  current block num
-    block    **head;            //!<  head of the block chain
+    block     *head;            //!<  head of the block chain
     uint32_t   start;           //!<  starting block num 
     uint32_t   end;             //!<  ending block num 
 }threadParams;

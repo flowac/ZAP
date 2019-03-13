@@ -46,17 +46,19 @@ void zip_test()
 chain *chain_gen(uint64_t size)
 {
 //#define rand() (33)
+    uint16_t j, k;
+    uint32_t nPack;
     uint64_t i;
-    uint16_t j, k, nPack;
     const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
     
     uint64_t key;
+    block bx;
     chain *ch = newChain();
     char *dn = (char *)malloc(sizeof(char) * 121);
     
     for (i = 0; i < size && i < B_SUM; i++) {
         nPack  = rand() % 50 + 50;
-        pack **packs = (pack **)malloc(sizeof(pack *) * nPack);
+        pack *packs = (pack *)malloc(sizeof(pack) * nPack);
         
         for (j = 0; j < nPack; j++) {
             k = rand() % 90 + 30;
@@ -66,12 +68,12 @@ chain *chain_gen(uint64_t size)
             }
             dn[0] = '0';
             
-            packs[j] = newPack(dn, (rand()%50+1)*1024*1024, dn, dn);
+            bool val = newPack(&packs[j], dn, (rand()%50+1)*1024*1024, dn, dn);
         }
         
         key = rand() % MAX_U16 * MAX_U32;
-        if (!insertBlock(newBlock((uint32_t)i, key, nPack, packs), ch))
-            break;
+	newBlock(&bx, (uint32_t)i, key, &nPack, &packs);
+        if (!insertBlock(&bx, ch)) break;
     }
     free(dn);
     return ch;

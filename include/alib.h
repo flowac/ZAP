@@ -28,10 +28,11 @@
  */
 inline time_t sNow();
 
-block *restore_block(uint32_t     time,
+void restore_block(block *bx,
+                         uint32_t time,
                          uint32_t crc,
-                         uint16_t n_pack,
-                         uint16_t n_tran,
+                         uint16_t *n_packs,
+                         uint16_t n_trans,
                          uint32_t n,
                          uint64_t key,
                          pack **packs
@@ -61,7 +62,8 @@ void printBlock(block *target //!< The block to be printed
  * @return NULL - something went wrong :( (malloc failed) \n
  * ptr to new pack struct
  */
-pack *newPack(char         *dn, //!< Display name
+bool newPack(pack *px,
+                  char     *dn, //!< Display name
                   uint64_t  xl, //!< Exact length (size in bytez)
                   char     *xt, //!< exact topic (URN with hash of file)
                   char *tr      //!< tracker url
@@ -73,10 +75,11 @@ tran *newTran();
  * @brief Create a new block
  * 
  */
-block *newBlock(uint32_t n,
+void newBlock(block *bx,
+                    uint32_t n,
                     uint64_t key,
-                    uint32_t nPack,
-                    pack **packs
+                    uint32_t *n_packs,//address of package count
+                    pack **packs      //address of package array
                     );
 
 chain *newChain(void);
