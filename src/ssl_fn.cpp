@@ -9,6 +9,7 @@
 #include <string.h>
 #include <errno.h>
 
+//TODO: take this out and use SHA3-512
 unsigned char *create_sha1sum(const char *dst)
 {
 	SHA_CTX ctx;// sha1 struct (look at sha.h)

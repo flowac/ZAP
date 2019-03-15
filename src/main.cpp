@@ -14,22 +14,6 @@
 #define N_THREADS 5
 #define N_TEST_BLOCKS 9000
 
-/* Test if ssl_fn.c create_sha1sum is working correctly
- *
- */
-void sha1_test()
-{
-	unsigned char *tmp = NULL;
-	tmp = create_sha1sum((char *) "shatest.file");
-	if (tmp != NULL) {
-		for (int i = 0; i < 20; i++) {
-			printf("%02x", tmp[i]);
-		}
-		printf("\n");
-		free(tmp);
-	}
-}
-
 /* Test if log.c log_msg is working correctly
  *
  */
@@ -134,53 +118,11 @@ void chain_test()
 	uncompress_test();
 }
 
-//Obsolete
-/*
-void decompress_test()
-{
-    printf("\nGenerating\n");
-    chain *ch = chain_gen(N_TEST_BLOCKS);
-
-    uint32_t tmp;
-#ifdef _WIN32
-    tmp = GetTickCount();
-#else
-    struct timespec tmp1,tmp2;
-    clock_gettime(CLOCK_MONOTONIC, &tmp1);//Start
-#endif
-
-    chainToText(ch, 1);
-    chainCompactor(ch, N_THREADS);
-    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
-    free(ch);
-    ch = chain_extractor("temp%s.file",5);
-    chainToText(ch, 2);
-    //FILE * fp = fopen("orig1.file", "r");
-    //chain *tmp_chain = newChain();
-    //text2Chainz(fp, tmp_chain);
-    //chainToText(tmp_chain, 2);
-    printf("\nFree'd %lu bytes\n", deleteChain(ch) + sizeof(chain));
-    free(ch);
-    //fclose(fp);
-
-#ifdef _WIN32
-    tmp = GetTickCount() - tmp;
-#else
-    clock_gettime(CLOCK_MONOTONIC, &tmp2);//End
-    tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000 + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
-#endif
-    printf("Took %d milliseconds\n", tmp);
-    
-}*/
-
 int main()
 {
 //    log_test();
-//    chain_test();
 //    zip_test();
 	chain_test();
-//    decompress_test();
-//    sha1_test();
 
 	//std::cout.imbue(std::locale());//Might be useful to remove valgrind false positives
 	return 0;
