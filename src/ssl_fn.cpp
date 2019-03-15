@@ -1,5 +1,3 @@
-/* YO @Flowing-water we gotta start plopping GPL all up in here */
-   
 #include "ssl_fn.h"
 #include "log.h"
 #include "time_fn.h"
@@ -13,38 +11,34 @@
 
 unsigned char *create_sha1sum(const char *dst)
 {
-    SHA_CTX ctx; // sha1 struct (look at sha.h)
-    unsigned char *sha1sum = NULL, // sha1sum dest
+	SHA_CTX ctx;// sha1 struct (look at sha.h)
+	unsigned char *sha1sum = NULL,// sha1sum dest
 	buffer[file_input_buff_size]; // buffer for file i/o
-    FILE *p_dst = NULL; // fd to dst
-    size_t read_size = 0;
-    
-    p_dst = fopen(dst, "r");
-    if (!p_dst) {
-        log_msg_default;
-        goto end;
-    }
+	FILE *p_dst = NULL;// fd to dst
+	size_t read_size = 0;
 
-    // wtf spartan naming and camel case? nice libssl
-    if (!SHA1_Init(&ctx))
-        goto end;
+	p_dst = fopen(dst, "r");
+	if (!p_dst) {
+		log_msg_default;
+		goto end;
+	}
+	// wtf spartan naming and camel case? nice libssl
+	if (!SHA1_Init(&ctx)) goto end;
 
-    // read file in
-    do {
-        read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
-        // update teh sha1sum with what we read
-        if(!SHA1_Update(&ctx, (void*)buffer, read_size))
-            goto end;
-    } while (read_size == file_input_buff_size); // fread returns less than that size on failure
+	// read file in
+	do {
+		read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
+		// update teh sha1sum with what we read
+		if (!SHA1_Update(&ctx, (void *) buffer, read_size)) goto end;
+	} while (read_size == file_input_buff_size);	// fread returns less than that size on failure
 
-    // create hash
-    sha1sum = (unsigned char*)malloc(sizeof(char) * SHA_DIGEST_LENGTH);
-    if (!sha1sum)
-	goto end;
-    SHA1_Final(sha1sum, &ctx);
+	// create hash
+	sha1sum = (unsigned char *) malloc(sizeof(char) * SHA_DIGEST_LENGTH);
+	if (!sha1sum) goto end;
+	SHA1_Final(sha1sum, &ctx);
 
- end:
-    if(p_dst)
-	fclose(p_dst);
-    return sha1sum;
+  end:
+	if (p_dst) fclose(p_dst);
+	return sha1sum;
 }
+

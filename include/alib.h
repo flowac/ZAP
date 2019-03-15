@@ -8,9 +8,6 @@
 #ifndef _ALIB_H
 #define _ALIB_H
 
-
-//#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "atype.h"
 #include <time.h>
 #include <stdio.h>
@@ -19,30 +16,19 @@
 #include <Windows.h>
 #endif
 
-//namespace pt = boost::posix_time;
-
-/**
- * @brief Get current time
- *
- * Get the current time in seconds since Epoch
- */
+//Get current time in seconds
 inline time_t sNow();
 
 void restore_block(block *bx,
-                         uint32_t time,
-                         uint32_t crc,
-                         uint16_t *n_packs,
-                         uint16_t n_trans,
-                         uint32_t n,
-                         uint64_t key,
-                         pack **packs
-                         );
+                   uint32_t time,
+                   uint32_t crc,
+                   uint16_t *n_packs,
+                   uint16_t n_trans,
+                   uint32_t n,
+                   uint64_t key,
+                   pack **packs);
 
-/**
- * @brief Print current time
- */
-inline void printTime(time_t time //!< The time to be printed.
-);
+inline void printTime(time_t time);
 
 /**
  * @brief This function will print the relative information of a block
@@ -52,8 +38,7 @@ inline void printTime(time_t time //!< The time to be printed.
  *	key (Unique identifier)
  *	number of payloads
  */
-void printBlock(block *target //!< The block to be printed
-);
+void printBlock(block *target);
 
 /**
  * @brief Create a new pack (magnet link info)
@@ -63,37 +48,27 @@ void printBlock(block *target //!< The block to be printed
  * ptr to new pack struct
  */
 bool newPack(pack *px,
-                  char     *dn, //!< Display name
-                  uint64_t  xl, //!< Exact length (size in bytez)
-                  char     *xt, //!< exact topic (URN with hash of file)
-                  char *tr      //!< tracker url
-                  );
+             char *dn,   //!< Display name
+             uint64_t xl,//!< Exact length (size in bytez)
+             char *xt,   //!< exact topic (URN with hash of file)
+             char *tr);  //!< tracker url
 
-tran *newTran();
+void newTran(tran *tx);
 
-/**
- * @brief Create a new block
- * 
- */
 void newBlock(block *bx,
-                    uint32_t n,
-                    uint64_t key,
-                    uint32_t *n_packs,//address of package count
-                    pack **packs      //address of package array
-                    );
+              uint32_t n,
+              uint64_t key,
+              uint32_t *n_packs,//address of package count
+              pack **packs);    //address of package array
 
 chain *newChain(void);
 
 //! return 1 on success
-bool insertBlock(block *bx,
-                     chain *ch
-                     );
+bool insertBlock(block *bx, chain *ch);
 
-void deletePack(pack *target
-);
+void deletePack(pack *target);
 
-void deleteChain(chain *target
-);
+void deleteChain(chain *target);
 
-#endif//_ALIB_H
+#endif //_ALIB_H
 

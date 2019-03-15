@@ -3,9 +3,6 @@
  * @brief Functions that deal with Logging
  */
 
-/* GPL stuff here idk what to put @flowingwater ill let you
- * handle this 
- */
 #ifndef _LOG_H
 #define _LOG_H
 
@@ -37,17 +34,15 @@
  * @return 0 - failure\n
  * 1 - success
  */
-int log_msg(char const *msg, //!< Format specified string
-            ... //!< Args if any
-            );
+int log_msg(char const *msg,//!< Format specified string
+            ...);           //!< Args if any
 
 /**
  * @brief Get the size of a file
  * 
  * @return Size of file (long value)
  */
-long get_file_size_c(FILE *fd //!< Fd to the file
-                     );
+long get_file_size_c(FILE *fd);//!< Fd to the file
 
 /**
  * @brief This function will return the size of the file specified
@@ -58,7 +53,7 @@ long get_file_size_c(FILE *fd //!< Fd to the file
  * @return Size of file on success \n
  * 0 on failure
  */
-UInt64 get_file_size(std::ofstream f_stream //!< Filestream to a file
-                     );
+UInt64 get_file_size(std::ofstream f_stream);//!< Filestream to a file
 
 #endif // _LOG_H
+
