@@ -7,7 +7,7 @@
 #define _LOG_H
 
 #include <fstream>
-#include "C/7zTypes.h"
+#include "7zTypes.h"
 
 #include <string.h>
 #include <errno.h>
@@ -27,6 +27,11 @@
  * of the errno
  */
 #define log_msg_custom_errno(msg, x) log_msg("%s %s:%d: %s:%d\n", __FILE__, __FUNCTION__, __LINE__, msg, x)
+
+/**
+ * @brief De-initialize logger
+ */
+void log_deinit(void);
 
 /**
  * @brief This function will append to the log file

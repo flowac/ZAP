@@ -11,8 +11,8 @@
 #include <string.h>
 #include <pthread.h>
 
-#define N_THREADS 5
-#define N_TEST_BLOCKS 9000
+#define N_THREADS 10
+#define N_TEST_BLOCKS 5000
 
 /* Test if log.c log_msg is working correctly
  *
@@ -103,11 +103,11 @@ void chain_test()
 	tmp = GetTickCount() - tmp;
 #else
 	struct timespec tmp1, tmp2;
-	clock_gettime(CLOCK_MONOTONIC, &tmp1);	//Start
+	clock_gettime(CLOCK_MONOTONIC, &tmp1); // start
 	chainCompactor(ch, N_THREADS);
-	clock_gettime(CLOCK_MONOTONIC, &tmp2);	//End
+	clock_gettime(CLOCK_MONOTONIC, &tmp2); // end
 	tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000
-            + (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
+		+ (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
 #endif
 	printf("Took %d milliseconds\n", tmp);
 
@@ -120,11 +120,12 @@ void chain_test()
 
 int main()
 {
-//    log_test();
-//    zip_test();
+	log_test();
+//zip_test();
 	chain_test();
 
-	//std::cout.imbue(std::locale());//Might be useful to remove valgrind false positives
+	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
+	log_deinit();
 	return 0;
 }
 

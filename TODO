@@ -1,14 +1,11 @@
 CURRENT
-***  Remove BOOST dependency
 ***  Remove argument processing library
-**   Rename project
 *    Update OpenSSL dependency (need SHA3 support)
 *    Clean up compression implementation
 
 FUTURE GOALS
-**  Fix 7z for windows, read DEPEND in winextern for instructions
 *   Test RAM usage
-    Create a simple search engine (or just copy pasta some google's open source code)
-    Make log macros thread safe  (strerror_s ?)
+    Create a simple search engine
+    Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
 

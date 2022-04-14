@@ -8,8 +8,8 @@
 #define _LZMA2_WRAPPER_H
 
 #include <string>
-#include "C/7zTypes.h"
-#include "C/LzmaEnc.h"
+#include "7zTypes.h"
+#include "LzmaEnc.h"
 
 /** @brief Default buffer size for i/o (64kb) */
 #define buffer_cread_size 65536	// 1 < 16

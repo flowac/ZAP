@@ -11,14 +11,14 @@ endif
 
 noinst_LIBRARIES=lib7z.a
 lib7z_a_SOURCES=\
-C/7zTypes.h \
-C/Alloc.c \
-C/Alloc.h \
-C/LzFind.c \
-C/LzFind.h \
-C/LzmaDec.c \
-C/LzmaDec.h \
-C/LzmaEnc.c \
-C/LzmaEnc.h \
-C/LzmaLib.c \
-C/LzmaLib.h
+7zTypes.h \
+Alloc.c \
+Alloc.h \
+LzFind.c \
+LzFind.h \
+LzmaDec.c \
+LzmaDec.h \
+LzmaEnc.c \
+LzmaEnc.h \
+LzmaLib.c \
+LzmaLib.h

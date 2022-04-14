@@ -8,7 +8,7 @@
 #include "log.h"
 #include "alibio.h"
 #include "lzma_wrapper.h"
-#include "C/LzmaEnc.h"
+#include "LzmaEnc.h"
 
 void packToText(pack * pk, FILE * fp, char *buf, int len)
 {

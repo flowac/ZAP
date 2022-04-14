@@ -23,11 +23,11 @@
 #include "lzma_wrapper.h"
 #include "log.h"
 /* extern */
-#include "C/LzmaLib.h"
-#include "C/7zTypes.h"
-#include "C/Alloc.h"
-#include "C/LzmaEnc.h"
-#include "C/LzmaDec.h"
+#include "LzmaLib.h"
+#include "7zTypes.h"
+#include "Alloc.h"
+#include "LzmaEnc.h"
+#include "LzmaDec.h"
 
 /**
  * @brief Function implementation for struct ISzAlloc 

@@ -1,5 +1,4 @@
-The documentation only covers code that we have written, libtorrent has
-its own documentation and lzma has comments in the library.
+The documentation only covers code that we have written.
 
 To compile the documentation you need:
 doxygen

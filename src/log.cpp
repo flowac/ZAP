@@ -12,7 +12,18 @@
 #include "log.h"
 #include "time_fn.h"
 /* extern */
-#include "C/7zTypes.h"
+#include "7zTypes.h"
+
+#define LOG_PATH "log"
+static FILE *LOG_FD = NULL;
+
+void log_deinit(void)
+{
+	if (!LOG_FD) return;
+
+	fclose(LOG_FD);
+	LOG_FD = NULL;
+}
 
 int log_msg(char const *msg, ...)
 {
@@ -27,8 +38,7 @@ int log_msg(char const *msg, ...)
 	char buffer_time[64];
 	va_list msg_formatted;
 
-	FILE *fd = fopen("log", "a");	// fd to log file
-	if (fd == NULL) {
+	if (!LOG_FD && !(LOG_FD = fopen(LOG_PATH, "a"))) {
 		printf("LOG: Failed to open logfile: %s\n", strerror(errno));
 		return 0;
 	}
@@ -37,9 +47,8 @@ int log_msg(char const *msg, ...)
 	strftime(buffer_time, sizeof(buffer_time), "%a %b %T", local_time_t);
 	vsnprintf(buffer_msg, sizeof(buffer_msg), msg, msg_formatted);
 
-	fprintf(fd, "%s %s", buffer_time, buffer_msg);
+	fprintf(LOG_FD, "%s %s", buffer_time, buffer_msg);
 
-	if (fd) fclose(fd);
 	va_end(msg_formatted);
 	return 1;
 }
