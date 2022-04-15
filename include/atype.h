@@ -60,10 +60,10 @@ typedef struct {
  */
 typedef struct {
 	uint32_t time;   //!< epoch seconds
-	uint32_t crc;    //!< checksum
-	uint16_t n_packs;//!< number of payloads, 255 per block max
-	uint16_t n_trans;//!< number of transactions
-	uint32_t n;      //!< block number
+	uint64_t crc;    //!< checksum
+	uint64_t n_packs;//!< number of payloads, 255 per block max
+	uint64_t n_trans;//!< number of transactions
+	uint64_t n;      //!< block number
 	uint64_t key;    //!< gen next
 	pack *packs;
 	tran *trans;
@@ -84,15 +84,4 @@ typedef struct {
 	block blk[B_SUM];
 } chain;
 
-/**
- * @brief Struct holding values for pthread fn call
- */
-typedef struct {
-	uint32_t i;    //!<  current block num
-	block *head;   //!<  head of the block chain
-	uint32_t start;//!<  starting block num 
-	uint32_t end;  //!<  ending block num 
-} threadParams;
-
 #endif //_ATYPE_H
-

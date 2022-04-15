@@ -24,8 +24,6 @@ AC_PROG_CC
 # Checks for libraries.
 AC_CHECK_LIB([crypto], [SHA1_Final], [], [AC_MSG_ERROR([Error: Requires library crypto 1.0.0 or later])])
 AC_CHECK_LIB([ssl], [SHA1_Final], [], [AC_MSG_ERROR([Error: Requires library ssl 1.0.0 or later])])
-AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([Error: Requires library pthread 2.15 or later])])
-AC_CHECK_LIB([rt], [pthread_create], [], [AC_MSG_ERROR([Error: Requires library rt 2.15 or later])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stddef.h stdint.h stdlib.h string.h])

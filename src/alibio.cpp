@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <pthread.h>
 #include <stdio.h>
 
 #include "alib.h"
@@ -10,7 +9,7 @@
 #include "lzma_wrapper.h"
 #include "LzmaEnc.h"
 
-void packToText(pack * pk, FILE * fp, char *buf, int len)
+void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
 	//2 tabs
 	if (!pk || !fp || !buf)
@@ -26,7 +25,7 @@ void packToText(pack * pk, FILE * fp, char *buf, int len)
 	fwrite(buf, 1, strlen(buf), fp);
 }
 
-void tranToText(tran * tx, FILE * fp, char *buf, int len)
+void tranToText(tran *tx, FILE *fp, char *buf, int len)
 {
 	//2 tabs
 	if (!tx || !fp || !buf)
@@ -43,7 +42,7 @@ void tranToText(tran * tx, FILE * fp, char *buf, int len)
 	fwrite(buf, 1, strlen(buf), fp);
 }
 
-void blockToText(block * bx, FILE * fp, char *buf, int len)
+void blockToText(block *bx, FILE *fp, char *buf, int len)
 {
 	//1 tabs
 	uint32_t i;
@@ -66,64 +65,6 @@ void blockToText(block * bx, FILE * fp, char *buf, int len)
 
 	strcpy(buf, "B},\n");
 	fwrite(buf, 1, strlen(buf), fp);
-}
-
-void *blockToText(void *args)
-{
-	threadParams *tp = (threadParams *) args;
-	uint8_t part = tp->i;
-	block *head = tp->head;
-	uint32_t start = tp->start;
-	uint32_t target = tp->end;
-	//1 tab
-	char tmp[16];
-	snprintf(tmp, 15, "temp%u.file", part);
-	FILE *fp = fopen(tmp, "w");
-
-	uint32_t i;
-	int len = 3000;
-
-	char *buf = (char *) malloc(sizeof(char) * (len + 1));
-	// char buf[3001];
-	if (buf == NULL || fp == NULL) {
-		char msg[80];
-		snprintf(msg, 79,
-				 "\nCreating part [%u] failed, name [%s], pointer [%p][%d]\n",
-				 part, tmp, fp, fp);
-		log_msg_custom(msg);
-		return NULL;
-	}
-
-	snprintf(buf, len, "Ctime: %u,\nCsize: %u,\n", part, target);
-
-	fwrite(buf, 1, strlen(buf), fp);
-
-	for (i = start; i < target; i++) {
-		blockToText(&head[i], fp, buf, len);
-	}
-
-	strcpy(buf, "EOF\n");
-	fwrite(buf, 1, strlen(buf), fp);
-
-	fclose(fp);
-	free(buf);
-
-	compress_file(tmp);
-
-	return NULL;
-}
-
-//! fix the function name
-//TODO: multithread this, or simplify
-void *chainToText(chain * ch, uint8_t parts)
-{
-	threadParams tp;
-	tp.i = parts;
-	tp.head = ch->blk;
-	tp.start = 0;
-	tp.end = ch->n_blk;
-
-	return blockToText(&tp);
 }
 
 /*temporary not used
@@ -182,13 +123,13 @@ char *indexes_of(char *haystack, const char *needle_start,
 		return NULL;
 
 	int len = ptr_end - ptr_start + 2;
-	char *dest = (char *) malloc(sizeof(char) * len + 1);
+	char *dest = (char *) malloc(sizeof(char) *len + 1);
 	dest[len] = '\0';
 	memcpy(dest, ptr_start + 2, len);
 	return dest;
 }
 
-bool text2Pac(pack * px, FILE * fp)
+bool text2Pac(pack *px, FILE *fp)
 {
 	bool ret = 1;
 	char s[MAX_U8 + 1], *dn = NULL, *xt = NULL, *p_xl = NULL, *tr = NULL;
@@ -235,21 +176,21 @@ bool text2Pac(pack * px, FILE * fp)
 	return ret;
 }
 
-tran *text2Tran(FILE * fp)
+tran *text2Tran(FILE *fp)
 {
 	return NULL;
 }
 
-void text2Block(FILE * fp, block * bx)
+void text2Block(FILE *fp, block *bx)
 {
 	char s[MAX_U8 + 1];
 	pack *packs = 0, px;
 	char *tmp;
 	uint32_t time = 0;
-	uint32_t crc = 0;
-	uint16_t n_pack = 0;
-	uint16_t n_tran = 0;
-	uint32_t n = 0;
+	uint64_t crc = 0;
+	uint64_t n_pack = 0;
+	uint64_t n_tran = 0;
+	uint64_t n = 0;
 	uint64_t key = 0;
 
 	while (fgets(s, MAX_U8, fp) != NULL) {
@@ -310,8 +251,7 @@ void text2Block(FILE * fp, block * bx)
 						free(tmp);
 					break;
 				case '}':
-					restore_block(bx, time, crc, &n_pack,
-								  n_tran, n, key, &packs);
+					newBlock(bx, time, n, key, &n_pack, &packs);
 					break;
 				default:
 					break;
@@ -321,7 +261,7 @@ void text2Block(FILE * fp, block * bx)
 	}
 }
 
-int text2Chainz(FILE * fp, chain * ch)
+int text2Chainz(FILE *fp, chain *ch)
 {
 	block bx;
 	char s[MAX_U8 + 1];
@@ -358,7 +298,7 @@ int text2Chainz(FILE * fp, chain * ch)
 	return 1;
 }
 
-chain *file_2_chainz(FILE * fp)
+chain *file_2_chainz(FILE *fp)
 {
 	chain *ch = newChain();
 	if (!text2Chainz(fp, ch))
@@ -366,44 +306,17 @@ chain *file_2_chainz(FILE * fp)
 	return NULL;
 }
 
-//TODO: multi-threading is no longer needed
 //  return 1 for success, 0 for failure
-bool chainCompactor(chain * ch, uint8_t parts)
+bool chainCompactor(chain *ch)
 {
-	uint32_t size = ch->n_blk, target,	// # of blocks each thread will compresss
-		done;					// # of blocks assigned to threads
-	uint8_t i;
-
-	if (parts == 0 || parts > MAX_U8) {
-		parts = 1;
+	FILE *fp = fopen("temp.file", "w");
+	const int b4k = 4096;
+	char buf4k[b4k + 1];
+	for (uint64_t i = 0; i < ch->n_blk; i++) {
+		blockToText(&(ch->blk[i]), fp, buf4k, b4k);
 	}
-	pthread_t threads[parts];
-	threadParams tp[parts];
 
-	done = 0;
-	target = size / parts;
-
-	for (i = 0; i < parts; i++) {
-		tp[i].i = i + 1;
-		tp[i].head = ch->blk;
-		tp[i].start = done;
-		done += target;
-		if (i == 0)
-			done += (size % parts);
-		tp[i].end = done;
-
-		if (pthread_create
-			(&threads[i], NULL, blockToText, (void *) &tp[i])) {
-			//temporary fix
-			printf
-				("\nFailing to create threads, falling back to single thread\n");
-			chainToText(ch, 1);
-			return 1;
-		}
-	}
-	for (i = 0; i < parts; i++)
-		pthread_join(threads[i], NULL);
-
+	fclose(fp);
 	return 1;
 }
 

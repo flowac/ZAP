@@ -19,15 +19,6 @@
 //Get current time in seconds
 inline time_t sNow();
 
-void restore_block(block *bx,
-                   uint32_t time,
-                   uint32_t crc,
-                   uint16_t *n_packs,
-                   uint16_t n_trans,
-                   uint32_t n,
-                   uint64_t key,
-                   pack **packs);
-
 inline void printTime(time_t time);
 
 /**
@@ -56,9 +47,10 @@ bool newPack(pack *px,
 void newTran(tran *tx);
 
 void newBlock(block *bx,
-              uint32_t n,
+			  uint32_t time,
+              uint64_t n,
               uint64_t key,
-              uint32_t *n_packs,//address of package count
+              uint64_t *n_packs,//address of package count
               pack **packs);    //address of package array
 
 chain *newChain(void);

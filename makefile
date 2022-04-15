@@ -39,7 +39,7 @@ INCLUDE = $(wildcard $(IDIR)/*.h)
 INCLUDE_EXTERN = $(wildcard $(IDIR)/*.h)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-LIBS += -L$(SSL)/lib -lssl -lcrypto -lpthread
+LIBS += -L$(SSL)/lib -lssl -lcrypto
 # statically linked libraries
 SLIB = $(LDIR)/lib7z.a
 

@@ -54,8 +54,7 @@ char *indexes_of(char *haystack,          //!< The string to search through
  * @brief compact the entire chain into x parts, using x threads
  * 
  */
-bool chainCompactor(chain *ch,        //!< Chain to be compacted
-                    uint8_t parts = 1);//!< Number of threads to use 
+bool chainCompactor(chain *ch);//!< Chain to be compacted
 
 /**
  * @brief convert struct block to text
@@ -90,13 +89,4 @@ void packToText(pack *pk, //!< Struct pack to be printed
                 char *buf,//!< Buffer used to print data
                 int len); //!< Length of buffer
 
-/**
- * @brief A thread start routine
- *
- * This fn will convert x number of blocks to text, it will
- * print the blocks from struct threadParams.start to struct
- * threadparams.end
- */
-void *chainToText(void *args);//!< Arguments to pass the thread fn
 #endif //_ALIBIO_H
-
