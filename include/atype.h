@@ -17,9 +17,7 @@
 #define MAX_U8  0xFFU        //!< max size of an 8 bit int
 #define MAX_U16 0xFFFFU      //!< max size of a 16 bit int
 #define MAX_U32 0xFFFFFFFFUL //!< max size of a 32 bit int
-#define B_OLD   600          //!< size of older blocks
-#define B_NEW   1800         //!< size of newly mined blocks
-#define B_SUM   (B_OLD+B_NEW)//!< total size
+#define B_MAX   5000         //!< max number of blocks
 
 /**
  * @brief not sure
@@ -81,7 +79,7 @@ typedef struct {
 	uint64_t n_bal;
 	uint64_t n_blk;
 	balance *bal;
-	block blk[B_SUM];
+	block blk[B_MAX];
 } chain;
 
 #endif //_ATYPE_H

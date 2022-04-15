@@ -1,45 +1,57 @@
+#include "alibio.h"
 #include "ssl_fn.h"
-#include "log.h"
-#include "time_fn.h"
 
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
-//TODO: take this out and use SHA3-512
-unsigned char *create_sha1sum(const char *dst)
+#define BUF4K 0x1000
+//#define BUF1M 0x100000
+
+uint8_t *check_sha3_512_from_file(const char *src)
 {
-	SHA_CTX ctx;// sha1 struct (look at sha.h)
-	unsigned char *sha1sum = NULL,// sha1sum dest
-	buffer[file_input_buff_size]; // buffer for file i/o
-	FILE *p_dst = NULL;// fd to dst
-	size_t read_size = 0;
+	EVP_MD_CTX *md_ctx = NULL;
+	FILE *fp = fopen(src, "rb");
+	uint32_t data_len, file_len = getFilesize(fp);
+	uint32_t md_len;
+	uint8_t *md_val = NULL;
+	uint8_t data[BUF4K];
 
-	p_dst = fopen(dst, "r");
-	if (!p_dst) {
-		log_msg_default;
-		goto end;
+	if (!fp || !(md_ctx = EVP_MD_CTX_new())) goto cleanup;
+	if (!(md_val = (uint8_t *) malloc(EVP_MAX_MD_SIZE))) goto cleanup;
+	memset(md_val, 0, EVP_MAX_MD_SIZE);
+	EVP_DigestInit_ex(md_ctx, EVP_sha3_512(), NULL);
+
+	while (file_len > 0)
+	{
+		data_len = fread(data, 1, BUF4K, fp);
+		file_len -= data_len;
+		EVP_DigestUpdate(md_ctx, data, data_len);
 	}
-	// wtf spartan naming and camel case? nice libssl
-	if (!SHA1_Init(&ctx)) goto end;
+	EVP_DigestFinal_ex(md_ctx, md_val, &md_len);
 
-	// read file in
-	do {
-		read_size = fread(buffer, sizeof(unsigned char), file_input_buff_size, p_dst);
-		// update teh sha1sum with what we read
-		if (!SHA1_Update(&ctx, (void *) buffer, read_size)) goto end;
-	} while (read_size == file_input_buff_size);	// fread returns less than that size on failure
-
-	// create hash
-	sha1sum = (unsigned char *) malloc(sizeof(char) * SHA_DIGEST_LENGTH);
-	if (!sha1sum) goto end;
-	SHA1_Final(sha1sum, &ctx);
-
-  end:
-	if (p_dst) fclose(p_dst);
-	return sha1sum;
+cleanup:
+	if (fp)     fclose(fp);
+	if (md_ctx) EVP_MD_CTX_free(md_ctx);
+	return md_val;
 }
 
+uint8_t *check_sha3_512(const uint8_t *data, uint32_t size)
+{
+	EVP_MD_CTX *md_ctx = NULL;
+	uint32_t md_len;
+	uint8_t *md_val = NULL;
+
+	if (!(md_ctx = EVP_MD_CTX_new())) goto cleanup;
+	if (!(md_val = (uint8_t *) malloc(EVP_MAX_MD_SIZE))) goto cleanup;
+	memset(md_val, 0, EVP_MAX_MD_SIZE);
+	EVP_DigestInit_ex(md_ctx, EVP_sha3_512(), NULL);
+	EVP_DigestUpdate(md_ctx, data, size);
+	EVP_DigestFinal_ex(md_ctx, md_val, &md_len);
+
+cleanup:
+	if (md_ctx) EVP_MD_CTX_free(md_ctx);
+	return md_val;
+}

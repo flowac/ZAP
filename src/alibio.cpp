@@ -9,6 +9,16 @@
 #include "lzma_wrapper.h"
 #include "LzmaEnc.h"
 
+uint32_t getFilesize(FILE *fp)
+{
+	uint32_t size;
+	if (!fp) return 0;
+	fseek(fp, 0L, SEEK_END);
+	size = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+	return size;
+}
+
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
 	//2 tabs

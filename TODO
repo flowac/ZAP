@@ -1,6 +1,10 @@
 CURRENT
-***  Remove argument processing library
-*    Update OpenSSL dependency (need SHA3 support)
+**** SHA checksum on blocks
+***  Chain audit and compare
+***  Block compaction
+**   SHA checksum on files
+*    Delta generation logic?
+*    Remove argument processing library
 *    Clean up compression implementation
 
 FUTURE GOALS

@@ -111,7 +111,7 @@ bool insertBlock(block *bx, chain *ch)
 	if (bx == 0 || ch == 0)
 		return 0;
 
-	if (ch->n_blk < B_SUM) {
+	if (ch->n_blk < B_MAX) {
 		ch->blk[ch->n_blk] = *bx;
 		ch->n_blk++;
 	} else {
@@ -140,6 +140,6 @@ void deleteBlock(block *target)
 void deleteChain(chain *target)
 {
 	uint32_t i;
-	for (i = 0; i < B_SUM; i++) deleteBlock(&(target->blk[i]));
+	for (i = 0; i < B_MAX; i++) deleteBlock(&(target->blk[i]));
 	free(target->bal);
 }

@@ -6,6 +6,12 @@
 #define _ALIBIO_
 
 #include "atype.h"
+#include <stdio.h>
+
+/**
+ * @brief Get remaining size of the file
+ */
+uint32_t getFilesize(FILE *fp);
 
 /**
  * @brief Extract a chain from a text file(s)

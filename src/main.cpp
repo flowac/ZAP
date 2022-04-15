@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define N_TEST_BLOCKS 5000
-
 /* Test if log.c log_msg is working correctly
  *
  */
@@ -63,7 +61,7 @@ chain *chain_gen(uint64_t size)
 void chain_test()
 {
 	printf("\nGenerating\n");
-	chain *ch = chain_gen(N_TEST_BLOCKS);
+	chain *ch = chain_gen(B_MAX);
 
 	printf("Compressing\n");
 	uint32_t tmp;

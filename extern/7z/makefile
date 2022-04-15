@@ -1,13 +1,16 @@
 PROG = lib7z
-CC   = gcc -O2 -Wall -Werror -IC -c
+CC   = gcc -O2 -Wall -Werror
 
-all:
-	$(CC) -o f1.o Alloc.c
-	$(CC) -o f2.o LzFind.c
-	$(CC) -o f3.o LzmaDec.c
-	$(CC) -o f4.o LzmaLib.c
-	$(CC) -o f5.o LzmaEnc.c
-	ar rcs ../../lib/$(PROG).a f1.o f2.o f3.o f4.o f5.o
+SOURCES = $(wildcard *.c)
+OBJ := $(SOURCES:%.c=%.o)
 
-clean:
+all: $(OBJ) lib7z.a
 	rm -f *.o
+
+%.o: %.cpp
+	$(CC) -o $@ $<
+
+lib7z.a:
+	echo $(SOURCES)
+	echo $(OBJ)
+	ar rcs $(PROG).a $(OBJ)

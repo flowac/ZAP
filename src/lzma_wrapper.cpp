@@ -135,7 +135,7 @@ static int open_io_files(const char *in_path, //!< Input path
 	}
 	return 1;
 
-  cleanup:
+cleanup:
 	if (fd[0]) fclose(fd[0]);
 	if (fd[1]) fclose(fd[1]);
 	return 0;
@@ -295,7 +295,7 @@ int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 	LzmaEncProps_Init(&prop_info);
 	assign_prop_vals(&prop_info, args);
 	rt = LzmaEnc_SetProps(enc_hand, &prop_info);
-	if (rt != SZ_OK) goto end;
+	if (rt != SZ_OK) goto cleanup;
 
 	rt = LzmaEnc_WriteProperties(enc_hand, props_header, &props_size);
 	for (int i = 0; i < 8; i++) {
@@ -312,7 +312,7 @@ int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 	LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
 	return 1;
 
-  end:
+cleanup:
 	log_msg_custom_errno("Error occurred compressing data: LZMA errno",
 						 rt);
 	LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);

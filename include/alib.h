@@ -62,5 +62,19 @@ void deletePack(pack *target);
 
 void deleteChain(chain *target);
 
-#endif //_ALIB_H
+/**
+ * @brief Validate content against internal checksums
+ *
+ * Chain length will be reset to the index of the first invalid block
+ * @return True if no problems found
+ */
+bool auditChain(chain *ch);
 
+/**
+ * @brief Compare two chains
+ *
+ * @return The index of the first disagreement
+ */
+uint64_t compareChain(chain *left, chain *right);
+
+#endif //_ALIB_H

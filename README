@@ -2,6 +2,5 @@
 
 This will be an attempt to create a new crypto-currency from scratch with Public Domain licensing.
 
-You need:   C compiler
-            OpenSSL
-
+You need: C++ compiler
+          OpenSSL 3.0+
