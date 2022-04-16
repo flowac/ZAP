@@ -10,14 +10,14 @@ ifeq ($(OS),Windows_NT)
 SSL   = winextern\openssl
 else
 LIBS += -lrt
-SSL   = /usr/include/openssl
+SSL_INC = /usr/include/openssl
 endif
 
 # default rule and rule shortcuts
 all: lib7z.a torrent
 
-FLAGS += -O3
-FLAGS += -Wall -Wno-format -Iinclude -I$(SSL)/include -I$(7Z_DIR)
+FLAGS += -O2
+FLAGS += -Wall -Wno-format -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
 ARGS_EXTERN = all
 
 debug: ARGS_EXTERN = debug
@@ -33,7 +33,7 @@ SDIR = src
 SOURCES = $(wildcard $(SDIR)/*.cpp)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-LIBS += -L$(SSL)/lib -lssl -lcrypto
+LIBS += -lssl -lcrypto
 # statically linked libraries
 SLIB = $(7Z_DIR)/lib7z.a
 
@@ -50,7 +50,7 @@ $(ODIR)/%.o: $(SDIR)/%.cpp
 	$(CC) -c -o $@ $< $(FLAGS) $(LIBS)
 
 clean: clean_local clean_files
-	$(RM) $(7Z_DIR)/*.a
+	$(MAKE) -C $(7Z_DIR) $@
 
 clean_local:
 	$(RM) $(PRG)*

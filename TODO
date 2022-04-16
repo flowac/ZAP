@@ -1,8 +1,10 @@
 CURRENT
+*    Timer function that pushes time onto a stack and pop when stopped
 **** SHA checksum on blocks
 ***  Chain audit and compare
 ***  Block compaction
 **   SHA checksum on files
+*    Fix make -j11
 *    Delta generation logic?
 *    Remove argument processing library
 *    Clean up compression implementation

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 /* Test if log.c log_msg is working correctly
  *
@@ -25,7 +26,6 @@ void zip_test()
 
 chain *chain_gen(uint64_t size)
 {
-//#define rand() (33)
 	uint16_t j, k;
 	uint64_t nPack;
 	uint64_t i;
@@ -60,24 +60,18 @@ chain *chain_gen(uint64_t size)
 
 void chain_test()
 {
-	printf("\nGenerating\n");
-	chain *ch = chain_gen(B_MAX);
+	printf("\nGenerate\n");
+	chain *ch = chain_gen(2000);
 
-	printf("Compressing\n");
+	printf("Write to file ");
 	uint32_t tmp;
-#ifdef _WIN32
-	tmp = GetTickCount();
+	struct timespec tm1, tm2;
+	timespec_get(&tm1, TIME_UTC); // start
 	chainCompactor(ch);
-	tmp = GetTickCount() - tmp;
-#else
-	struct timespec tmp1, tmp2;
-	clock_gettime(CLOCK_MONOTONIC, &tmp1); // start
-	chainCompactor(ch);
-	clock_gettime(CLOCK_MONOTONIC, &tmp2); // end
-	tmp = (tmp2.tv_sec - tmp1.tv_sec) * 1000
-		+ (tmp2.tv_nsec - tmp1.tv_nsec) / 1000000;
-#endif
-	printf("Took %d milliseconds\n", tmp);
+	timespec_get(&tm2, TIME_UTC); // end
+	tmp = (tm2.tv_sec - tm1.tv_sec) * 1000
+		+ (tm2.tv_nsec - tm1.tv_nsec) / 1000000;
+	printf("took %d milliseconds\n", tmp);
 
 	deleteChain(ch);
 	printf("\nMemory free'd");
@@ -87,11 +81,32 @@ void chain_test()
 	decompress_file("temp.file.7z", "temp.1unc");
 }
 
+void checksum_test(const char *src)
+{
+	uint32_t i, len;
+	uint8_t *sum = check_sha3_512_from_file(src, &len);
+
+	printf("%-14s [%02d]: ", src, len);
+	for (i = 0; i < len; i++)
+	{
+		printf("%02x", sum[i]);
+	}
+	printf("\n");
+
+	if (sum) free(sum);
+}
+
 int main()
 {
+	time_t tm;
+	srand((unsigned) time(&tm));
+
 	log_test();
-//zip_test();
 	chain_test();
+
+	checksum_test("temp.file");
+	checksum_test("temp.1unc");
+	checksum_test("temp.file.7z");
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();
