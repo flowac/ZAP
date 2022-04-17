@@ -16,7 +16,7 @@
 #define MAX_U2   0x03U        //!< max size of a  2 bit int
 #define MAX_U4   0x0FU        //!< max size of a  4 bit int
 #define MAX_U6   0x3FU        //!< max size of a  6 bit int
-#define MAX_U8   0xFFU        //!< max size of an 8 bit int
+#define MAX_U8   0xFFUL       //!< max size of an 8 bit int
 #define MAX_U16  0xFFFFUL     //!< max size of a 16 bit int
 #define MAX_U32  0xFFFFFFFFUL //!< max size of a 32 bit int
 
@@ -40,11 +40,11 @@ enum Link {
  * @brief Holds information about the parameters of the magnet link
  */
 typedef struct {
-	char info[INFO_LEN + 1];
 	uint64_t xl; //!< exact length, size of file in bytez
 	char *dn;    //!< display name, filename
 	char *xt;    //!< exact topic, URN with hash of file
 	char *tr;    //!< address tracker, tracker url
+	char info[INFO_LEN + 1];
 } pack;
 
 /**
@@ -63,9 +63,9 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
+	uint8_t  crc[64];//!< checksum 512 bits
 	uint64_t time;   //!< epoch seconds
 	uint64_t n;      //!< block number
-	uint8_t  crc[64];//!< checksum 512 bits
 	// TODO: change key to 512 bits
 	uint64_t key;    //!< gen next
 	uint8_t  n_packs;//!< number of payloads, 255 per block max
@@ -75,7 +75,7 @@ typedef struct {
 } block;
 
 typedef struct {
-	uint8_t address[512];//!< SHA3-512 checksum
+	uint8_t address[64]; //!< SHA3-512 checksum
 	//If balance is less than 1, the entry shall be trimmed
 	uint64_t id;         //SHAKE-128(64) of SHA3-512 checksum (for sorting)
 	uint64_t deci;       //Decimal value
@@ -85,8 +85,8 @@ typedef struct {
 typedef struct {
 	uint64_t n_bal;
 	uint64_t n_blk;
-	balance *bal;
 	block blk[B_MAX];
+	balance *bal;
 } chain;
 
 #endif //_ATYPE_H

@@ -28,7 +28,7 @@ ARGS_EXTERN = all
 
 # default rule and rule shortcuts
 all: lib7z.a $(OBJ)
-	$(CC) $(OBJ) $(7Z_DIR)/*.o -o $(PRG) $(LIBS) $(FLAGS)
+	$(CC) $(OBJ) $(7Z_DIR)/*.o -o $(PRG) $(LIBS)
 
 debug: FLAGS += -g
 debug: all

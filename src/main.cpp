@@ -49,7 +49,7 @@ chain *chain_gen(uint64_t size)
 
 	for (i = 0; i < size; i++) {
 		nPack = rand() % 50 + 50;
-		pack *packs = (pack *) malloc(sizeof(pack) * nPack);
+		pack *packs = (pack *) calloc(nPack, sizeof(pack));
 
 		for (j = 0; j < nPack; j++) {
 			k = rand() % 90 + 30;
@@ -62,6 +62,7 @@ chain *chain_gen(uint64_t size)
 			dn[0] = xt[0] = tr[0] = '0';
 
 			bool val = newPack(&packs[j], dn, (rand() % 50 + 1) * 1024 * 1024, xt, tr);
+			if (!val) printf("    newPack failed?");
 		}
 
 		key = (rand() % MAX_U16) * MAX_U32;
@@ -98,6 +99,7 @@ void chain_test(int size)
 	deleteChain(ch);
 	free(ch);
 
+	#if false
 	printf("\n7zip text\n");
 	start_timer();
 	compress_file(txtFile, zipFile);
@@ -118,6 +120,7 @@ void chain_test(int size)
 	checksum_test("temp.zaa.unz");
 	print_elapsed_time();
 
+	#endif
 	print_elapsed_time();
 }
 

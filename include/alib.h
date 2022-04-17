@@ -35,8 +35,7 @@ void printBlock(block *target);
  * @brief Create a new pack (magnet link info)
  * 
  * This fn will allocate a pack struct, and all of its parameters
- * @return NULL - something went wrong :( (malloc failed) \n
- * ptr to new pack struct
+ * @return True if success
  */
 bool newPack(pack *px,
              char *dn,   //!< Display name
@@ -46,7 +45,7 @@ bool newPack(pack *px,
 
 void newTran(tran *tx);
 
-void newBlock(block *bx,
+bool newBlock(block *bx,
 			  uint32_t time,
               uint64_t n,
               uint64_t key,

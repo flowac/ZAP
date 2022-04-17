@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -7,6 +8,7 @@
 #include "log.h"
 #include "ssl_fn.h"
 
+// TODO: move the two below to time_fn.cpp
 time_t sNow()
 {
 	time_t raw;
@@ -42,7 +44,7 @@ bool newPack(pack *px, char *dn, uint64_t xl, char *xt, char *tr)
 	uint32_t ntr = strlen(tr) + 1;
 
 	if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8)
-		return 1;
+		return false;
 
 	px->xl = xl;
 	strncpy(px->info, dn, 5);
@@ -53,20 +55,20 @@ bool newPack(pack *px, char *dn, uint64_t xl, char *xt, char *tr)
 	px->tr = (char *) malloc(sizeof(char) * ntr);
 
 	if (!px->dn || !px->xt || !px->tr)
-		return 1;
+		return false;
 
 	strcpy(px->dn, dn);
 	strcpy(px->xt, xt);
 	strcpy(px->tr, tr);
 
-	return 0;
+	return true;
 }
 
 void newTran(tran *tx)
 {
 }
 
-void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_packs,
+bool newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_packs,
 			  pack **packs)
 {
 	uint8_t *shaSum;
@@ -74,6 +76,18 @@ void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_pa
 	bx->time = time ? time : (uint32_t) sNow();
 	bx->n = n;
 	bx->key = key;
+
+	// TODO: fix this half-assed attempt, hash one string at a time
+	// TODO: add n_trans
+	shaSum = check_sha3_512(packs, std::max(*n_packs, MAX_U8), &shaLen);
+	memcpy(bx->crc, shaSum, shaLen);
+	free(shaSum);
+	if (shaLen != 64)
+	{
+		printf("    crc check failed on block %lu\n", n);
+		return false;
+	}
+
 	bx->packs = *packs;
 	if (*n_packs > MAX_U8) {
 		bx->n_packs = MAX_U8;
@@ -86,28 +100,20 @@ void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_pa
 	}
 	bx->n_trans = 0;
 	bx->trans = 0;
-	// TODO: fix this half-assed attempt, hash one string at a time
-	shaSum = check_sha3_512(packs, bx->n_packs, &shaLen);
-	memcpy(bx->crc, shaSum, shaLen);
-	free(shaSum);
-	if (shaLen == 0) printf("crc failed on block %lu", n);
-	// TODO: add n_trans
 	if (LOG)
 		printTime(bx->time);
+
+	return true;
 }
 
 chain *newChain(void)
 {
 	chain *ch = (chain *) malloc(sizeof(chain));
-	if (ch == NULL) {
-		log_msg_default;
-		return NULL;
-	}
+	if (!ch) return ch;
 
 	ch->n_bal = 0;
 	ch->n_blk = 0;
-	ch->bal = 0;
-	memset(ch->blk, 0, sizeof(block *) * 2000);
+	ch->bal = NULL;
 	return ch;
 }
 
@@ -119,7 +125,7 @@ bool insertBlock(block *bx, chain *ch)
 
 	if (ch->n_blk < B_MAX) {
 		ch->blk[ch->n_blk] = *bx;
-		ch->n_blk++;
+		++ch->n_blk;
 	}
 	else
 	{
@@ -131,23 +137,20 @@ bool insertBlock(block *bx, chain *ch)
 
 void deletePack(pack *target)
 {
-	if (target->dn != NULL) free(target->dn);
-	if (target->xt != NULL) free(target->xt);
-	if (target->tr != NULL) free(target->tr);
+	if (target->dn) free(target->dn);
+	if (target->xt) free(target->xt);
+	if (target->tr) free(target->tr);
 }
 
 void deleteBlock(block *target)
 {
-	uint32_t i;
-	if (target == 0) return;
-	for (i = 0; i < target->n_packs; i++) deletePack(&(target->packs[i]));
+	for (uint32_t i = 0; i < target->n_packs; i++) deletePack(&(target->packs[i]));
 	if (target->packs != 0) free(target->packs);
 	if (target->trans != 0) free(target->trans);
 }
 
 void deleteChain(chain *target)
 {
-	uint32_t i;
-	for (i = 0; i < B_MAX; i++) deleteBlock(&(target->blk[i]));
-	free(target->bal);
+	for (uint32_t i = 0; i < target->n_blk; i++) deleteBlock(&(target->blk[i]));
+	if (target->bal) free(target->bal);
 }

@@ -82,12 +82,13 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 
 bool chainToText(chain *ch, const char *dest)
 {
-	char buf[BUF4K + 1];
+	char buf[BUF4K];
 	FILE *fp;
 	if (!ch || !dest || !(fp = fopen(dest, "w"))) return false;
 
+	memset(buf, 0, BUF4K);
 	for (uint64_t i = 0; i < ch->n_blk; i++) {
-		blockToText(&(ch->blk[i]), fp, buf, BUF4K);
+		blockToText(&(ch->blk[i]), fp, buf, BUF4K - 1);
 	}
 
 	fclose(fp);
@@ -134,7 +135,6 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf, uint32_t len)
 	uint32_t i, slen;
 	if (!pk || !fp || !buf) return;
 
-	memset(buf, 0, len);
 	buf[0] = 'P';
 	memcpy(buf + 1, pk->info, INFO_LEN);
 	i = 1 + INFO_LEN;
@@ -181,8 +181,8 @@ void blockToZip(block *bx, FILE *fp, uint8_t *buf, uint32_t len)
 	memcpy(buf + i, bx->crc, 64);
 	i += 64;
 	i += longPacker(buf + i, bx->key);
-	buf[i++] = bx->n_packs;
-	buf[i++] = bx->n_trans;
+	buf[i++] = bx->n_packs & MAX_U8;
+	buf[i++] = bx->n_trans & MAX_U8;
 	fwrite(buf, 1, i, fp);
 
 	for (i = 0; i < bx->n_packs; i++) {
@@ -196,9 +196,10 @@ void blockToZip(block *bx, FILE *fp, uint8_t *buf, uint32_t len)
 bool chainToZip(chain *ch, const char *dest)
 {
 	FILE *fp;
-	uint8_t buf[BUF4K + 1];
+	uint8_t buf[BUF4K];
 	if (!ch || !dest || !(fp = fopen(dest, "wb"))) return false;
 
+	memset(buf, 0, BUF4K);
 	buf[0] = 'C';
 	longPacker(buf + 1, ch->n_blk);
 	fwrite(buf, 1, 9, fp);
