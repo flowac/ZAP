@@ -27,7 +27,7 @@ void packToText(pack *pk, FILE *fp, char *buf, int len)
 		return;
 	snprintf(buf, len, "\t{P"
 			 "\n\t\tPinfo: %s,"
-			 "\n\t\tPlen : %llu,"
+			 "\n\t\tPlen : %lu,"
 			 "\n\t\tPdn  : %s,"
 			 "\n\t\tPxt  : %s,"
 			 "\n\t\tPtr  : %s,"
@@ -43,11 +43,11 @@ void tranToText(tran *tx, FILE *fp, char *buf, int len)
 	if (!tx || !fp || !buf)
 		return;
 	snprintf(buf, len, "\t{T"
-			 "\n\t\tTtime: %llu,"
-			 "\n\t\tTid  : %llu,"
-			 "\n\t\tTsum : %llu,"
-			 "\n\t\tTsrc : %llu,"
-			 "\n\t\tTdest: %llu,"
+			 "\n\t\tTtime: %lu,"
+			 "\n\t\tTid  : %lu,"
+			 "\n\t\tTsum : %lu,"
+			 "\n\t\tTsrc : %lu,"
+			 "\n\t\tTdest: %lu,"
 			 "\n\t},\n",
 			 tx->time, tx->id, tx->amount, tx->src, tx->dest);
 
@@ -59,9 +59,9 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 	//1 tabs
 	uint32_t i;
 	snprintf(buf, len, "{B"
-			 "\n\tBgmt : %llu,"
-			 "\n\tBn   : %llu,"
-			 "\n\tBkey : %llu,"
+			 "\n\tBgmt : %lu,"
+			 "\n\tBn   : %lu,"
+			 "\n\tBkey : %lu,"
 			 "\n\tBpack: %u,"
 			 "\n\tBtran: %u,\n",
 			 bx->time, bx->n, bx->key, bx->n_packs, bx->n_trans);

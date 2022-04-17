@@ -25,7 +25,7 @@ void printBlock(block *target)
 	uint32_t n_packs = target->n_packs;
 
 	printTime((time_t) target->time);
-	printf("[%u] > 0x%lX [%u]\n", target->time, target->key, n_packs);
+	printf("[%lu] > 0x%lX [%u]\n", target->time, target->key, n_packs);
 
 	if (!LOG)
 		return;
@@ -90,7 +90,7 @@ void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_pa
 	shaSum = check_sha3_512(packs, bx->n_packs, &shaLen);
 	memcpy(bx->crc, shaSum, shaLen);
 	free(shaSum);
-	if (shaLen == 0) printf("crc failed on block %llu", n);
+	if (shaLen == 0) printf("crc failed on block %lu", n);
 	// TODO: add n_trans
 	if (LOG)
 		printTime(bx->time);

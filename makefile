@@ -23,7 +23,7 @@ OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
 LIBS += -lssl -lcrypto
 FLAGS += -O2
-FLAGS += -Wall -Wno-format -fpermissive -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
+FLAGS += -Wall -fpermissive -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
 ARGS_EXTERN = all
 
 # default rule and rule shortcuts

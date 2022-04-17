@@ -192,13 +192,8 @@ bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProp
 	FILE *input, *output; /* i/o file descriptors */
 	char out_path_local[PATH_MAX];
 	set_comp_out_file_name(in_path, out_path, out_path_local);
+	printf("  compressing %s -> %s\n", in_path, out_path_local);
 
-	char msg[200];
-	snprintf(msg, 199, "  compressing %s -> %s\n", in_path,
-			 out_path_local);
-	std::cout << msg;
-
-	/* open i/o files, return fail if this failes */
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
 	compress_data_incr(input, output, args);
 
@@ -216,12 +211,9 @@ bool decompress_file(const char *in_path, const char *out_path)
 	FILE *input, *output; /* i/o file descriptors */
 	char out_path_local[PATH_MAX];
 	set_decomp_out_file_name(in_path, out_path, out_path_local);
+	printf("  decompressing %s -> %s\n", in_path, out_path_local);
 
-	/* open i/o files, return fail if this failes */
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	char msg[200];
-	snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
-	std::cout << msg;
 	if (!decompress_data_incr(input, output))
 		log_msg("Failed to decompress\n");
 

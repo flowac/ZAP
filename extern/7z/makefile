@@ -1,5 +1,5 @@
 PROG = lib7z
-CC   = gcc -std=c17 -O2 -Wall -Werror -Wdangling-pointer=0
+CC   = gcc -std=c17 -O2 -Wall
 
 SOURCES = $(wildcard *.c)
 OBJ := $(SOURCES:%.c=%.o)
