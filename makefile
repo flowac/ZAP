@@ -17,7 +17,7 @@ endif
 all: lib7z.a torrent
 
 FLAGS += -O2
-FLAGS += -Wall -Wno-format -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
+FLAGS += -Wall -Wno-format -fpermissive -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
 ARGS_EXTERN = all
 
 debug: ARGS_EXTERN = debug

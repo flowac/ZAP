@@ -1,13 +1,8 @@
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
 
-#include "alib.h"
-#include "log.h"
 #include "alibio.h"
-#include "lzma_wrapper.h"
-#include "LzmaEnc.h"
 
 uint32_t getFilesize(FILE *fp)
 {
@@ -19,18 +14,25 @@ uint32_t getFilesize(FILE *fp)
 	return size;
 }
 
+void printBytes(FILE *fp, uint8_t *data, uint32_t len)
+{
+	if (!fp) return;
+	for (uint32_t i = 0; i < len; i++) fprintf(fp, "%02x", data[i]);
+}
+
 void packToText(pack *pk, FILE *fp, char *buf, int len)
 {
 	//2 tabs
 	if (!pk || !fp || !buf)
 		return;
-	snprintf(buf, len, "\t{P\
-\n\t\tPinfo: %s,\
-\n\t\tPdn  : %s,\
-\n\t\tPlen : %lld,\
-\n\t\tPxt  : %s,\
-\n\t\tPtr  : %s,\
-\n\tP},\n", pk->info, pk->dn, pk->xl, pk->xt, pk->tr);
+	snprintf(buf, len, "\t{P"
+			 "\n\t\tPinfo: %s,"
+			 "\n\t\tPlen : %llu,"
+			 "\n\t\tPdn  : %s,"
+			 "\n\t\tPxt  : %s,"
+			 "\n\t\tPtr  : %s,"
+			 "\n\tP},\n",
+			 pk->info, pk->xl, pk->dn, pk->xt, pk->tr);
 
 	fwrite(buf, 1, strlen(buf), fp);
 }
@@ -40,14 +42,14 @@ void tranToText(tran *tx, FILE *fp, char *buf, int len)
 	//2 tabs
 	if (!tx || !fp || !buf)
 		return;
-	snprintf(buf, len, "\t{T\
-\n\t\tTtime: %d,\
-\n\t\tTid  : %d,\
-\n\t\tTsrc : %ld,\
-\n\t\tTdest: %ld,\
-\n\t\tTsum : %ld,\
-\n\t\tTkey : %ld,\
-\n\t},\n", tx->time, tx->id, tx->src, tx->dest, tx->amount, tx->key);
+	snprintf(buf, len, "\t{T"
+			 "\n\t\tTtime: %llu,"
+			 "\n\t\tTid  : %llu,"
+			 "\n\t\tTsum : %llu,"
+			 "\n\t\tTsrc : %llu,"
+			 "\n\t\tTdest: %llu,"
+			 "\n\t},\n",
+			 tx->time, tx->id, tx->amount, tx->src, tx->dest);
 
 	fwrite(buf, 1, strlen(buf), fp);
 }
@@ -56,15 +58,16 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 {
 	//1 tabs
 	uint32_t i;
-	snprintf(buf, len, "{B\
-\n\tBgmt : %d,\
-\n\tBcrc : %d,\
-\n\tBpack: %d,\
-\n\tBtran: %d,\
-\n\tBn   : %d,\
-\n\tBkey : %ld,\n", bx->time, bx->crc, bx->n_packs, bx->n_trans, bx->n, bx->key);
-
+	snprintf(buf, len, "{B"
+			 "\n\tBgmt : %llu,"
+			 "\n\tBn   : %llu,"
+			 "\n\tBkey : %llu,"
+			 "\n\tBpack: %u,"
+			 "\n\tBtran: %u,\n",
+			 bx->time, bx->n, bx->key, bx->n_packs, bx->n_trans);
+	
 	fwrite(buf, 1, strlen(buf), fp);
+	printBytes(fp, bx->crc, 64);
 
 	for (i = 0; i < bx->n_packs; i++) {
 		packToText(&(bx->packs[i]), fp, buf, len);
@@ -77,275 +80,135 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 	fwrite(buf, 1, strlen(buf), fp);
 }
 
-/*temporary not used
-//returns number of bytes read (always higher than actual buf1 strlen)
-uint32_t read_struct(FILE *fp, char **buf1, char **buf2, uint32_t *len)
+bool chainToText(chain *ch, const char *dest)
 {
-    if (!*len)  *len  = MAX_U8;
-    if (!*buf1) *buf1 = (char *)malloc(*len);
-    if (!*buf2) *buf2 = (char *)malloc(*len), memset(*buf2, 0, *len);
-    
-    memset(*buf1, 0, *len);
-    memcpy(*buf1, *buf2, *len);
-    memset(*buf2, 0, *len);
-    
-    char *buf3;
-    uint32_t lb1 = strlen(*buf1), red = 0;//strlen of buf1, bytes read
-    
-    while ( !(buf3 = strchr(*buf2, '}')) ) {//end brace not found
-        memset(*buf2, 0, *len);
-        if ( !(red = fread(*buf2, MAX_U6, 1, fp)) ) {
-            return lb1;//EOF
-        }
-        
-        if (lb1 + MAX_U6 > *len) {
-            //increase buffer size to prevent overflow
-            *len += MAX_U8;
-            assert(*len < MAX_U16);
-            
-            *buf1 = (char *)realloc(*buf1, *len);
-            *buf2 = (char *)realloc(*buf2, *len);
-        }
-        
-        memcpy(*buf1 + lb1, *buf2, red);
-        lb1 += red;
-    }
-    
-    // previous size + 1 +  buf1 + offset of '}' in buf2
-    buf3 = lb1 - red + 1 + *buf1 - *buf2 + buf3;//location of the ending brace
-    strcpy(*buf2, buf3);
-    *buf1[buf3 - *buf1 + 1] = 0;//terminate the brace
-    
-    return lb1;
-//boost::regex_search(buf,eReg);
-//buf2 = boost::regex_replace(buf2, convertReg2, pad, boost::format_first_only);
-}
-*/
+	char *buf;
+	FILE *fp = fopen(dest, "w");
+	if (!fp) return false;
+	if (!(buf = (char *) malloc(BUF4K + 1))) return false;
 
-//To be DEPRECIATED
-char *indexes_of(char *haystack, const char *needle_start,
-				 const char *needle_end)
-{
-	char *ptr_start = strstr(haystack, needle_start);
-	char *ptr_end = strstr(haystack, needle_end);
-
-	if (!(ptr_start && ptr_end))
-		return NULL;
-
-	int len = ptr_end - ptr_start + 2;
-	char *dest = (char *) malloc(sizeof(char) *len + 1);
-	dest[len] = '\0';
-	memcpy(dest, ptr_start + 2, len);
-	return dest;
-}
-
-bool text2Pac(pack *px, FILE *fp)
-{
-	bool ret = 1;
-	char s[MAX_U8 + 1], *dn = NULL, *xt = NULL, *p_xl = NULL, *tr = NULL;
-	uint64_t xl = 0;
-
-	while (fgets(s, MAX_U8, fp) != NULL) {
-		int len = 0;
-		char *data = strstr(s, (char *) "P");
-		if (data) {
-			len = strlen(data);
-		}
-		if (len > 1) {
-			switch (data[1]) {
-			case 'i':			// pack->info
-				break;
-			case 'd':			// pack->dn
-				dn = indexes_of(data, ": ", ",");
-				break;
-			case 'l':			// pack->xl
-				p_xl = indexes_of(data, ": ", ",");
-				xl = atof(p_xl);
-				break;
-			case 'x':			// pack->xt
-				xt = indexes_of(data, ": ", ",");
-				break;
-			case 't':			// pack->tr
-				tr = indexes_of(data, ": ", ",");
-				break;
-			case '}':			// end of pack
-				ret = newPack(px, dn, xl, xt, tr);
-				if (dn)
-					free(dn);
-				if (p_xl)
-					free(p_xl);
-				if (xt)
-					free(xt);
-				if (tr)
-					free(tr);
-			default:
-				break;
-			}
-		}
-	}
-	return ret;
-}
-
-tran *text2Tran(FILE *fp)
-{
-	return NULL;
-}
-
-void text2Block(FILE *fp, block *bx)
-{
-	char s[MAX_U8 + 1];
-	pack *packs = 0, px;
-	char *tmp;
-	uint32_t time = 0;
-	uint64_t crc = 0;
-	uint64_t n_pack = 0;
-	uint64_t n_tran = 0;
-	uint64_t n = 0;
-	uint64_t key = 0;
-
-	while (fgets(s, MAX_U8, fp) != NULL) {
-		if (strstr(s, (char *) "{P") != NULL) {
-			if (!text2Pac(&px, fp)) {
-				n_pack++;
-				if (n_pack > MAX_U16) {
-					deletePack(&px);
-					log_msg_custom("nPack limit reached\n");
-					break;
-				}
-				packs = (pack *) realloc(packs, sizeof(pack) * n_pack);
-				packs[n_pack - 1] = px;
-			}
-		} else {
-			int len = 0;
-			char *data = strstr(s, (char *) "B");
-			if (data)
-				len = strlen(data);
-			if (len > 1) {
-				switch (data[1]) {
-				case 'g':		// block->time
-					tmp = indexes_of(data, ": ", ",");
-					time = atol(tmp);
-					if (tmp)
-						free(tmp);
-					break;
-				case 'c':		// block->crc
-					tmp = indexes_of(data, ": ", ",");
-					crc = atol(tmp);
-					if (tmp)
-						free(tmp);
-					break;
-				case 'p':		// block->nPack
-					/* n_pack is being counted in the other
-					 * part of the loop
-					 */
-					//tmp = indexes_of(data, ": ", ",");
-					//n_pack = atol(tmp);
-					//if (tmp) free(tmp);
-					break;
-				case 't':		// block->nTran
-					tmp = indexes_of(data, ": ", ",");
-					n_tran = atol(tmp);
-					if (tmp)
-						free(tmp);
-					break;
-				case 'n':		// block->n
-					tmp = indexes_of(data, ": ", ",");
-					n = atol(tmp);
-					if (tmp)
-						free(tmp);
-					break;
-				case 'k':		// block->key
-					tmp = indexes_of(data, ": ", ",");
-					key = strtoll(tmp, NULL, 10);
-					if (tmp)
-						free(tmp);
-					break;
-				case '}':
-					newBlock(bx, time, n, key, &n_pack, &packs);
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	}
-}
-
-int text2Chainz(FILE *fp, chain *ch)
-{
-	block bx;
-	char s[MAX_U8 + 1];
-	if (ch == NULL)
-		return 0;
-
-	/* Parse the text searching for the start of a block
-	 *
-	 */
-	while (fgets(s, MAX_U8, fp) != NULL) {
-		if (strstr(s, (char *) "{B") != NULL) {
-			text2Block(fp, &bx);
-			if (!insertBlock(&bx, ch))
-				log_msg_custom("Failed to insert block");
-		} else {
-			int len = 0;
-			char *data = strstr(s, (char *) "C");
-			if (data)
-				len = strlen(data);
-			if (len > 1) {
-				switch (data[1]) {
-				case 't':
-					// Ctime
-					break;
-					// Csize
-				case 's':
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	}
-	return 1;
-}
-
-chain *file_2_chainz(FILE *fp)
-{
-	chain *ch = newChain();
-	if (!text2Chainz(fp, ch))
-		log_msg_default;
-	return NULL;
-}
-
-//  return 1 for success, 0 for failure
-bool chainCompactor(chain *ch)
-{
-	FILE *fp = fopen("temp.file", "w");
-	const int b4k = 4096;
-	char buf4k[b4k + 1];
 	for (uint64_t i = 0; i < ch->n_blk; i++) {
-		blockToText(&(ch->blk[i]), fp, buf4k, b4k);
+		blockToText(&(ch->blk[i]), fp, buf, BUF4K);
 	}
 
 	fclose(fp);
-	return 1;
+	free(buf);
+	return true;
 }
 
-//  return 1 for success, 0 for failure
-/* Right now dont worry about compressing/decompressing
- */
-chain *chain_extractor(const char *inFile, uint8_t parts)
+uint32_t charPacker(uint8_t *buf, const char *str, uint32_t len)
 {
-	char buffy[69];
-	chain *ch = newChain();
-	FILE *fp = NULL;
-	for (int i = 1; i <= parts; i++) {
-		sprintf(buffy, "temp%d.file", i);
-		fp = fopen(buffy, "r");
-		if (fp == NULL) {
-			log_msg_default;
-			continue;
+	char ch;
+	uint8_t uch;
+	uint32_t i = 0, j;
+	buf[i] = len & MAX_U8;
+
+	for (j = 0; j < len; j++)
+	{
+		ch = str[j];
+		if      (ch < 0x20) uch = 0;
+		else if (ch < 0x60) uch = ch - 0x20;
+		else if (ch < 0x80) uch = ch - 0x40;
+		else                uch = 0;
+
+		switch (j % 4)
+		{
+		case 0: buf[++i] = uch & MAX_U6; break;
+		case 1: buf[i] |= (uch & MAX_U2) << 6; buf[++i] = (uch & MAX_U4); break;
+		case 2: buf[i] |= (uch & MAX_U4) << 4; buf[++i] = (uch & MAX_U2); break;
+		case 3: buf[i] |= (uch & MAX_U6) << 2; break;
 		}
-		text2Chainz(fp, ch);
 	}
-	return ch;
+	return i + 1;
+}
+
+uint32_t longPacker(uint8_t *buf, uint64_t data)
+{
+	for (uint32_t i = 0; i < 8; i++)
+	{
+		buf[i] = (data >> (i * 8)) & MAX_U8;
+	}
+	return 8U;
+}
+
+void packToZip(pack *pk, FILE *fp, uint8_t *buf, uint32_t len)
+{
+	uint32_t i, slen;
+	if (!pk || !fp || !buf) return;
+
+	memset(buf, 0, len);
+	buf[0] = 'P';
+	memcpy(buf + 1, pk->info, INFO_LEN);
+	i = 1 + INFO_LEN;
+	i += longPacker(buf + i, pk->xl);
+
+	// log a message? fix the length calc?
+	if ((slen = strlen(pk->dn)) > (len - i)) return;
+	i += charPacker(buf + i, pk->dn, slen);
+
+	if ((slen = strlen(pk->xt)) > (len - i)) return;
+	i += charPacker(buf + i, pk->xt, slen);
+
+	if ((slen = strlen(pk->tr)) > (len - i)) return;
+	i += charPacker(buf + i, pk->tr, slen);
+
+	fwrite(buf, 1, i, fp);
+}
+
+void tranToZip(tran *tx, FILE *fp, uint8_t *buf, uint32_t len)
+{
+	uint32_t i;
+	if (!tx || !fp || !buf) return;
+
+	buf[0] = 'T';
+	i = 1;
+	i += longPacker(buf + i, tx->time);
+	i += longPacker(buf + i, tx->id);
+	i += longPacker(buf + i, tx->amount);
+	i += longPacker(buf + i, tx->src);
+	i += longPacker(buf + i, tx->dest);
+
+	fwrite(buf, 1, i, fp);
+}
+
+void blockToZip(block *bx, FILE *fp, uint8_t *buf, uint32_t len)
+{
+	uint32_t i;
+	if (!bx || !fp || !buf) return;
+
+	buf[0] = 'B';
+	i = 1;
+	i += longPacker(buf + i, bx->time);
+	i += longPacker(buf + i, bx->n);
+	memcpy(buf + i, bx->crc, 64);
+	i += 64;
+	i += longPacker(buf + i, bx->key);
+	buf[i++] = bx->n_packs;
+	buf[i++] = bx->n_trans;
+	fwrite(buf, 1, i, fp);
+
+	for (i = 0; i < bx->n_packs; i++) {
+		packToZip(&(bx->packs[i]), fp, buf, len);
+	}
+	for (i = 0; i < bx->n_trans; i++) {
+		tranToZip(&(bx->trans[i]), fp, buf, len);
+	}
+}
+
+bool chainToZip(chain *ch, const char *dest)
+{
+	FILE *fp;
+	uint8_t buf[BUF4K + 1];
+	if (!ch || !dest || !(fp = fopen(dest, "wb"))) return false;
+
+	buf[0] = 'C';
+	longPacker(buf + 1, ch->n_blk);
+	fwrite(buf, 1, 9, fp);
+
+	for (uint64_t i = 0; i < ch->n_blk; i++) {
+		blockToZip(&(ch->blk[i]), fp, buf, BUF4K);
+	}
+
+	fclose(fp);
+	return true;
 }

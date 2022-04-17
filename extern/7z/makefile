@@ -1,5 +1,5 @@
 PROG = lib7z
-CC   = gcc -O2 -Wall -Werror
+CC   = gcc -O2 -Wall -Werror -Wdangling-pointer=0
 
 SOURCES = $(wildcard *.c)
 OBJ := $(SOURCES:%.c=%.o)
@@ -10,8 +10,6 @@ all: $(OBJ) lib7z.a
 	$(CC) -o $@ $<
 
 lib7z.a:
-	echo $(SOURCES)
-	echo $(OBJ)
 	ar rcs $(PROG).a $(OBJ)
 
 clean:

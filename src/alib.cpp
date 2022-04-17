@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "alib.h"
-#include "lzma_wrapper.h"
 #include "log.h"
+#include "ssl_fn.h"
 
 time_t sNow()
 {
@@ -69,15 +69,16 @@ void newTran(tran *tx)
 void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_packs,
 			  pack **packs)
 {
+	uint8_t *shaSum;
+	uint32_t shaLen;
 	bx->time = time ? time : (uint32_t) sNow();
-	bx->crc = 0;
 	bx->n = n;
 	bx->key = key;
 	bx->packs = *packs;
-	if (*n_packs > MAX_U16) {
-		bx->n_packs = MAX_U16;
-		*n_packs -= MAX_U16;
-		*packs = &((*packs)[MAX_U16]);
+	if (*n_packs > MAX_U8) {
+		bx->n_packs = MAX_U8;
+		*n_packs -= MAX_U8;
+		*packs = &((*packs)[MAX_U8]);
 	} else {
 		bx->n_packs = *n_packs;
 		*n_packs = 0;
@@ -85,6 +86,12 @@ void newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_pa
 	}
 	bx->n_trans = 0;
 	bx->trans = 0;
+	// TODO: fix this half-assed attempt, hash one string at a time
+	shaSum = check_sha3_512(packs, bx->n_packs, &shaLen);
+	memcpy(bx->crc, shaSum, shaLen);
+	free(shaSum);
+	if (shaLen == 0) printf("crc failed on block %llu", n);
+	// TODO: add n_trans
 	if (LOG)
 		printTime(bx->time);
 }
@@ -108,15 +115,16 @@ chain *newChain(void)
 //TODO: compact blocks once full
 bool insertBlock(block *bx, chain *ch)
 {
-	if (bx == 0 || ch == 0)
-		return 0;
+	if (!bx || !ch) return false;
 
 	if (ch->n_blk < B_MAX) {
 		ch->blk[ch->n_blk] = *bx;
 		ch->n_blk++;
-	} else {
+	}
+	else
+	{
 		log_msg_default;
-		return 0;
+		return false;
 	}
 	return true;
 }

@@ -11,32 +11,38 @@
 
 #include <stdint.h>
 
-#define LOG 0                //!< not sure
+#define LOG 0                 //!< not sure
 
-#define MAX_U6  0x3FU        //!< max size of a  6 bit int
-#define MAX_U8  0xFFU        //!< max size of an 8 bit int
-#define MAX_U16 0xFFFFU      //!< max size of a 16 bit int
-#define MAX_U32 0xFFFFFFFFUL //!< max size of a 32 bit int
-#define B_MAX   5000         //!< max number of blocks
+#define MAX_U2   0x03U        //!< max size of a  2 bit int
+#define MAX_U4   0x0FU        //!< max size of a  4 bit int
+#define MAX_U6   0x3FU        //!< max size of a  6 bit int
+#define MAX_U8   0xFFU        //!< max size of an 8 bit int
+#define MAX_U16  0xFFFFUL     //!< max size of a 16 bit int
+#define MAX_U32  0xFFFFFFFFUL //!< max size of a 32 bit int
+
+#define INFO_LEN 5            //!< length of info of pack
+#define B_MAX    5000         //!< max number of blocks
+
+#define BUF4K    0x1000UL
 
 /**
  * @brief not sure
  */
 enum Link {
-	DN = 0,//!< display name
-	XL,    //!< exact length
-	XT,    //!< exact topic
-	TR,    //!< address tracker
-	MLEN   //!< number of total parameters, must be last
+	P_DN = 0,//!< display name
+	P_XL,    //!< exact length
+	P_XT,    //!< exact topic
+	P_TR,    //!< address tracker
+	P_LEN    //!< number of total parameters, must be last
 };
 
 /**
  * @brief Holds information about the parameters of the magnet link
  */
 typedef struct {
-	char info[6];//!< first 5 characters of name, null terminated
-	char *dn;    //!< display name, filename
+	char info[INFO_LEN + 1];
 	uint64_t xl; //!< exact length, size of file in bytez
+	char *dn;    //!< display name, filename
 	char *xt;    //!< exact topic, URN with hash of file
 	char *tr;    //!< address tracker, tracker url
 } pack;
@@ -45,24 +51,25 @@ typedef struct {
  * @brief Holds information about a transaction
  */
 typedef struct {
-	uint32_t time;
-	uint32_t id;
+	uint64_t time;
+	uint64_t id;
+	uint64_t amount;
+	// TODO: change all of the below into 256 bit uint8_t
 	uint64_t src;
 	uint64_t dest;
-	uint64_t amount;
-	uint64_t key;
 } tran;
 
 /**
  * @brief Holds information about a block
  */
 typedef struct {
-	uint32_t time;   //!< epoch seconds
-	uint64_t crc;    //!< checksum
-	uint64_t n_packs;//!< number of payloads, 255 per block max
-	uint64_t n_trans;//!< number of transactions
+	uint64_t time;   //!< epoch seconds
 	uint64_t n;      //!< block number
+	uint8_t  crc[64];//!< checksum 512 bits
+	// TODO: change key to 512 bits
 	uint64_t key;    //!< gen next
+	uint8_t  n_packs;//!< number of payloads, 255 per block max
+	uint8_t  n_trans;//!< number of transactions, 255 per block max
 	pack *packs;
 	tran *trans;
 } block;

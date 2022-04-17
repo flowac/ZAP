@@ -30,33 +30,6 @@
 #include "LzmaDec.h"
 
 /**
- * @brief Function implementation for struct ISzAlloc 
- * see examples in LzmaUtil.c and C/alloc.c
- *
- * @return Returns a ptr allocated space
- */
-static void *SzAlloc(void *p,    //!< Not implemented
-                     size_t size)//!< Amount to malloc
-{
-	(void) p;// silence unused var warning
-	return MyAlloc(size);// just a malloc call...
-}
-
-/**
- * @brief Function implementation for struct ISzAlloc 
- * see examples in LzmaUtil.c and C/alloc.c
- */
-static void SzFree(void *p,      //!< Not implemented
-                   void *address)//!< Ptr to where we will call free
-{
-	(void) p;       // silence unused var warning
-	MyFree(address);// just a free call ... 
-}
-
-/** @brief Struct implementation */
-ISzAlloc g_Alloc = { SzAlloc, SzFree };
-
-/**
  * @brief Read raw data from a filedescriptor
  * INPUT:
  * @return

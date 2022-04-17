@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUF4K 0x1000UL
-
 uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 {
 	if (!src || !retLen) return NULL;
@@ -19,8 +17,7 @@ uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 	uint8_t *data = (uint8_t *) malloc(BUF4K);
 
 	if (!data || !fp || !(md_ctx = EVP_MD_CTX_new())) goto cleanup;
-	if (!(md_val = (uint8_t *) malloc(EVP_MAX_MD_SIZE))) goto cleanup;
-	memset(md_val, 0, EVP_MAX_MD_SIZE);
+	if (!(md_val = (uint8_t *) calloc(EVP_MAX_MD_SIZE, 1))) goto cleanup;
 	EVP_DigestInit_ex(md_ctx, EVP_sha3_512(), NULL);
 
 	while (file_len > 0)
@@ -39,15 +36,14 @@ cleanup:
 	return md_val;
 }
 
-uint8_t *check_sha3_512(const uint8_t *data, uint32_t size, uint32_t *retLen)
+uint8_t *check_sha3_512(const void *data, uint32_t size, uint32_t *retLen)
 {
 	if (!data || !retLen) return NULL;
 	EVP_MD_CTX *md_ctx = NULL;
 	uint8_t *md_val = NULL;
 
 	if (!(md_ctx = EVP_MD_CTX_new())) goto cleanup;
-	if (!(md_val = (uint8_t *) malloc(EVP_MAX_MD_SIZE))) goto cleanup;
-	memset(md_val, 0, EVP_MAX_MD_SIZE);
+	if (!(md_val = (uint8_t *) calloc(EVP_MAX_MD_SIZE, 1))) goto cleanup;
 	EVP_DigestInit_ex(md_ctx, EVP_sha3_512(), NULL);
 	EVP_DigestUpdate(md_ctx, data, size);
 	EVP_DigestFinal_ex(md_ctx, md_val, retLen);
