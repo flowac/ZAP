@@ -82,17 +82,15 @@ void blockToText(block *bx, FILE *fp, char *buf, int len)
 
 bool chainToText(chain *ch, const char *dest)
 {
-	char *buf;
-	FILE *fp = fopen(dest, "w");
-	if (!fp) return false;
-	if (!(buf = (char *) malloc(BUF4K + 1))) return false;
+	char buf[BUF4K + 1];
+	FILE *fp;
+	if (!ch || !dest || !(fp = fopen(dest, "w"))) return false;
 
 	for (uint64_t i = 0; i < ch->n_blk; i++) {
 		blockToText(&(ch->blk[i]), fp, buf, BUF4K);
 	}
 
 	fclose(fp);
-	free(buf);
 	return true;
 }
 

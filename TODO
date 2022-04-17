@@ -3,7 +3,6 @@ CURRENT
 **** Fully implement SHA checksum on blocks (use SHA256 for some cases?)
 ***  Chain audit and compare
 **   Block compaction
-*    Fix make -j11
 *    Delta generation logic?
 *    Remove argument processing library
      Clean up compression implementation or remove 7zip completely

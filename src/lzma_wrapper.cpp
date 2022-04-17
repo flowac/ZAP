@@ -87,31 +87,21 @@ static size_t write_data(void *p,         //!< ptr to \link seq_out_stream \endl
 /** @brief Open two files, one for input one for output
  *
  * @return
- * 1 - success \n
- * 0 - failure
+ * True - success \n
+ * False - failure
  */
-static int open_io_files(const char *in_path, //!< Input path
-                         const char *out_path,//!< Output path
-                         FILE *fd[])          //!< Array of FP, should change to individual Fps
+static bool open_io_files(const char *in_path, //!< Input path
+						  const char *out_path,//!< Output path
+						  FILE **input,        //!< Input file descriptor
+						  FILE **output)       //!< Output file descriptor
 {
-	fd[0] = fopen(in_path, "rb");
-	if (!fd[0]) {
-		log_msg_default;
-		goto cleanup;
-	}
-	fd[1] = fopen(out_path, "wb+");
-	if (!fd[1]) {
-		char msg[60];
-		snprintf(msg, 59, "\nOpening [%s] failed\n", out_path);
-		log_msg_custom(msg);
-		goto cleanup;
-	}
-	return 1;
+	*input = fopen(in_path, "rb");
+	*output = fopen(out_path, "wb+");
+	if (*input && *output) return true;
 
-cleanup:
-	if (fd[0]) fclose(fd[0]);
-	if (fd[1]) fclose(fd[1]);
-	return 0;
+	if (*input) fclose(*input);
+	if (*output) fclose(*output);
+	return false;
 }
 
 /** @brief Get params of the 7z file
@@ -193,19 +183,15 @@ static void set_decomp_out_file_name(const char *in_path, //!< Input path
 	}
 }
 
-/* work in progress, wrapper fn for compression call */
-int compress_file(const char *in_path, const char *out_path, const CLzmaEncProps *args)
+bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProps *args)
 {
 	if (in_path == NULL) {
 		log_msg("Invalid args to compress_file");
-		return 0;
+		return false;
 	}
+	FILE *input, *output; /* i/o file descriptors */
 	char out_path_local[PATH_MAX];
 	set_comp_out_file_name(in_path, out_path, out_path_local);
-
-	FILE *fd[2];				/* i/o file descriptors */
-	fd[0] = 0;
-	fd[1] = 0;
 
 	char msg[200];
 	snprintf(msg, 199, "  compressing %s -> %s\n", in_path,
@@ -213,38 +199,35 @@ int compress_file(const char *in_path, const char *out_path, const CLzmaEncProps
 	std::cout << msg;
 
 	/* open i/o files, return fail if this failes */
-	if (!open_io_files(in_path, out_path_local, fd)) return 0;
-	compress_data_incr(fd[0], fd[1], args);
+	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
+	compress_data_incr(input, output, args);
 
-	if (fd[0] != NULL) fclose(fd[0]);
-	if (fd[1] != NULL) fclose(fd[1]);
-	return 1;
+	fclose(input);
+	fclose(output);
+	return true;
 }
 
-int decompress_file(const char *in_path, const char *out_path)
+bool decompress_file(const char *in_path, const char *out_path)
 {
 	if (in_path == NULL) {
 		log_msg("Invalid args to decompress_file");
-		return 0;
+		return false;
 	}
+	FILE *input, *output; /* i/o file descriptors */
 	char out_path_local[PATH_MAX];
 	set_decomp_out_file_name(in_path, out_path, out_path_local);
 
-	FILE *fd[2];/* i/o file descriptors */
-	fd[0] = 0;
-	fd[1] = 0;
-
 	/* open i/o files, return fail if this failes */
-	if (!open_io_files(in_path, out_path_local, fd)) return 0;
+	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
 	char msg[200];
 	snprintf(msg, 199, "  decompressing %s -> %s\n", in_path, out_path_local);
 	std::cout << msg;
-	if (!decompress_data_incr(fd[0], fd[1]))
+	if (!decompress_data_incr(input, output))
 		log_msg("Failed to decompress\n");
 
-	if (fd[0]) fclose(fd[0]);
-	if (fd[1]) fclose(fd[1]);
-	return 1;
+	fclose(input);
+	fclose(output);
+	return true;
 }
 
 int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
@@ -348,4 +331,3 @@ int decompress_data_incr(FILE *input, FILE *output)
 	LzmaDec_Free(&state, &g_Alloc);
 	return 1;
 }
-

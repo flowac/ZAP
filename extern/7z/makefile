@@ -1,16 +1,14 @@
 PROG = lib7z
-CC   = gcc -O2 -Wall -Werror -Wdangling-pointer=0
+CC   = gcc -std=c17 -O2 -Wall -Werror -Wdangling-pointer=0
 
 SOURCES = $(wildcard *.c)
 OBJ := $(SOURCES:%.c=%.o)
 
-all: $(OBJ) lib7z.a
+all: $(OBJ)
+#	ar rcs $(PROG).a $(OBJ)
 
-%.o: %.cpp
-	$(CC) -o $@ $<
-
-lib7z.a:
-	ar rcs $(PROG).a $(OBJ)
+%.o: %.c
+	$(CC) -c -o $@ $<
 
 clean:
 	rm -f *.o *.a

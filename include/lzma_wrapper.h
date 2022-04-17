@@ -80,17 +80,17 @@ int in_stream_read(void *p, void *buf, size_t *size);
  * 1 - success\n
  * 0 - failure
  */
-int compress_file(const char *in_path,        //!< Path to the input file
-                  const char *out_path = NULL,//!< Path to the output
-                  const CLzmaEncProps * args = &default_props);//!< Arguments for compression see CLzmaEncProps in LzmaEnc.h for more info
+bool compress_file(const char *in_path,        //!< Path to the input file
+				   const char *out_path = NULL,//!< Path to the output
+				   const CLzmaEncProps * args = &default_props);//!< Arguments for compression see CLzmaEncProps in LzmaEnc.h for more info
 
 /**
  * @brief Decompress a compressed file, barely modified from lzmautil
  *
  * This implementation should be redone
  */
-int decompress_file(const char *in_path,         //!< Path to compressed file
-                    const char *out_path = NULL);//!< Path to destination, default will just chop off .7z
+bool decompress_file(const char *in_path,         //!< Path to compressed file
+					 const char *out_path = NULL);//!< Path to destination, default will just chop off .7z
 
 /**
  * @brief Compress data incrementally
@@ -119,4 +119,3 @@ int compress_data_incr(FILE *input, //!< Fp to input file
 int decompress_data_incr(FILE *input,  //!< Fp to compressed file
                          FILE *output);//!< Fp to dest
 #endif //_LZMA2_WRAPPER_H
-
