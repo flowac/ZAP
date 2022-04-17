@@ -1,17 +1,15 @@
 CURRENT
 *    Timer function that pushes time onto a stack and pop when stopped
-**** SHA checksum on blocks
+**** Fully implement SHA checksum on blocks (use SHA256 for some cases?)
 ***  Chain audit and compare
-***  Block compaction
-**   SHA checksum on files
+**   Block compaction
 *    Fix make -j11
 *    Delta generation logic?
 *    Remove argument processing library
-*    Clean up compression implementation
+     Clean up compression implementation or remove 7zip completely
 
 FUTURE GOALS
 *   Test RAM usage
     Create a simple search engine
     Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
-
