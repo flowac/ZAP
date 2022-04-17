@@ -21,7 +21,7 @@ SDIR = src
 SOURCES = $(wildcard $(SDIR)/*.cpp)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-LIBS += -lssl -lcrypto
+LIBS += -lssl -lcrypto -lpthread
 FLAGS += -O2
 FLAGS += -Wall -fpermissive -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
 ARGS_EXTERN = all
@@ -39,7 +39,7 @@ lib7z.a:
 
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp
-	$(CC) -c -o $@ $< $(FLAGS) $(LIBS)
+	$(CC) -c -o $@ $< $(FLAGS)
 
 clean: clean_local clean_files
 	$(MAKE) -C $(7Z_DIR) $@
