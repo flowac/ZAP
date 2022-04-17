@@ -1,5 +1,4 @@
 CURRENT
-*    Timer function that pushes time onto a stack and pop when stopped
 **** Fully implement SHA checksum on blocks (use SHA256 for some cases?)
 ***  Chain audit and compare
 **   Block compaction

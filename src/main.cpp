@@ -2,6 +2,7 @@
 #include "alib.h"
 #include "alibio.h"
 #include "ssl_fn.h"
+#include "time_fn.h"
 #include "log.h"
 #include "lzma_wrapper.h"
 
@@ -77,33 +78,47 @@ void chain_test(int size)
 	const char *txtFile = "temp.txt"; // chainToText output
 	const char *unzFile = "temp.unz"; // unzipped file
 
+	start_timer();
+
 	printf("\nGenerate\n");
+	start_timer();
 	chain *ch = chain_gen(size);
+	print_elapsed_time();
 
-	printf("Write to file ");
-	uint32_t tmp;
-	struct timespec tm1, tm2;
-	timespec_get(&tm1, TIME_UTC); // start
+	printf("\nWrite to file\n");
+	start_timer();
 	chainToText(ch, txtFile);
-	timespec_get(&tm2, TIME_UTC); // end
-	tmp = (tm2.tv_sec - tm1.tv_sec) * 1000
-		+ (tm2.tv_nsec - tm1.tv_nsec) / 1000000;
-	printf("took %d milliseconds\n", tmp);
+	print_elapsed_time();
 
+	printf("\nWrite to zip\n");
+	start_timer();
 	chainToZip(ch, zaaFile);
+	print_elapsed_time();
+
 	deleteChain(ch);
 	free(ch);
 
+	printf("\n7zip text\n");
+	start_timer();
 	compress_file(txtFile, zipFile);
 	decompress_file(zipFile, unzFile);
+	print_elapsed_time();
+
+	printf("\n7zip zip\n");
+	start_timer();
 	compress_file(zaaFile, "temp.zaa.zip");
 	decompress_file("temp.zaa.zip", "temp.zaa.unz");
+	print_elapsed_time();
 
+	start_timer();
 	checksum_test(txtFile);
 	checksum_test(unzFile);
 	checksum_test(zipFile);
 	checksum_test(zaaFile);
 	checksum_test("temp.zaa.unz");
+	print_elapsed_time();
+
+	print_elapsed_time();
 }
 
 int main()

@@ -1,7 +1,7 @@
 # executable
 PRG = test
 
-CC    = g++ -std=c++20
+CC    = g++ -std=c++2a
 RM    = rm -f
 
 # for windows os
