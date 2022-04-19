@@ -2,24 +2,11 @@
  * @file alib.h
  * @brief Functions that deal with the initialization of
  * the block structure
- *
- * Essentially just cleanup/init functions
  */
 #ifndef _ALIB_H
 #define _ALIB_H
 
 #include "atype.h"
-#include <time.h>
-#include <stdio.h>
-
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
-//Get current time in seconds
-inline time_t sNow();
-
-inline void printTime(time_t time);
 
 /**
  * @brief Packs uint64_t into uint8_t buffer little endian style
@@ -60,12 +47,22 @@ bool newBlock(block *bx,
 
 chain *newChain(void);
 
-//! return 1 on success
+//! return true on success
 bool insertBlock(block *bx, chain *ch);
 
 void deletePack(pack *target);
 
+void deleteTran(tran *target);
+
 void deleteChain(chain *target);
+
+bool enqueuePack(pack *target);
+
+bool enqueueTran(tran *target);
+
+pack *dequeuePack(void);
+
+tran *dequeueTran(void);
 
 /**
  * @brief Validate content against internal checksums

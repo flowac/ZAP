@@ -1,13 +1,13 @@
 CURRENT
-***  Chain audit and compare
-**   Block compaction
-**   Fix package and transaction checksums
-*    Delta generation logic?
-*    Remove argument processing library
-     Clean up compression implementation or remove 7zip completely
+*** Chain audit and compare
+**  Block compaction
+**  Fix package and transaction checksums
+*   Delta generation logic?
+*   Remove argument processing library
 
 FUTURE GOALS
 *   Test RAM usage
+    Clean up compression implementation or remove 7zip completely
     Create a simple search engine
     Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen

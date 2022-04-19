@@ -4,6 +4,8 @@
 #include <time.h>
 
 struct tm *get_loc_time();
+time_t sNow();
+void printTime(time_t time);
 
 /**
  * @brief Start LCFS stack timer function

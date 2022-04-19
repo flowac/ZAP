@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <queue>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -7,20 +8,10 @@
 #include "alib.h"
 #include "log.h"
 #include "ssl_fn.h"
+#include "time_fn.h"
 
-// TODO: move the two below to time_fn.cpp
-time_t sNow()
-{
-	time_t raw;
-	time(&raw);
-	return raw;
-}
-
-void printTime(time_t time)
-{
-	char buf[MAX_U8];
-	strftime(buf, MAX_U8, "%g %B %d  %H:%M:%S", localtime(&time));
-}
+static std::queue<pack *> pack_queue;
+static std::queue<tran *> tran_queue;
 
 uint32_t u64Packer(uint8_t *buf, uint64_t data)
 {
@@ -152,6 +143,10 @@ void deletePack(pack *target)
 	if (target->xt) free(target->xt);
 	if (target->tr) free(target->tr);
 }
+ 
+void deleteTran(tran *target)
+{
+}
 
 void deleteBlock(block *target)
 {
@@ -166,4 +161,34 @@ void deleteChain(chain *target)
 {
 	for (uint32_t i = 0; i < target->n_blk; i++) deleteBlock(&(target->blk[i]));
 	if (target->bal) free(target->bal);
+}
+
+bool enqueuePack(pack *target)
+{
+	if (!target) return false;
+	pack_queue.push(target);
+	return true;
+}
+
+bool enqueueTran(tran *target)
+{
+	if (!target) return false;
+	tran_queue.push(target);
+	return true;
+}
+
+pack *dequeuePack(void)
+{
+	if (pack_queue.empty()) return NULL;
+	pack *target = pack_queue.front();
+	pack_queue.pop();
+	return target;
+}
+
+tran *dequeueTran(void)
+{
+	if (tran_queue.empty()) return NULL;
+	tran *target = tran_queue.front();
+	tran_queue.pop();
+	return target;
 }
