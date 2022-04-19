@@ -1,8 +1,6 @@
 #include "alibio.h"
 #include "ssl_fn.h"
 
-#include <openssl/evp.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,19 +34,35 @@ cleanup:
 	return md_val;
 }
 
-uint8_t *check_sha3_512(const void *data, uint32_t size, uint32_t *retLen)
+EVP_MD_CTX *update_sha3_512(const void *data, uint32_t size, EVP_MD_CTX *md_ctx)
 {
-	if (!data || !retLen) return NULL;
-	EVP_MD_CTX *md_ctx = NULL;
+	EVP_MD_CTX *local_ctx = md_ctx;
+
+	if (!data) goto cleanup;
+	if (!local_ctx && !(local_ctx = EVP_MD_CTX_new())) goto cleanup;
+	if (!md_ctx) EVP_DigestInit_ex(local_ctx, EVP_sha3_512(), NULL);
+	EVP_DigestUpdate(local_ctx, data, size);
+
+	return local_ctx;
+cleanup:
+	if (local_ctx) EVP_MD_CTX_free(local_ctx);
+	return NULL;
+}
+
+uint8_t *finish_sha3_512(uint32_t *retLen, EVP_MD_CTX *md_ctx)
+{
 	uint8_t *md_val = NULL;
 
-	if (!(md_ctx = EVP_MD_CTX_new())) goto cleanup;
+	if (!retLen || !md_ctx) goto cleanup;
 	if (!(md_val = (uint8_t *) calloc(EVP_MAX_MD_SIZE, 1))) goto cleanup;
-	EVP_DigestInit_ex(md_ctx, EVP_sha3_512(), NULL);
-	EVP_DigestUpdate(md_ctx, data, size);
 	EVP_DigestFinal_ex(md_ctx, md_val, retLen);
 
 cleanup:
 	if (md_ctx) EVP_MD_CTX_free(md_ctx);
 	return md_val;
+}
+
+uint8_t *finish_sha3_512(const void *data, uint32_t size, uint32_t *retLen, EVP_MD_CTX *md_ctx)
+{
+	return finish_sha3_512(retLen, update_sha3_512(data, size, md_ctx));
 }

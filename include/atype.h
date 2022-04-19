@@ -63,11 +63,10 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
-	uint8_t  crc[64];//!< checksum 512 bits
-	uint64_t time;   //!< epoch seconds
+	uint8_t *key;    //!< gen next 512 bits
+	uint8_t *crc;    //!< checksum 512 bits
 	uint64_t n;      //!< block number
-	// TODO: change key to 512 bits
-	uint64_t key;    //!< gen next
+	uint64_t time;   //!< epoch seconds
 	uint8_t  n_packs;//!< number of payloads, 255 per block max
 	uint8_t  n_trans;//!< number of transactions, 255 per block max
 	pack *packs;

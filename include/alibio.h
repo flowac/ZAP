@@ -18,7 +18,8 @@ uint32_t getFilesize(FILE *fp);
  */
 void printBytes(FILE *fp,
 				uint8_t *data,
-				uint32_t len);
+				uint32_t len,
+				const char *suffix = NULL);
 
 /**
  * @brief convert the entire chain into a file

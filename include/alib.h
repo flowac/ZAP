@@ -22,6 +22,11 @@ inline time_t sNow();
 inline void printTime(time_t time);
 
 /**
+ * @brief Packs uint64_t into uint8_t buffer little endian style
+ */
+uint32_t u64Packer(uint8_t *buf, uint64_t data);
+
+/**
  * @brief This function will print the relative information of a block
  * 
  * it will print the:
@@ -46,11 +51,12 @@ bool newPack(pack *px,
 void newTran(tran *tx);
 
 bool newBlock(block *bx,
-			  uint32_t time,
-              uint64_t n,
-              uint64_t key,
-              uint64_t *n_packs,//address of package count
-              pack **packs);    //address of package array
+			  uint64_t n,
+              uint64_t time,
+              uint32_t n_packs,//package count
+              pack *packs,     //package array
+              uint32_t n_trans,//transaction count
+              tran *trans);    //transaction array
 
 chain *newChain(void);
 

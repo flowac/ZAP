@@ -22,19 +22,19 @@ void printTime(time_t time)
 	strftime(buf, MAX_U8, "%g %B %d  %H:%M:%S", localtime(&time));
 }
 
+uint32_t u64Packer(uint8_t *buf, uint64_t data)
+{
+	for (uint32_t i = 0; i < 8; i++)
+	{
+		buf[i] = (data >> (i * 8)) & MAX_U8;
+	}
+	return 8U;
+}
+
 void printBlock(block *target)
 {
-	uint32_t n_packs = target->n_packs;
-
-	printTime((time_t) target->time);
-	printf("[%lu] > 0x%lX [%u]\n", target->time, target->key, n_packs);
-
-	if (!LOG)
-		return;
-	for (uint32_t i = 0; i < n_packs; i++) {
-//        printf("%lX\t", target->packs[i]);
-	}
-	printf("\n");
+	//printTime((time_t) target->time);
+	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
 }
 
 bool newPack(pack *px, char *dn, uint64_t xl, char *xt, char *tr)
@@ -68,41 +68,52 @@ void newTran(tran *tx)
 {
 }
 
-bool newBlock(block *bx, uint32_t time, uint64_t n, uint64_t key, uint64_t *n_packs,
-			  pack **packs)
+bool newBlock(block *bx, uint64_t n, uint64_t time,
+			  uint32_t n_packs, pack *packs,
+			  uint32_t n_trans, tran *trans)
 {
-	uint8_t *shaSum;
+	if (!bx || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
 	uint32_t shaLen;
-	bx->time = time ? time : (uint32_t) sNow();
-	bx->n = n;
-	bx->key = key;
+	EVP_MD_CTX *md_ctx;
 
-	// TODO: fix this half-assed attempt, hash one string at a time
-	// TODO: add n_trans
-	shaSum = check_sha3_512(packs, std::max(*n_packs, MAX_U8), &shaLen);
-	memcpy(bx->crc, shaSum, shaLen);
-	free(shaSum);
+	bx->n = n;
+	bx->time = time ? time : (uint64_t) sNow();
+	bx->n_packs = n_packs;
+	bx->n_trans = n_trans;
+	bx->packs = packs;
+	bx->trans = trans;
+
+	uint8_t bitPack[18];
+	u64Packer(bitPack, bx->n);
+	u64Packer(bitPack + 8, bx->time);
+	bitPack[16] = bx->n_packs;
+	bitPack[17] = bx->n_trans;
+
+	if (!(md_ctx = update_sha3_512(bitPack, 18, NULL))) return false;
+
+	// TODO: Do these checksums properly instead of taking a whole chunk of memory
+	if (bx->packs) if (!update_sha3_512(bx->packs, sizeof(pack) * bx->n_packs, md_ctx)) return false;
+	if (bx->trans) if (!update_sha3_512(bx->trans, sizeof(tran) * bx->n_trans, md_ctx)) return false;
+
+	bx->crc = finish_sha3_512(&shaLen, md_ctx);
 	if (shaLen != 64)
 	{
-		printf("    crc check failed on block %lu\n", n);
+		if (bx->crc) free(bx->crc);
+		printf("SHA3-512 for crc failed. Bytes expected=64, actual=%u\n", shaLen);
 		return false;
 	}
 
-	bx->packs = *packs;
-	if (*n_packs > MAX_U8) {
-		bx->n_packs = MAX_U8;
-		*n_packs -= MAX_U8;
-		*packs = &((*packs)[MAX_U8]);
-	} else {
-		bx->n_packs = *n_packs;
-		*n_packs = 0;
-		*packs = 0;
+	// TODO: fix this broken key gen
+	bx->key = finish_sha3_512(bx->crc, 64, &shaLen);
+	if (shaLen != 64)
+	{
+		if (bx->key) free(bx->key);
+		free(bx->crc);
+		printf("SHA3-512 for key failed. Bytes expected=64, actual=%u\n", shaLen);
+		return false;
 	}
-	bx->n_trans = 0;
-	bx->trans = 0;
-	if (LOG)
-		printTime(bx->time);
 
+	if (LOG) printTime(bx->time);
 	return true;
 }
 
@@ -145,8 +156,10 @@ void deletePack(pack *target)
 void deleteBlock(block *target)
 {
 	for (uint32_t i = 0; i < target->n_packs; i++) deletePack(&(target->packs[i]));
-	if (target->packs != 0) free(target->packs);
-	if (target->trans != 0) free(target->trans);
+	if (target->key)   free(target->key);
+	if (target->crc)   free(target->crc);
+	if (target->packs) free(target->packs);
+	if (target->trans) free(target->trans);
 }
 
 void deleteChain(chain *target)

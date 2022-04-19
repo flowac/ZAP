@@ -1,7 +1,7 @@
 CURRENT
-**** Fully implement SHA checksum on blocks (use SHA256 for some cases?)
 ***  Chain audit and compare
 **   Block compaction
+**   Fix package and transaction checksums
 *    Delta generation logic?
 *    Remove argument processing library
      Clean up compression implementation or remove 7zip completely

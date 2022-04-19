@@ -38,20 +38,23 @@ void checksum_test(const char *src)
 chain *chain_gen(uint64_t size)
 {
 	uint16_t j, k;
-	uint64_t nPack;
+	uint32_t nPacks;
+	uint32_t nTrans;
 	uint64_t i;
 	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
 
-	uint64_t key;
+	bool val;
 	block bx;
 	chain *ch = newChain();
 	char dn[121], xt[121], tr[121];
 
 	for (i = 0; i < size; i++) {
-		nPack = rand() % 50 + 50;
-		pack *packs = (pack *) calloc(nPack, sizeof(pack));
+		nPacks = rand() % 50 + 50;
+		pack *packs = (pack *) calloc(nPacks, sizeof(pack));
+		nTrans = 0;
+		tran *trans = NULL;
 
-		for (j = 0; j < nPack; j++) {
+		for (j = 0; j < nPacks; j++) {
 			k = rand() % 90 + 30;
 			dn[k] = xt[k] = tr[k] = 0;
 			for (--k; k > 0; --k) {
@@ -61,12 +64,13 @@ chain *chain_gen(uint64_t size)
 			}
 			dn[0] = xt[0] = tr[0] = '0';
 
-			bool val = newPack(&packs[j], dn, (rand() % 50 + 1) * 1024 * 1024, xt, tr);
+			val = newPack(&packs[j], dn, (rand() % 50 + 1) * 1024 * 1024, xt, tr);
 			if (!val) printf("    newPack failed?");
 		}
 
-		key = (rand() % MAX_U16) * MAX_U32;
-		newBlock(&bx, 0, i, key, &nPack, &packs);
+		val = newBlock(&bx, i, 0, nPacks, packs, nTrans, trans);
+		if (!val) printf("    newBlock failed?");
+
 		if (!insertBlock(&bx, ch)) break;
 	}
 	return ch;
