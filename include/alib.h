@@ -45,8 +45,6 @@ bool newBlock(block *bx,
               uint32_t n_trans,//transaction count
               tran *trans);    //transaction array
 
-chain *newChain(void);
-
 //! return true on success
 bool insertBlock(block *bx, chain *ch);
 

@@ -35,7 +35,7 @@ void checksum_test(const char *src)
 	if (sum) free(sum);
 }
 
-chain *chain_gen(uint64_t size)
+void chain_gen(chain *ch, uint64_t size)
 {
 	uint16_t j, k;
 	uint32_t nPacks;
@@ -45,7 +45,6 @@ chain *chain_gen(uint64_t size)
 
 	bool val;
 	block bx;
-	chain *ch = newChain();
 	char dn[121], xt[121], tr[121];
 
 	for (i = 0; i < size; i++) {
@@ -71,9 +70,12 @@ chain *chain_gen(uint64_t size)
 		val = newBlock(&bx, i, 0, nPacks, packs, nTrans, trans);
 		if (!val) printf("    newBlock failed?");
 
-		if (!insertBlock(&bx, ch)) break;
+		if (!insertBlock(&bx, ch))
+		{
+			printf("Failed to add block at %lu", ch->blk.size());
+			break;
+		}
 	}
-	return ch;
 }
 
 void chain_test(int size)
@@ -87,21 +89,21 @@ void chain_test(int size)
 
 	printf("\nGenerate\n");
 	start_timer();
-	chain *ch = chain_gen(size);
+	chain ch;
+	chain_gen(&ch, size);
 	print_elapsed_time();
 
 	printf("\nWrite to file\n");
 	start_timer();
-	chainToText(ch, txtFile);
+	chainToText(&ch, txtFile);
 	print_elapsed_time();
 
 	printf("\nWrite to zip\n");
 	start_timer();
-	chainToZip(ch, zaaFile);
+	chainToZip(&ch, zaaFile);
 	print_elapsed_time();
 
-	deleteChain(ch);
-	free(ch);
+	deleteChain(&ch);
 
 	#if false
 	printf("\n7zip text\n");
@@ -134,7 +136,7 @@ int main()
 	srand((unsigned) time(&tm));
 
 	log_test();
-	chain_test(2000);
+	chain_test(1000);
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();

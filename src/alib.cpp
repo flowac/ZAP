@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <queue>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -108,32 +107,18 @@ bool newBlock(block *bx, uint64_t n, uint64_t time,
 	return true;
 }
 
-chain *newChain(void)
-{
-	chain *ch = (chain *) malloc(sizeof(chain));
-	if (!ch) return ch;
-
-	ch->n_bal = 0;
-	ch->n_blk = 0;
-	ch->bal = NULL;
-	return ch;
-}
-
-//! return 1 on success
 //TODO: compact blocks once full
+//TODO: validate blocks or merge with newBlock
 bool insertBlock(block *bx, chain *ch)
 {
 	if (!bx || !ch) return false;
 
-	if (ch->n_blk < B_MAX) {
-		ch->blk[ch->n_blk] = *bx;
-		++ch->n_blk;
-	}
-	else
+	ch->blk.push_back(*bx);
+	if (ch->blk.size() > B_MAX)
 	{
-		log_msg_default;
-		return false;
+		printf("Max number of blocks %d exceeded. Currently %lu.\n", B_MAX, ch->blk.size());
 	}
+
 	return true;
 }
 
@@ -159,8 +144,9 @@ void deleteBlock(block *target)
 
 void deleteChain(chain *target)
 {
-	for (uint32_t i = 0; i < target->n_blk; i++) deleteBlock(&(target->blk[i]));
-	if (target->bal) free(target->bal);
+	target->bal.clear();
+	for (uint64_t i = target->blk.size() - 1; i >= 0; --i) deleteBlock(&(target->blk[i]));
+	target->blk.clear();
 }
 
 bool enqueuePack(pack *target)

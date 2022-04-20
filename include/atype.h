@@ -9,6 +9,8 @@
 #ifndef _ATYPE_H
 #define _ATYPE_H
 
+#include <queue>
+#include <vector>
 #include <stdint.h>
 
 #define LOG 0                 //!< not sure
@@ -82,10 +84,8 @@ typedef struct {
 } balance;
 
 typedef struct {
-	uint64_t n_bal;
-	uint64_t n_blk;
-	block blk[B_MAX];
-	balance *bal;
+	std::vector<balance> bal;
+	std::vector<block> blk;
 } chain;
 
 #endif //_ATYPE_H

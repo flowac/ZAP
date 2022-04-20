@@ -59,8 +59,8 @@ void blockToText(block *bx, FILE *fp)
 			"\n\tBtran: %u,\n",
 			bx->n, bx->time, bx->n_packs, bx->n_trans);
 
-	for (uint32_t i = 0; i < bx->n_packs; i++) packToText(&(bx->packs[i]), fp);
-	for (uint32_t i = 0; i < bx->n_trans; i++) tranToText(&(bx->trans[i]), fp);
+	for (uint32_t i = 0; i < bx->n_packs; ++i) packToText(&(bx->packs[i]), fp);
+	for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
 
 	fprintf(fp, "},\n");
 }
@@ -70,7 +70,7 @@ bool chainToText(chain *ch, const char *dest)
 	FILE *fp;
 	if (!ch || !dest || !(fp = fopen(dest, "w"))) return false;
 
-	for (uint64_t i = 0; i < ch->n_blk; i++) blockToText(&(ch->blk[i]), fp);
+	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToText(&(ch->blk[i]), fp);
 
 	fclose(fp);
 	return true;
@@ -170,10 +170,10 @@ bool chainToZip(chain *ch, const char *dest)
 
 	memset(buf, 0, BUF4K);
 	buf[0] = 'C';
-	u64Packer(buf + 1, ch->n_blk);
+	u64Packer(buf + 1, ch->blk.size());
 	fwrite(buf, 1, 9, fp);
 
-	for (uint64_t i = 0; i < ch->n_blk; i++) blockToZip(&(ch->blk[i]), fp, buf, BUF4K);
+	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToZip(&(ch->blk[i]), fp, buf, BUF4K);
 
 	fclose(fp);
 	return true;
