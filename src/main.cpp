@@ -46,6 +46,7 @@ void chain_gen(chain *ch, uint64_t size)
 	bool val;
 	block bx;
 	char dn[121], xt[121], tr[121];
+	char *kt[KEYWORD_TOPIC_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 
 	for (i = 0; i < size; i++) {
 		nPacks = rand() % 50 + 50;
@@ -63,7 +64,7 @@ void chain_gen(chain *ch, uint64_t size)
 			}
 			dn[0] = xt[0] = tr[0] = '0';
 
-			val = newPack(&packs[j], dn, (rand() % 50 + 1) * 1024 * 1024, xt, tr);
+			val = newPack(&packs[j], (rand() % 50 + 1) * 1024 * 1024, dn, xt, tr, kt);
 			if (!val) printf("    newPack failed?");
 		}
 
@@ -105,7 +106,7 @@ void chain_test(int size)
 
 	deleteChain(&ch);
 
-	#if false
+	#if true
 	printf("\n7zip text\n");
 	start_timer();
 	compress_file(txtFile, zipFile);
@@ -125,8 +126,8 @@ void chain_test(int size)
 	checksum_test(zaaFile);
 	checksum_test("temp.zaa.unz");
 	print_elapsed_time();
-
 	#endif
+
 	print_elapsed_time();
 }
 
@@ -136,7 +137,7 @@ int main()
 	srand((unsigned) time(&tm));
 
 	log_test();
-	chain_test(1000);
+	chain_test(200);
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();

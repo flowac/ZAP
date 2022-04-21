@@ -14,7 +14,7 @@ uint8_t *check_sha3_512_from_file(const char *src,
 /**
  * @brief Begin or update checksum procedure
  *
- * The EVP_MD_CTX will be free'd if a failure was encountered
+ * The EVP_MD_CTX will not be allocated if data or size is 0
  *
  * @return NULL - failure
  */

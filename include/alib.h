@@ -30,10 +30,11 @@ void printBlock(block *target);
  * @return True if success
  */
 bool newPack(pack *px,
-             char *dn,   //!< Display name
              uint64_t xl,//!< Exact length (size in bytez)
+             char *dn,   //!< Display name
              char *xt,   //!< exact topic (URN with hash of file)
-             char *tr);  //!< tracker url
+             char *tr,  //!< tracker url
+			 char *kt[KEYWORD_TOPIC_COUNT]);
 
 void newTran(tran *tx);
 

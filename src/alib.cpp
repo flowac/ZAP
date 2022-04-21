@@ -27,31 +27,41 @@ void printBlock(block *target)
 	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
 }
 
-bool newPack(pack *px, char *dn, uint64_t xl, char *xt, char *tr)
+bool newPack(pack *px, uint64_t xl, char *dn, char *xt, char *tr, char *kt[KEYWORD_TOPIC_COUNT])
 {
 	uint32_t ndn = strlen(dn) + 1;
 	uint32_t nxt = strlen(xt) + 1;
 	uint32_t ntr = strlen(tr) + 1;
+	uint32_t nkt;
 
 	if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8)
 		return false;
 
 	px->xl = xl;
-	strncpy(px->info, dn, 5);
-	px->info[5] = 0;
-
-	px->dn = (char *) malloc(sizeof(char) * ndn);
-	px->xt = (char *) malloc(sizeof(char) * nxt);
-	px->tr = (char *) malloc(sizeof(char) * ntr);
-
-	if (!px->dn || !px->xt || !px->tr)
-		return false;
-
+	if (!(px->dn = (char *) calloc(ndn, sizeof(char)))) goto cleanup;
+	if (!(px->xt = (char *) calloc(nxt, sizeof(char)))) goto cleanup;
+	if (!(px->tr = (char *) calloc(ntr, sizeof(char)))) goto cleanup;
 	strcpy(px->dn, dn);
 	strcpy(px->xt, xt);
 	strcpy(px->tr, tr);
 
+	for (uint32_t i = 0; i < KEYWORD_TOPIC_COUNT; ++i) px->kt[i] = NULL;
+	for (uint32_t i = 0, j = 0; i < KEYWORD_TOPIC_COUNT; ++i)
+	{
+		if (!kt[i]) break;
+		nkt = strlen(kt[i]) + 1;
+		if (nkt > MAX_U8) continue;
+		if (!(px->kt[j] = (char *) calloc(nkt, sizeof(char)))) continue;
+		strcpy(px->kt[j], kt[i]);
+		++j;
+	}
+
 	return true;
+cleanup:
+	if (px->dn) free(px->dn);
+	if (px->xt) free(px->xt);
+	if (px->tr) free(px->tr);
+	return false;
 }
 
 void newTran(tran *tx)
@@ -127,6 +137,7 @@ void deletePack(pack *target)
 	if (target->dn) free(target->dn);
 	if (target->xt) free(target->xt);
 	if (target->tr) free(target->tr);
+	for (uint32_t i = 0; i < KEYWORD_TOPIC_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
 }
  
 void deleteTran(tran *target)
@@ -135,7 +146,7 @@ void deleteTran(tran *target)
 
 void deleteBlock(block *target)
 {
-	for (uint32_t i = 0; i < target->n_packs; i++) deletePack(&(target->packs[i]));
+	for (uint32_t i = 0; i < target->n_packs; ++i) deletePack(&(target->packs[i]));
 	if (target->key)   free(target->key);
 	if (target->crc)   free(target->crc);
 	if (target->packs) free(target->packs);
@@ -145,7 +156,7 @@ void deleteBlock(block *target)
 void deleteChain(chain *target)
 {
 	target->bal.clear();
-	for (uint64_t i = target->blk.size() - 1; i >= 0; --i) deleteBlock(&(target->blk[i]));
+	for (uint64_t i = 0; i < target->blk.size(); ++i) deleteBlock(&(target->blk[i]));
 	target->blk.clear();
 }
 

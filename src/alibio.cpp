@@ -22,6 +22,7 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
+// TODO: add kt
 void packToText(pack *pk, FILE *fp)
 {
 	fprintf(fp, "\t{P"
@@ -29,9 +30,8 @@ void packToText(pack *pk, FILE *fp)
 			"\n\t\tPdn  : %s,"
 			"\n\t\tPxt  : %s,"
 			"\n\t\tPtr  : %s,"
-			"\n\t\tPinfo: %s,"
 			"\n\t\t},\n",
-			pk->xl, pk->dn, pk->xt, pk->tr, pk->info);
+			pk->xl, pk->dn, pk->xt, pk->tr);
 }
 
 void tranToText(tran *tx, FILE *fp)
@@ -102,6 +102,7 @@ uint32_t charPacker(uint8_t *buf, const char *str, uint32_t len)
 	return i + 1;
 }
 
+// TODO: add kt
 void packToZip(pack *pk, FILE *fp, uint8_t *buf, uint32_t len)
 {
 	uint32_t i = 0, slen;
@@ -119,10 +120,6 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf, uint32_t len)
 
 	if ((slen = strlen(pk->tr)) > (len - i)) return;
 	i += charPacker(buf + i, pk->tr, slen);
-
-	if (INFO_LEN > (len - i)) return;
-	memcpy(buf + i, pk->info, INFO_LEN);
-	i += INFO_LEN;
 
 	fwrite(buf, 1, i, fp);
 }

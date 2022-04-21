@@ -22,7 +22,7 @@
 #define MAX_U16  0xFFFFUL     //!< max size of a 16 bit int
 #define MAX_U32  0xFFFFFFFFUL //!< max size of a 32 bit int
 
-#define INFO_LEN 5            //!< length of info of pack
+#define KEYWORD_TOPIC_COUNT 5   //!< max number of search keywords
 #define B_MAX    5000         //!< max number of blocks
 
 #define BUF4K    0x1000UL
@@ -38,6 +38,11 @@ enum Link {
 	P_LEN    //!< number of total parameters, must be last
 };
 
+//typedef struct
+//{
+//	char *
+//} pack_kt;
+
 /**
  * @brief Holds information about the parameters of the magnet link
  */
@@ -46,7 +51,7 @@ typedef struct {
 	char *dn;    //!< display name, filename
 	char *xt;    //!< exact topic, URN with hash of file
 	char *tr;    //!< address tracker, tracker url
-	char info[INFO_LEN + 1];
+	char *kt[KEYWORD_TOPIC_COUNT];
 } pack;
 
 /**
@@ -78,7 +83,6 @@ typedef struct {
 typedef struct {
 	uint8_t address[64]; //!< SHA3-512 checksum
 	//If balance is less than 1, the entry shall be trimmed
-	uint64_t id;         //SHAKE-128(64) of SHA3-512 checksum (for sorting)
 	uint64_t deci;       //Decimal value
 	uint64_t frac;       //Floating point value
 } balance;
