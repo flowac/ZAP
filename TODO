@@ -3,11 +3,26 @@ CURRENT
 **  Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?
-*   Remove argument processing library
 
 FUTURE GOALS
-*   Test RAM usage
-    Clean up compression implementation or remove 7zip completely
-    Create a simple search engine
-    Make log macros thread safe (strerror_s ?)
+*** Create a simple search engine
+**  Clean up compression implementation or remove 7zip completely
+*   Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
+
+NOTES
+    Using about 25MB of memory per 1000 blocks uder current testing conditions
+        About 75 torrents with 75 character length links per block
+        No transactions or balances yet
+    Need to check how good block compaction and torrent trimming is
+    Estimate amount of active torrents and transaction rates
+    Most likely have to use a database instead of doing all ops in memory
+    Target memory usage: below 4 GB
+    Target block time: 10 seconds to 1 minute
+    Target block queue: 2000 to 10,000
+
+PLANS
+    Generate a block index file (allocation table) and use merkle tree
+    Determine proof of work method
+        geolocation (distance) to peers (ping?)
+        data transfered (proxy function?)
