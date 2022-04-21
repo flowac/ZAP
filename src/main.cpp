@@ -106,7 +106,7 @@ void chain_test(int size)
 
 	deleteChain(&ch);
 
-	#if true
+	#if false
 	printf("\n7zip text\n");
 	start_timer();
 	compress_file(txtFile, zipFile);
