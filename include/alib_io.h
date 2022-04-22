@@ -2,8 +2,8 @@
  * @file alibio.h
  * @brief Functions that deal with i/o of the chain
  */
-#ifndef _ALIBIO_H
-#define _ALIBIO_
+#ifndef _ALIB_IO_H
+#define _ALIB_IO_H
 
 #include "atype.h"
 #include <stdio.h>
@@ -33,4 +33,10 @@ bool chainToText(chain *ch,        //!< Chain to write
 bool chainToZip(chain *ch,        //!< Chain to be compressed
 				const char *dest);//!< Destination file
 
-#endif //_ALIBIO_H
+/**
+ * @brief extract the entire chain
+ */
+bool chainFromZip(chain *ch,      //!< Chain to be extracted 
+				  const char *dest);//!< Destination file
+
+#endif //_ALIB_IO_H

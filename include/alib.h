@@ -12,6 +12,7 @@
  * @brief Packs uint64_t into uint8_t buffer little endian style
  */
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
+uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
 
 /**
  * @brief This function will print the relative information of a block
@@ -30,11 +31,11 @@ void printBlock(block *target);
  * @return True if success
  */
 bool newPack(pack *px,
+             char *xt,   //!< exact topic (URN with hash of file)
              uint64_t xl,//!< Exact length (size in bytez)
              char *dn,   //!< Display name
-             char *xt,   //!< exact topic (URN with hash of file)
              char *tr,  //!< tracker url
-			 char *kt[KEYWORD_TOPIC_COUNT]);
+			 char *kt[MAGNET_KT_COUNT]);
 
 void newTran(tran *tx);
 

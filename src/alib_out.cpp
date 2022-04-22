@@ -1,9 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "alib.h"
-#include "alibio.h"
+#include "alib_io.h"
 
 uint32_t getFilesize(FILE *fp)
 {
@@ -25,13 +24,14 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 // TODO: add kt
 void packToText(pack *pk, FILE *fp)
 {
-	fprintf(fp, "\t{P"
+	fprintf(fp, "\t{P\n\t\t");
+	printBytes(fp, pk->xt, 20);
+	fprintf(fp, ","
 			"\n\t\tPlen : %lu,"
 			"\n\t\tPdn  : %s,"
-			"\n\t\tPxt  : %s,"
 			"\n\t\tPtr  : %s,"
 			"\n\t\t},\n",
-			pk->xl, pk->dn, pk->xt, pk->tr);
+			pk->xl, pk->dn, pk->tr);
 }
 
 void tranToText(tran *tx, FILE *fp)
@@ -49,8 +49,8 @@ void tranToText(tran *tx, FILE *fp)
 void blockToText(block *bx, FILE *fp)
 {
 	fprintf(fp, "{B\n");
-	printBytes(fp, bx->key, 64, "\n");
-	printBytes(fp, bx->crc, 64);
+	printBytes(fp, bx->key, SHA512_LEN, "\n");
+	printBytes(fp, bx->crc, SHA512_LEN);
 
 	fprintf(fp,
 			"\n\tBn   : %lu,"
@@ -76,55 +76,31 @@ bool chainToText(chain *ch, const char *dest)
 	return true;
 }
 
-uint32_t charPacker(uint8_t *buf, const char *str, uint32_t len)
-{
-	char ch;
-	uint8_t uch;
-	uint32_t i = 0, j;
-	buf[i] = len & MAX_U8;
-
-	for (j = 0; j < len; j++)
-	{
-		ch = str[j];
-		if      (ch < 0x20) uch = 0;
-		else if (ch < 0x60) uch = ch - 0x20;
-		else if (ch < 0x80) uch = ch - 0x40;
-		else                uch = 0;
-
-		switch (j % 4)
-		{
-		case 0: buf[++i] = uch & MAX_U6; break;
-		case 1: buf[i] |= (uch & MAX_U2) << 6; buf[++i] = (uch & MAX_U4); break;
-		case 2: buf[i] |= (uch & MAX_U4) << 4; buf[++i] = (uch & MAX_U2); break;
-		case 3: buf[i] |= (uch & MAX_U6) << 2; break;
-		}
-	}
-	return i + 1;
-}
-
 // TODO: add kt
-void packToZip(pack *pk, FILE *fp, uint8_t *buf, uint32_t len)
+void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 {
 	uint32_t i = 0, slen;
 	if (!pk || !fp || !buf) return;
 
 	buf[i++] = 'P';
+	memcpy(buf + i, pk->xt, 20);
+	i += 20;
 	i += u64Packer(buf + i, pk->xl);
 
-	// TODO: log a message on overflow? fix the length calc?
-	if ((slen = strlen(pk->dn)) > (len - i)) return;
-	i += charPacker(buf + i, pk->dn, slen);
+	slen = strlen(pk->dn);
+	buf[i++] = slen;
+	memcpy(buf + i, pk->dn, slen);
+	i += slen;
 
-	if ((slen = strlen(pk->xt)) > (len - i)) return;
-	i += charPacker(buf + i, pk->xt, slen);
-
-	if ((slen = strlen(pk->tr)) > (len - i)) return;
-	i += charPacker(buf + i, pk->tr, slen);
+	slen = strlen(pk->tr);
+	buf[i++] = slen;
+	memcpy(buf + i, pk->tr, slen);
+	i += slen;
 
 	fwrite(buf, 1, i, fp);
 }
 
-void tranToZip(tran *tx, FILE *fp, uint8_t *buf, uint32_t len)
+void tranToZip(tran *tx, FILE *fp, uint8_t *buf)
 {
 	uint32_t i = 0;
 	if (!tx || !fp || !buf) return;
@@ -139,38 +115,38 @@ void tranToZip(tran *tx, FILE *fp, uint8_t *buf, uint32_t len)
 	fwrite(buf, 1, i, fp);
 }
 
-void blockToZip(block *bx, FILE *fp, uint8_t *buf, uint32_t len)
+void blockToZip(block *bx, FILE *fp, uint8_t *buf)
 {
 	uint32_t i = 0;
 	if (!bx || !fp || !buf) return;
 
 	buf[i++] = 'B';
-	memcpy(buf + i, bx->key, 64);
-	i += 64;
-	memcpy(buf + i, bx->crc, 64);
-	i += 64;
+	memcpy(buf + i, bx->key, SHA512_LEN);
+	i += SHA512_LEN;
+	memcpy(buf + i, bx->crc, SHA512_LEN);
+	i += SHA512_LEN;
 	i += u64Packer(buf + i, bx->n);
 	i += u64Packer(buf + i, bx->time);
 	buf[i++] = bx->n_packs & MAX_U8;
 	buf[i++] = bx->n_trans & MAX_U8;
 	fwrite(buf, 1, i, fp);
 
-	for (i = 0; i < bx->n_packs; i++) packToZip(&(bx->packs[i]), fp, buf, len);
-	for (i = 0; i < bx->n_trans; i++) tranToZip(&(bx->trans[i]), fp, buf, len);
+	for (i = 0; i < bx->n_packs; i++) packToZip(&(bx->packs[i]), fp, buf);
+	for (i = 0; i < bx->n_trans; i++) tranToZip(&(bx->trans[i]), fp, buf);
 }
 
 bool chainToZip(chain *ch, const char *dest)
 {
 	FILE *fp;
-	uint8_t buf[BUF4K];
+	uint8_t buf[BUF1K];
 	if (!ch || !dest || !(fp = fopen(dest, "wb"))) return false;
 
-	memset(buf, 0, BUF4K);
+	memset(buf, 0, BUF1K);
 	buf[0] = 'C';
 	u64Packer(buf + 1, ch->blk.size());
 	fwrite(buf, 1, 9, fp);
 
-	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToZip(&(ch->blk[i]), fp, buf, BUF4K);
+	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToZip(&(ch->blk[i]), fp, buf);
 
 	fclose(fp);
 	return true;

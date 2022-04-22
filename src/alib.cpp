@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 #include "alib.h"
 #include "log.h"
@@ -21,37 +22,71 @@ uint32_t u64Packer(uint8_t *buf, uint64_t data)
 	return 8U;
 }
 
+uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
+{
+	*data = 0;
+	for (uint32_t i = 0; i < 8; i++)
+	{
+		*data |= (uint64_t) buf[i] << (i * 8);
+	}
+	return 8U;
+}
+
+bool sha512_copy(uint8_t *dest, uint8_t *md_val, uint32_t shaLen)
+{
+	if (!md_val || shaLen != SHA512_LEN)
+	{
+		if (md_val) free(md_val);
+		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA512_LEN, shaLen);
+		return false;
+	}
+	memcpy(dest, md_val, SHA512_LEN);
+	free(md_val);
+	return true;
+}
+
 void printBlock(block *target)
 {
 	//printTime((time_t) target->time);
 	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
 }
 
-bool newPack(pack *px, uint64_t xl, char *dn, char *xt, char *tr, char *kt[KEYWORD_TOPIC_COUNT])
+bool newPack(pack *px, char *xt, uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
 {
+	char buf[3];
+	uint32_t nxt = strlen(xt);
 	uint32_t ndn = strlen(dn) + 1;
-	uint32_t nxt = strlen(xt) + 1;
 	uint32_t ntr = strlen(tr) + 1;
-	uint32_t nkt;
+	uint32_t nkt, i, j, tmp;
 
-	if (ndn > MAX_U8 || nxt > MAX_U8 || ntr > MAX_U8)
-		return false;
+	if (nxt != MAGNET_XT_LEN * 2 || ndn > MAX_U8 || ntr > MAX_U8) return false;
 
+	memset(px->xt, 0, MAGNET_XT_LEN);
+	for (i = j = 0; j < MAGNET_XT_LEN; ++i, ++j)
+	{
+		buf[0] = xt[i];
+		buf[1] = xt[++i];
+		buf[2] = 0;
+		errno = 0;
+		tmp = strtol(buf, NULL, 16);
+		if (errno || tmp > MAX_U8) return false;
+		px->xt[j] = (uint8_t) tmp;
+	}
 	px->xl = xl;
 	if (!(px->dn = (char *) calloc(ndn, sizeof(char)))) goto cleanup;
-	if (!(px->xt = (char *) calloc(nxt, sizeof(char)))) goto cleanup;
 	if (!(px->tr = (char *) calloc(ntr, sizeof(char)))) goto cleanup;
+	// TODO: check input for special characters, make it match packToZip
+	// TODO: xt has to be 160 bit checksum
 	strcpy(px->dn, dn);
-	strcpy(px->xt, xt);
 	strcpy(px->tr, tr);
 
-	for (uint32_t i = 0; i < KEYWORD_TOPIC_COUNT; ++i) px->kt[i] = NULL;
-	for (uint32_t i = 0, j = 0; i < KEYWORD_TOPIC_COUNT; ++i)
+	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
+	for (i = 0, j = 0; i < MAGNET_KT_COUNT; ++i)
 	{
 		if (!kt[i]) break;
-		nkt = strlen(kt[i]) + 1;
-		if (nkt > MAX_U8) continue;
-		if (!(px->kt[j] = (char *) calloc(nkt, sizeof(char)))) continue;
+		nkt = strlen(kt[i]);
+		if (nkt > MAGNET_KT_LEN) continue;
+		if (!(px->kt[j] = (char *) calloc(nkt + 1, sizeof(char)))) continue;
 		strcpy(px->kt[j], kt[i]);
 		++j;
 	}
@@ -59,7 +94,6 @@ bool newPack(pack *px, uint64_t xl, char *dn, char *xt, char *tr, char *kt[KEYWO
 	return true;
 cleanup:
 	if (px->dn) free(px->dn);
-	if (px->xt) free(px->xt);
 	if (px->tr) free(px->tr);
 	return false;
 }
@@ -73,6 +107,7 @@ bool newBlock(block *bx, uint64_t n, uint64_t time,
 			  uint32_t n_trans, tran *trans)
 {
 	if (!bx || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
+	uint8_t *md_val;
 	uint32_t shaLen;
 	EVP_MD_CTX *md_ctx;
 
@@ -95,23 +130,12 @@ bool newBlock(block *bx, uint64_t n, uint64_t time,
 	if (bx->packs) if (!update_sha3_512(bx->packs, sizeof(pack) * bx->n_packs, md_ctx)) return false;
 	if (bx->trans) if (!update_sha3_512(bx->trans, sizeof(tran) * bx->n_trans, md_ctx)) return false;
 
-	bx->crc = finish_sha3_512(&shaLen, md_ctx);
-	if (shaLen != 64)
-	{
-		if (bx->crc) free(bx->crc);
-		printf("SHA3-512 for crc failed. Bytes expected=64, actual=%u\n", shaLen);
-		return false;
-	}
+	md_val = finish_sha3_512(&shaLen, md_ctx);
+	if (!sha512_copy(bx->crc, md_val, shaLen)) return false;
 
 	// TODO: fix this broken key gen
-	bx->key = finish_sha3_512(bx->crc, 64, &shaLen);
-	if (shaLen != 64)
-	{
-		if (bx->key) free(bx->key);
-		free(bx->crc);
-		printf("SHA3-512 for key failed. Bytes expected=64, actual=%u\n", shaLen);
-		return false;
-	}
+	md_val = finish_sha3_512(bx->crc, SHA512_LEN, &shaLen);
+	if (!sha512_copy(bx->key, md_val, shaLen)) return false;
 
 	if (LOG) printTime(bx->time);
 	return true;
@@ -135,9 +159,8 @@ bool insertBlock(block *bx, chain *ch)
 void deletePack(pack *target)
 {
 	if (target->dn) free(target->dn);
-	if (target->xt) free(target->xt);
 	if (target->tr) free(target->tr);
-	for (uint32_t i = 0; i < KEYWORD_TOPIC_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
+	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
 }
  
 void deleteTran(tran *target)
@@ -147,8 +170,6 @@ void deleteTran(tran *target)
 void deleteBlock(block *target)
 {
 	for (uint32_t i = 0; i < target->n_packs; ++i) deletePack(&(target->packs[i]));
-	if (target->key)   free(target->key);
-	if (target->crc)   free(target->crc);
 	if (target->packs) free(target->packs);
 	if (target->trans) free(target->trans);
 }

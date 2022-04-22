@@ -1,6 +1,6 @@
 #include "atype.h"
 #include "alib.h"
-#include "alibio.h"
+#include "alib_io.h"
 #include "ssl_fn.h"
 #include "time_fn.h"
 #include "log.h"
@@ -37,16 +37,17 @@ void checksum_test(const char *src)
 
 void chain_gen(chain *ch, uint64_t size)
 {
-	uint16_t j, k;
-	uint32_t nPacks;
-	uint32_t nTrans;
+	int32_t j, k;
+	int32_t nPacks;
+	int32_t nTrans;
 	uint64_t i;
 	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
+	const char checksumset[] = "0123456789abcdef";//16
 
 	bool val;
 	block bx;
-	char dn[121], xt[121], tr[121];
-	char *kt[KEYWORD_TOPIC_COUNT] = {NULL, NULL, NULL, NULL, NULL};
+	char dn[121], xt[MAGNET_XT_LEN * 2 + 1], tr[121];
+	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 
 	for (i = 0; i < size; i++) {
 		nPacks = rand() % 50 + 50;
@@ -55,16 +56,17 @@ void chain_gen(chain *ch, uint64_t size)
 		tran *trans = NULL;
 
 		for (j = 0; j < nPacks; j++) {
-			k = rand() % 90 + 30;
-			dn[k] = xt[k] = tr[k] = 0;
-			for (--k; k > 0; --k) {
+			memset(xt, 0, MAGNET_XT_LEN * 2 + 1);
+			memset(dn, 0, 121);
+			memset(tr, 0, 121);
+			k = rand() % 70 + 40;
+			for (; k >= 0; --k) {
+				if (k < MAGNET_XT_LEN * 2) xt[k] = checksumset[rand() % 16];
 				dn[k] = charset[rand() % 62];
-				xt[k] = charset[rand() % 62];
 				tr[k] = charset[rand() % 62];
 			}
-			dn[0] = xt[0] = tr[0] = '0';
 
-			val = newPack(&packs[j], (rand() % 50 + 1) * 1024 * 1024, dn, xt, tr, kt);
+			val = newPack(&packs[j], xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val) printf("    newPack failed?");
 		}
 

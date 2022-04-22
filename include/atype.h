@@ -22,36 +22,24 @@
 #define MAX_U16  0xFFFFUL     //!< max size of a 16 bit int
 #define MAX_U32  0xFFFFFFFFUL //!< max size of a 32 bit int
 
-#define KEYWORD_TOPIC_COUNT 5   //!< max number of search keywords
 #define B_MAX    5000         //!< max number of blocks
-
+#define BUF1K    0x400UL
 #define BUF4K    0x1000UL
 
-/**
- * @brief not sure
- */
-enum Link {
-	P_DN = 0,//!< display name
-	P_XL,    //!< exact length
-	P_XT,    //!< exact topic
-	P_TR,    //!< address tracker
-	P_LEN    //!< number of total parameters, must be last
-};
-
-//typedef struct
-//{
-//	char *
-//} pack_kt;
+#define SHA512_LEN      64    //!< number of bytes for a SHA3-512
+#define MAGNET_XT_LEN   20    //!< 160 bit file checksum
+#define MAGNET_KT_COUNT 5     //!< max number of search keywords
+#define MAGNET_KT_LEN   16    //!< longest possible search keyword
 
 /**
  * @brief Holds information about the parameters of the magnet link
  */
 typedef struct {
-	uint64_t xl; //!< exact length, size of file in bytez
+	uint8_t  xt[MAGNET_XT_LEN]; //!< exact topic, 160 bit file hash
+	uint64_t xl; //!< exact length, size of file in bytes
 	char *dn;    //!< display name, filename
-	char *xt;    //!< exact topic, URN with hash of file
 	char *tr;    //!< address tracker, tracker url
-	char *kt[KEYWORD_TOPIC_COUNT];
+	char *kt[MAGNET_KT_COUNT]; //!< search keywords
 } pack;
 
 /**
@@ -70,8 +58,8 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
-	uint8_t *key;    //!< gen next 512 bits
-	uint8_t *crc;    //!< checksum 512 bits
+	uint8_t key[SHA512_LEN]; //!< gen next 512 bits
+	uint8_t crc[SHA512_LEN]; //!< checksum 512 bits
 	uint64_t n;      //!< block number
 	uint64_t time;   //!< epoch seconds
 	uint8_t  n_packs;//!< number of payloads, 255 per block max
@@ -81,10 +69,10 @@ typedef struct {
 } block;
 
 typedef struct {
-	uint8_t address[64]; //!< SHA3-512 checksum
+	uint8_t address[SHA512_LEN]; //!< SHA3-512 checksum
 	//If balance is less than 1, the entry shall be trimmed
-	uint64_t deci;       //Decimal value
-	uint64_t frac;       //Floating point value
+	uint64_t deci; //Decimal value
+	uint64_t frac; //Floating point value
 } balance;
 
 typedef struct {
