@@ -89,9 +89,7 @@ void chain_test(int size)
 	const char *zaaFile = "temp.zaa"; // chainToZip file
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
 	const char *za3File = "temp.za3"; // imported x2, then chainToZip'd file
-	const char *zipFile = "temp.zip"; // 7zip compress file
 	const char *txtFile = "temp.txt"; // chainToText output
-	const char *unzFile = "temp.unz"; // unzipped file
 
 	start_timer();
 
@@ -140,23 +138,25 @@ void chain_test(int size)
 	deleteChain(&cin2);
 	checksum_test(za3File);
 
-#if false
-	printf("\n7zip text\n");
-	start_timer();
-	compress_file(txtFile, zipFile);
-	decompress_file(zipFile, unzFile);
-	print_elapsed_time();
-
+#if 0
 	printf("\n7zip zip\n");
 	start_timer();
 	compress_file(zaaFile, "temp.zaa.zip");
+	print_elapsed_time();
+
+	start_timer();
 	decompress_file("temp.zaa.zip", "temp.zaa.unz");
 	print_elapsed_time();
 
 	start_timer();
-	checksum_test(txtFile);
-	checksum_test(unzFile);
-	checksum_test(zipFile);
+	compress_file(zaaFile, "temp.zaa.zip2", &slow_props);
+	print_elapsed_time();
+
+	start_timer();
+	decompress_file("temp.zaa.zip2", "temp.zaa.unz2");
+	print_elapsed_time();
+
+	start_timer();
 	checksum_test(zaaFile);
 	checksum_test("temp.zaa.unz");
 	print_elapsed_time();

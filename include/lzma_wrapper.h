@@ -11,8 +11,8 @@
 #include "7zTypes.h"
 #include "LzmaEnc.h"
 
-/** @brief Default buffer size for i/o (64kb) */
-#define buffer_cread_size 65536	// 1 < 16
+/** @brief Default buffer size for i/o (1MB) */
+#define buffer_cread_size (1<<20)
 
 /** @brief Size of prop and the following data that contains the filesize */
 #define LZMA_PROPS_SIZE_FILESIZE LZMA_PROPS_SIZE + 8
@@ -27,13 +27,13 @@
  * Then pass your struct as the third arg to compressfile
  */
 const CLzmaEncProps default_props = {
-	5,            //!< level
+	2,            //!< level
 	1 << 16,      //!< dictSize
-	4,            //!< lc
+	3,            //!< lc
 	0,            //!< lp
 	2,            //!< pb
 	0,            //!< algo
-	128,          //!< fb
+	32,           //!< fb
 	0,            //!< btMode
 	4,            //!< numHashbytes
 	16UL,         //!< mc
@@ -43,11 +43,22 @@ const CLzmaEncProps default_props = {
 	0             //!< affinity
 };
 
-/* Default values that we are using for the prop
- * in the lzma library, look at lzmalib.h for more info
- * on what each value does, see our definition in alib.cpp
- */
-extern const CLzmaEncProps default_props;
+const CLzmaEncProps slow_props = {
+	9,            //!< level
+	1 << 24,      //!< dictSize
+	3,            //!< lc
+	0,            //!< lp
+	2,            //!< pb
+	1,            //!< algo
+	64,           //!< fb
+	0,            //!< btMode
+	4,            //!< numHashbytes
+	16UL,         //!< mc
+	0,            //!< writeEndmark
+	2,            //!< numThreads
+	0x7FFFFFFFULL,//!< reduceSize
+	0             //!< affinity
+};
 
 /**
  * @brief ISeqInstream struct implementation 
@@ -82,7 +93,7 @@ int in_stream_read(void *p, void *buf, size_t *size);
  */
 bool compress_file(const char *in_path,        //!< Path to the input file
 				   const char *out_path = NULL,//!< Path to the output
-				   const CLzmaEncProps * args = &default_props);//!< Arguments for compression see CLzmaEncProps in LzmaEnc.h for more info
+				   const CLzmaEncProps *args = &default_props);//!< Arguments for compression see CLzmaEncProps in LzmaEnc.h for more info
 
 /**
  * @brief Decompress a compressed file, barely modified from lzmautil

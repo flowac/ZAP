@@ -35,7 +35,7 @@ debug: all
 
 # compile 7zip
 lib7z.a:
-	$(MAKE) -j12 -C $(7Z_DIR) $(ARGS_EXTERN)
+	$(MAKE) -j10 -C $(7Z_DIR) $(ARGS_EXTERN)
 
 # compile src files into objects
 $(ODIR)/%.o: $(SDIR)/%.cpp

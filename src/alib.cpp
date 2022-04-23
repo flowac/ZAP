@@ -10,6 +10,7 @@
 #include "ssl_fn.h"
 #include "time_fn.h"
 
+// TODO: when calling newBlock, use these queues instead of taking parameters
 static std::queue<pack *> pack_queue;
 static std::queue<tran *> tran_queue;
 
