@@ -88,7 +88,6 @@ void chain_test(int size)
 {
 	const char *zaaFile = "temp.zaa"; // chainToZip file
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
-	const char *za3File = "temp.za3"; // imported x2, then chainToZip'd file
 	const char *txtFile = "temp.txt"; // chainToText output
 
 	start_timer();
@@ -124,19 +123,6 @@ void chain_test(int size)
 
 	deleteChain(&cin1);
 	checksum_test(za2File);
-
-	printf("\nImport 2\n");
-	start_timer();
-	if (!chainFromZip(&cin2, za2File)) printf("> failed!\n");
-	print_elapsed_time();
-
-	printf("\nWrite to zip 3\n");
-	start_timer();
-	chainToZip(&cin2, za3File);
-	print_elapsed_time();
-
-	deleteChain(&cin2);
-	checksum_test(za3File);
 
 #if 0
 	printf("\n7zip zip\n");

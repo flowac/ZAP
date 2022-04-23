@@ -88,12 +88,12 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 	i += u64Packer(buf + i, pk->xl);
 
 	slen = strlen(pk->dn);
-	buf[i++] = slen;
+	buf[i++] = (uint8_t) slen;
 	memcpy(buf + i, pk->dn, slen);
 	i += slen;
 
 	slen = strlen(pk->tr);
-	buf[i++] = slen;
+	buf[i++] = (uint8_t) slen;
 	memcpy(buf + i, pk->tr, slen);
 	i += slen;
 

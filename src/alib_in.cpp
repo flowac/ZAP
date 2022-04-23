@@ -13,24 +13,22 @@ bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 	char dn[MAX_U8 + 1];
 	char tr[MAX_U8 + 1];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
-	printf("p ");
 	if (!px || !fp || !buf) return false;
 
-	printf("p0 ");
 	len = 9 + MAGNET_XT_LEN;
 	if (len != fread(buf, 1, len, fp)) return false;
 	if (buf[0] != 'P') return false;
 	memcpy(xt, buf + 1, MAGNET_XT_LEN);
 	u64Unpack(buf + 1 + MAGNET_XT_LEN, &xl);
 
-	printf("p1 ");
-	len = fread(buf, 1, 1, fp);
+	if (1 != fread(buf, 1, 1, fp)) return false;
+	len = buf[0];
 	if (len > MAX_U8 || len != fread(buf, 1, len, fp)) return false;
 	memcpy(dn, buf, len);
 	dn[len] = 0;
 
-	printf("p2 ");
-	len = fread(buf, 1, 1, fp);
+	if (1 != fread(buf, 1, 1, fp)) return false;
+	len = buf[0];
 	if (len > MAX_U8 || len != fread(buf, 1, len, fp)) return false;
 	memcpy(tr, buf, len);
 	tr[len] = 0;
@@ -42,10 +40,8 @@ bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 {
 	uint64_t time, id, amount, src, dest;
-	printf("t ");
 	if (!tx || !fp || !buf) return false;
 
-	printf("t0 ");
 	if (41 != fread(buf, 1, 41, fp)) return false;
 	if (buf[0] != 'T') return false;
 	u64Unpack(buf + 1,  &time);
@@ -99,7 +95,6 @@ bool chainFromZip(chain *ch, const char *dest)
 
 	for (uint64_t i = 0; i < chainLen; ++i)
 	{
-		printf("%lu ", i);
 		if (!blockFromZip(&bx, fp, buf) || !insertBlock(&bx, ch))
 		{
 			deleteChain(ch);
