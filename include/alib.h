@@ -31,13 +31,18 @@ void printBlock(block *target);
  * @return True if success
  */
 bool newPack(pack *px,
-             char *xt,   //!< exact topic (URN with hash of file)
+             uint8_t xt[MAGNET_XT_LEN],//!< exact topic (file hash)
              uint64_t xl,//!< Exact length (size in bytez)
              char *dn,   //!< Display name
              char *tr,  //!< tracker url
 			 char *kt[MAGNET_KT_COUNT]);
 
-void newTran(tran *tx);
+bool newTran(tran *tx,
+			 uint64_t time,
+			 uint64_t id,
+			 uint64_t amount,
+			 uint64_t src,
+			 uint64_t dest);
 
 bool newBlock(block *bx,
 			  uint64_t n,

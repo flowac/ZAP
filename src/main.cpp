@@ -42,26 +42,29 @@ void chain_gen(chain *ch, uint64_t size)
 	int32_t nTrans;
 	uint64_t i;
 	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
-	const char checksumset[] = "0123456789abcdef";//16
 
 	bool val;
 	block bx;
-	char dn[121], xt[MAGNET_XT_LEN * 2 + 1], tr[121];
+	uint8_t xt[MAGNET_XT_LEN];
+	char dn[121], tr[121];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < size; i++)
+	{
 		nPacks = rand() % 50 + 50;
 		pack *packs = (pack *) calloc(nPacks, sizeof(pack));
 		nTrans = 0;
 		tran *trans = NULL;
 
-		for (j = 0; j < nPacks; j++) {
-			memset(xt, 0, MAGNET_XT_LEN * 2 + 1);
+		for (j = 0; j < nPacks; j++)
+		{
+			memset(xt, 0, MAGNET_XT_LEN);
 			memset(dn, 0, 121);
 			memset(tr, 0, 121);
 			k = rand() % 70 + 40;
-			for (; k >= 0; --k) {
-				if (k < MAGNET_XT_LEN * 2) xt[k] = checksumset[rand() % 16];
+			for (; k >= 0; --k)
+			{
+				if (k < MAGNET_XT_LEN) xt[k] = rand() % MAX_U8;
 				dn[k] = charset[rand() % 62];
 				tr[k] = charset[rand() % 62];
 			}
@@ -84,6 +87,8 @@ void chain_gen(chain *ch, uint64_t size)
 void chain_test(int size)
 {
 	const char *zaaFile = "temp.zaa"; // chainToZip file
+	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
+	const char *za3File = "temp.za3"; // imported x2, then chainToZip'd file
 	const char *zipFile = "temp.zip"; // 7zip compress file
 	const char *txtFile = "temp.txt"; // chainToText output
 	const char *unzFile = "temp.unz"; // unzipped file
@@ -92,7 +97,7 @@ void chain_test(int size)
 
 	printf("\nGenerate\n");
 	start_timer();
-	chain ch;
+	chain ch, cin1, cin2;
 	chain_gen(&ch, size);
 	print_elapsed_time();
 
@@ -107,8 +112,35 @@ void chain_test(int size)
 	print_elapsed_time();
 
 	deleteChain(&ch);
+	checksum_test(zaaFile);
 
-	#if false
+	printf("\nImport 1\n");
+	start_timer();
+	if (!chainFromZip(&cin1, zaaFile)) printf("> failed!\n");
+	print_elapsed_time();
+
+	printf("\nWrite to zip 2\n");
+	start_timer();
+	chainToZip(&cin1, za2File);
+	print_elapsed_time();
+
+	deleteChain(&cin1);
+	checksum_test(za2File);
+
+	printf("\nImport 2\n");
+	start_timer();
+	if (!chainFromZip(&cin2, za2File)) printf("> failed!\n");
+	print_elapsed_time();
+
+	printf("\nWrite to zip 3\n");
+	start_timer();
+	chainToZip(&cin2, za3File);
+	print_elapsed_time();
+
+	deleteChain(&cin2);
+	checksum_test(za3File);
+
+#if false
 	printf("\n7zip text\n");
 	start_timer();
 	compress_file(txtFile, zipFile);
@@ -128,7 +160,7 @@ void chain_test(int size)
 	checksum_test(zaaFile);
 	checksum_test("temp.zaa.unz");
 	print_elapsed_time();
-	#endif
+#endif
 
 	print_elapsed_time();
 }

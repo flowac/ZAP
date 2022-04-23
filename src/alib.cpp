@@ -51,27 +51,15 @@ void printBlock(block *target)
 	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
 }
 
-bool newPack(pack *px, char *xt, uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
+bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
 {
-	char buf[3];
-	uint32_t nxt = strlen(xt);
 	uint32_t ndn = strlen(dn) + 1;
 	uint32_t ntr = strlen(tr) + 1;
-	uint32_t nkt, i, j, tmp;
+	uint32_t nkt, i, j;
 
-	if (nxt != MAGNET_XT_LEN * 2 || ndn > MAX_U8 || ntr > MAX_U8) return false;
+	if (ndn > MAX_U8 || ntr > MAX_U8) return false;
 
-	memset(px->xt, 0, MAGNET_XT_LEN);
-	for (i = j = 0; j < MAGNET_XT_LEN; ++i, ++j)
-	{
-		buf[0] = xt[i];
-		buf[1] = xt[++i];
-		buf[2] = 0;
-		errno = 0;
-		tmp = strtol(buf, NULL, 16);
-		if (errno || tmp > MAX_U8) return false;
-		px->xt[j] = (uint8_t) tmp;
-	}
+	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
 	if (!(px->dn = (char *) calloc(ndn, sizeof(char)))) goto cleanup;
 	if (!(px->tr = (char *) calloc(ntr, sizeof(char)))) goto cleanup;
@@ -98,8 +86,15 @@ cleanup:
 	return false;
 }
 
-void newTran(tran *tx)
+bool newTran(tran *tx, uint64_t time, uint64_t id, uint64_t amount, uint64_t src, uint64_t dest)
 {
+	// TODO: add error checks
+	tx->time = time;
+	tx->id = id;
+	tx->amount = amount;
+	tx->src = src;
+	tx->dest = dest;
+	return true;
 }
 
 bool newBlock(block *bx, uint64_t n, uint64_t time,
