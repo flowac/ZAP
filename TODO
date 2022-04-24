@@ -1,4 +1,5 @@
 CURRENT
+*** Stick transactions and packs into the queues
 **  Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?

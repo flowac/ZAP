@@ -69,18 +69,18 @@ void printBlock(block *target)
 
 bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
 {
-	uint32_t ndn = strlen(dn) + 1;
-	uint32_t ntr = strlen(tr) + 1;
+	uint32_t ndn = strlen(dn);
+	uint32_t ntr = strlen(tr);
 	uint32_t nkt, i;
 
-	if (ndn > MAX_U8 || ntr > MAX_U8) return false;
+	if (!ndn || !ntr || ndn > MAX_U8 || ntr > MAX_U8) return false;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
-	if (!(px->dn = (char *) calloc(ndn, 1))) goto cleanup;
-	if (!(px->tr = (char *) calloc(ntr, 1))) goto cleanup;
-	strcpy(px->dn, dn);
-	strcpy(px->tr, tr);
+	if (!(px->dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
+	if (!(px->tr = (char *) calloc(ntr + 1, 1))) goto cleanup;
+	memcpy(px->dn, dn, ndn);
+	memcpy(px->tr, tr, ntr);
 
 	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 	for (i = 0; i < MAGNET_KT_COUNT; ++i)

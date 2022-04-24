@@ -72,6 +72,7 @@ void chain_gen(chain *ch, uint64_t size)
 			for (k = 0; k < nkt; ++k)
 			{
 				uint8_t len = rand() % MAGNET_KT_LEN;
+				if (len == 0) break;
 				kt[k] = (char *) calloc(len + 1, 1);
 				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
 			}
