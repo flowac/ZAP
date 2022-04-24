@@ -9,7 +9,6 @@
 
 bool checkBlock(block *bx, bool modify)
 {
-	printf("%c ", modify?'y':'n');
 	if (!bx || (bx->n_packs && !bx->packs) || (bx->n_trans && !bx->trans)) return false;
 	uint8_t *md_val;
 	uint32_t shaLen;
@@ -21,21 +20,15 @@ bool checkBlock(block *bx, bool modify)
 	bitPack[16] = bx->n_packs;
 	bitPack[17] = bx->n_trans;
 
-	printf("0 ");
 	if (!(md_ctx = update_sha3_512(bitPack, 18, NULL))) return false;
 
 	// TODO: Do these checksums properly instead of taking a whole chunk of memory
-	printf("1 ");
 //	if (bx->packs) if (!update_sha3_512(bx->packs, sizeof(pack) * bx->n_packs, md_ctx)) return false;
 //	if (bx->trans) if (!update_sha3_512(bx->trans, sizeof(tran) * bx->n_trans, md_ctx)) return false;
-	printf("2 ");
 	if (!update_sha3_512(bx->key, SHA512_LEN, md_ctx)) return false;
-	printf("k%02X%02X ", bx->key[0], bx->key[1]);
 
-	printf("3 ");
 	md_val = finish_sha3_512(&shaLen, md_ctx);
 	if (modify)	return sha512_copy_free(bx->crc, md_val, shaLen);
-	printf("4 ");
 	return sha512_cmp_free(bx->crc, md_val);
 }
 

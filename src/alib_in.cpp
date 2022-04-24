@@ -56,37 +56,35 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 bool blockFromZip(chain *ch, FILE *fp, uint8_t *buf)
 {
 	if (!ch || !fp || !buf) return false;
-	bool ret;
 	uint8_t crc[SHA512_LEN], key[SHA512_LEN];
 	uint32_t i = 0, nRead, n_packs, n_trans;
 	uint64_t n, time;
-	pack *packs;
-	tran *trans;
+	pack *packs = NULL;
+	tran *trans = NULL;
 
 	nRead = 1 + 2 * SHA512_LEN;
 	if (nRead != fread(buf, 1, nRead, fp)) return false;
 	if (buf[0] != 'B') return false;
 	memcpy(crc, buf + 1, SHA512_LEN);
 	memcpy(key, buf + 1 + SHA512_LEN, SHA512_LEN);
-	printf("c%02X%02X ", crc[0], crc[1]);
-	printf("k%02X%02X ", key[0], key[1]);
 
 	if (18 != fread(buf, 1, 18, fp)) return false;
 	u64Unpack(buf, &n);
 	u64Unpack(buf + 8, &time);
 	n_packs = buf[16];
 	n_trans = buf[17];
-	packs = (pack *) calloc(n_packs, sizeof(pack));
-	trans = (tran *) calloc(n_trans, sizeof(tran));
+	if (n_packs) packs = (pack *) calloc(n_packs, sizeof(pack));
+	if (n_trans) trans = (tran *) calloc(n_trans, sizeof(tran));
 
-	for (i = 0; i < n_packs; i++) if (!packFromZip(&packs[i], fp, buf)) return false;
-	for (i = 0; i < n_trans; i++) if (!tranFromZip(&trans[i], fp, buf)) return false;
+	for (i = 0; i < n_packs; i++) if (!packFromZip(&(packs[i]), fp, buf)) goto cleanup;
+	for (i = 0; i < n_trans; i++) if (!tranFromZip(&(trans[i]), fp, buf)) goto cleanup;
 	// TODO: run a sha3-512 check to see if crc matches
 
-	ret = insertBlock(ch, n, time, n_packs, packs, n_trans, trans, crc, key);
+	return insertBlock(ch, n, time, n_packs, packs, n_trans, trans, crc, key);
+cleanup:
 	if (packs) free(packs);
 	if (trans) free(trans);
-	return ret;
+	return false;
 }
 
 bool chainFromZip(chain *ch, const char *dest)

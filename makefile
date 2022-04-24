@@ -55,3 +55,4 @@ clean_files:
 c:  clean
 cl: clean_local
 cf: clean_files
+d:  debug

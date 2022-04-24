@@ -39,8 +39,6 @@ bool sha512_cmp(uint8_t *left, uint8_t *right)
 bool sha512_cmp_free(uint8_t *left, uint8_t *target)
 {
 	bool ret = sha512_cmp(left, target);
-	printf("-%02X%02X ", left[0], left[1]);
-	if (target) printf("_%02X%02X ", target[0], target[1]);
 	if (target) free(target);
 	return ret;
 }
@@ -73,28 +71,27 @@ bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *t
 {
 	uint32_t ndn = strlen(dn) + 1;
 	uint32_t ntr = strlen(tr) + 1;
-	uint32_t nkt, i, j;
+	uint32_t nkt, i;
 
 	if (ndn > MAX_U8 || ntr > MAX_U8) return false;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
-	if (!(px->dn = (char *) calloc(ndn, sizeof(char)))) goto cleanup;
-	if (!(px->tr = (char *) calloc(ntr, sizeof(char)))) goto cleanup;
+	if (!(px->dn = (char *) calloc(ndn, 1))) goto cleanup;
+	if (!(px->tr = (char *) calloc(ntr, 1))) goto cleanup;
 	// TODO: check input for special characters, make it match packToZip
 	// TODO: xt has to be 160 bit checksum
 	strcpy(px->dn, dn);
 	strcpy(px->tr, tr);
 
 	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
-	for (i = 0, j = 0; i < MAGNET_KT_COUNT; ++i)
+	for (i = 0; i < MAGNET_KT_COUNT; ++i)
 	{
 		if (!kt[i]) break;
 		nkt = strlen(kt[i]);
-		if (nkt > MAGNET_KT_LEN) continue;
-		if (!(px->kt[j] = (char *) calloc(nkt + 1, sizeof(char)))) continue;
-		strcpy(px->kt[j], kt[i]);
-		++j;
+		if (nkt > MAGNET_KT_LEN) goto cleanup;
+		if (!(px->kt[i] = (char *) calloc(nkt + 1, 1))) goto cleanup;
+		strcpy(px->kt[i], kt[i]);
 	}
 
 	return true;
@@ -140,10 +137,8 @@ bool insertBlock(chain *ch,
 	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
 	if (key) if (!sha512_cmp(key, md_val)) return false;
 	if (!sha512_copy_free(bx.key, md_val, shaLen)) return false;
-	printf("k_%02X%02X ", bx.key[0], bx.key[1]);
 	if (crc && !sha512_copy(bx.crc, crc, SHA512_LEN)) return false;
 
-	if (crc) printf("c_%02X%02X ", crc[0], crc[1]);
 	if (!checkBlock(&bx, crc == NULL)) return false;
 	ch->blk.push_back(bx);
 	if (ch->blk.size() > B_MAX)

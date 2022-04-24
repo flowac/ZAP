@@ -82,12 +82,12 @@ void chain_test(int size)
 	const char *zaaFile = "temp.zaa"; // chainToZip file
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
 	const char *txtFile = "temp.txt"; // chainToText output
+	chain ch, cin1, cin2;
 
 	start_timer();
 
 	printf("\nGenerate\n");
 	start_timer();
-	chain ch, cin1, cin2;
 	chain_gen(&ch, size);
 	print_elapsed_time();
 
@@ -101,13 +101,12 @@ void chain_test(int size)
 	chainToZip(&ch, zaaFile);
 	print_elapsed_time();
 
-	printf("\nAudit\n");
+	printf("\nAudit: ");
 	if (auditChain(&ch))
-		printf("\n\nOK\n\n");
+		printf("OK\n");
 	else
-		printf("\n\nFAIL\n\n");
+		printf("FAIL\n");
 
-	deleteChain(&ch);
 	checksum_test(zaaFile);
 
 	printf("\nImport 1\n");
@@ -115,17 +114,20 @@ void chain_test(int size)
 	if (!chainFromZip(&cin1, zaaFile)) printf("> failed!\n");
 	print_elapsed_time();
 
-	printf("\nAudit\n");
-	if (auditChain(&ch))
-		printf("\n\nOK\n\n");
-	else
-		printf("\n\nFAIL\n\n");
-
 	printf("\nWrite to zip 2\n");
 	start_timer();
 	chainToZip(&cin1, za2File);
 	print_elapsed_time();
 
+	printf("\nAudit: ");
+	if (auditChain(&cin1))
+		printf("OK\n");
+	else
+		printf("FAIL\n");
+
+	uint64_t ccomp = compareChain(&ch, &cin1);
+	printf("Chain compare status %lu (%s)\n", ccomp, ccomp == MAX_U64 ? "OK" : "BAD");
+	deleteChain(&ch);
 	deleteChain(&cin1);
 	checksum_test(za2File);
 
