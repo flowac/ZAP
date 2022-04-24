@@ -44,7 +44,6 @@ void chain_gen(chain *ch, uint64_t size)
 	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
 
 	bool val;
-	block bx;
 	uint8_t xt[MAGNET_XT_LEN];
 	char dn[121], tr[121];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
@@ -73,14 +72,8 @@ void chain_gen(chain *ch, uint64_t size)
 			if (!val) printf("    newPack failed?");
 		}
 
-		val = newBlock(&bx, i, 0, nPacks, packs, nTrans, trans);
-		if (!val) printf("    newBlock failed?");
-
-		if (!insertBlock(&bx, ch))
-		{
-			printf("Failed to add block at %lu", ch->blk.size());
-			break;
-		}
+		val = insertBlock(ch, i, 0, nPacks, packs, nTrans, trans);
+		if (!val) printf("    newBlock failed at %lu?", i);
 	}
 }
 
@@ -108,6 +101,12 @@ void chain_test(int size)
 	chainToZip(&ch, zaaFile);
 	print_elapsed_time();
 
+	printf("\nAudit\n");
+	if (auditChain(&ch))
+		printf("\n\nOK\n\n");
+	else
+		printf("\n\nFAIL\n\n");
+
 	deleteChain(&ch);
 	checksum_test(zaaFile);
 
@@ -115,6 +114,12 @@ void chain_test(int size)
 	start_timer();
 	if (!chainFromZip(&cin1, zaaFile)) printf("> failed!\n");
 	print_elapsed_time();
+
+	printf("\nAudit\n");
+	if (auditChain(&ch))
+		printf("\n\nOK\n\n");
+	else
+		printf("\n\nFAIL\n\n");
 
 	printf("\nWrite to zip 2\n");
 	start_timer();

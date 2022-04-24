@@ -49,8 +49,8 @@ void tranToText(tran *tx, FILE *fp)
 void blockToText(block *bx, FILE *fp)
 {
 	fprintf(fp, "{B\n");
-	printBytes(fp, bx->key, SHA512_LEN, "\n");
-	printBytes(fp, bx->crc, SHA512_LEN);
+	printBytes(fp, bx->crc, SHA512_LEN, "\n");
+	printBytes(fp, bx->key, SHA512_LEN);
 
 	fprintf(fp,
 			"\n\tBn   : %lu,"
@@ -83,8 +83,8 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 	if (!pk || !fp || !buf) return;
 
 	buf[i++] = 'P';
-	memcpy(buf + i, pk->xt, 20);
-	i += 20;
+	memcpy(buf + i, pk->xt, MAGNET_XT_LEN);
+	i += MAGNET_XT_LEN;
 	i += u64Packer(buf + i, pk->xl);
 
 	slen = strlen(pk->dn);
@@ -121,9 +121,9 @@ void blockToZip(block *bx, FILE *fp, uint8_t *buf)
 	if (!bx || !fp || !buf) return;
 
 	buf[i++] = 'B';
-	memcpy(buf + i, bx->key, SHA512_LEN);
-	i += SHA512_LEN;
 	memcpy(buf + i, bx->crc, SHA512_LEN);
+	i += SHA512_LEN;
+	memcpy(buf + i, bx->key, SHA512_LEN);
 	i += SHA512_LEN;
 	i += u64Packer(buf + i, bx->n);
 	i += u64Packer(buf + i, bx->time);

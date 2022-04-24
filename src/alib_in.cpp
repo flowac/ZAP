@@ -53,36 +53,45 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	return newTran(tx, time, id, amount, src, dest);
 }
 
-bool blockFromZip(block *bx, FILE *fp, uint8_t *buf)
+bool blockFromZip(chain *ch, FILE *fp, uint8_t *buf)
 {
-	uint32_t i = 0, nRead;
-	if (!bx || !fp || !buf) return false;
+	if (!ch || !fp || !buf) return false;
+	bool ret;
+	uint8_t crc[SHA512_LEN], key[SHA512_LEN];
+	uint32_t i = 0, nRead, n_packs, n_trans;
+	uint64_t n, time;
+	pack *packs;
+	tran *trans;
 
 	nRead = 1 + 2 * SHA512_LEN;
 	if (nRead != fread(buf, 1, nRead, fp)) return false;
 	if (buf[0] != 'B') return false;
-	memcpy(bx->key, buf + 1, SHA512_LEN);
-	memcpy(bx->crc, buf + 1 + SHA512_LEN, SHA512_LEN);
+	memcpy(crc, buf + 1, SHA512_LEN);
+	memcpy(key, buf + 1 + SHA512_LEN, SHA512_LEN);
+	printf("c%02X%02X ", crc[0], crc[1]);
+	printf("k%02X%02X ", key[0], key[1]);
 
 	if (18 != fread(buf, 1, 18, fp)) return false;
-	u64Unpack(buf, &bx->n);
-	u64Unpack(buf + 8, &bx->time);
-	bx->n_packs = buf[16];
-	bx->n_trans = buf[17];
-	bx->packs = (pack *) calloc(bx->n_packs, sizeof(pack));
-	bx->trans = (tran *) calloc(bx->n_trans, sizeof(tran));
+	u64Unpack(buf, &n);
+	u64Unpack(buf + 8, &time);
+	n_packs = buf[16];
+	n_trans = buf[17];
+	packs = (pack *) calloc(n_packs, sizeof(pack));
+	trans = (tran *) calloc(n_trans, sizeof(tran));
 
-	for (i = 0; i < bx->n_packs; i++) if (!packFromZip(&(bx->packs[i]), fp, buf)) return false;
-	for (i = 0; i < bx->n_trans; i++) if (!tranFromZip(&(bx->trans[i]), fp, buf)) return false;
+	for (i = 0; i < n_packs; i++) if (!packFromZip(&packs[i], fp, buf)) return false;
+	for (i = 0; i < n_trans; i++) if (!tranFromZip(&trans[i], fp, buf)) return false;
 	// TODO: run a sha3-512 check to see if crc matches
 
-	return true;
+	ret = insertBlock(ch, n, time, n_packs, packs, n_trans, trans, crc, key);
+	if (packs) free(packs);
+	if (trans) free(trans);
+	return ret;
 }
 
 bool chainFromZip(chain *ch, const char *dest)
 {
 	bool ret = false;
-	block bx;
 	FILE *fp;
 	uint8_t buf[BUF1K];
 	uint64_t chainLen;
@@ -95,7 +104,7 @@ bool chainFromZip(chain *ch, const char *dest)
 
 	for (uint64_t i = 0; i < chainLen; ++i)
 	{
-		if (!blockFromZip(&bx, fp, buf) || !insertBlock(&bx, ch))
+		if (!blockFromZip(ch, fp, buf))
 		{
 			deleteChain(ch);
 			goto cleanup;

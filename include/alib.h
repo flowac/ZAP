@@ -6,6 +6,7 @@
 #ifndef _ALIB_H
 #define _ALIB_H
 
+#include <cstddef>
 #include "atype.h"
 
 /**
@@ -13,6 +14,11 @@
  */
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
+
+bool sha512_cmp      (uint8_t *left, uint8_t *right);
+bool sha512_cmp_free (uint8_t *left, uint8_t *target);
+bool sha512_copy     (uint8_t *dest, uint8_t *src,    uint32_t shaLen);
+bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen);
 
 /**
  * @brief This function will print the relative information of a block
@@ -44,16 +50,15 @@ bool newTran(tran *tx,
 			 uint64_t src,
 			 uint64_t dest);
 
-bool newBlock(block *bx,
-			  uint64_t n,
-              uint64_t time,
-              uint32_t n_packs,//package count
-              pack *packs,     //package array
-              uint32_t n_trans,//transaction count
-              tran *trans);    //transaction array
-
-//! return true on success
-bool insertBlock(block *bx, chain *ch);
+bool insertBlock(chain *ch,
+				 uint64_t n,
+				 uint64_t time,
+				 uint32_t n_packs,//package count
+				 pack *packs,     //package array
+				 uint32_t n_trans,//transaction count
+				 tran *trans,    //transaction array
+				 uint8_t crc[SHA512_LEN] = NULL,
+				 uint8_t key[SHA512_LEN] = NULL);
 
 void deletePack(pack *target);
 
@@ -70,10 +75,12 @@ pack *dequeuePack(void);
 tran *dequeueTran(void);
 
 /**
+ * @brief Generate a block checksum or validate an existing checksum
+ */
+bool checkBlock(block *bx, bool modify = false);
+
+/**
  * @brief Validate content against internal checksums
- *
- * Chain length will be reset to the index of the first invalid block
- * @return True if no problems found
  */
 bool auditChain(chain *ch);
 

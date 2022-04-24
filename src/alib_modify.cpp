@@ -1,9 +1,6 @@
-#include <algorithm>
 #include <errno.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <time.h>
 
 #include "alib.h"
 #include "log.h"
@@ -33,17 +30,37 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 	return 8U;
 }
 
-bool sha512_copy(uint8_t *dest, uint8_t *md_val, uint32_t shaLen)
+bool sha512_cmp(uint8_t *left, uint8_t *right)
 {
-	if (!md_val || shaLen != SHA512_LEN)
+	if (!left || !right) return false;
+	return 0 == memcmp(left, right, SHA512_LEN);
+}
+
+bool sha512_cmp_free(uint8_t *left, uint8_t *target)
+{
+	bool ret = sha512_cmp(left, target);
+	printf("-%02X%02X ", left[0], left[1]);
+	if (target) printf("_%02X%02X ", target[0], target[1]);
+	if (target) free(target);
+	return ret;
+}
+
+bool sha512_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
+{
+	if (!src || shaLen != SHA512_LEN)
 	{
-		if (md_val) free(md_val);
 		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA512_LEN, shaLen);
 		return false;
 	}
-	memcpy(dest, md_val, SHA512_LEN);
-	free(md_val);
+	memcpy(dest, src, SHA512_LEN);
 	return true;
+}
+
+bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
+{
+	bool ret = sha512_copy(dest, target, shaLen);
+	if (target) free(target);
+	return ret;
 }
 
 void printBlock(block *target)
@@ -98,54 +115,40 @@ bool newTran(tran *tx, uint64_t time, uint64_t id, uint64_t amount, uint64_t src
 	return true;
 }
 
-bool newBlock(block *bx, uint64_t n, uint64_t time,
-			  uint32_t n_packs, pack *packs,
-			  uint32_t n_trans, tran *trans)
+// TODO: compact blocks once full
+bool insertBlock(chain *ch,
+				 uint64_t n, uint64_t time,
+				 uint32_t n_packs, pack *packs,
+				 uint32_t n_trans, tran *trans,
+				 uint8_t crc[SHA512_LEN],
+				 uint8_t key[SHA512_LEN])
 {
-	if (!bx || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
+	if (!ch || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
+	if (ch->blk.size() != 0 && n != (ch->blk.back().n + 1)) return false;
 	uint8_t *md_val;
 	uint32_t shaLen;
-	EVP_MD_CTX *md_ctx;
+	block bx;
 
-	bx->n = n;
-	bx->time = time ? time : (uint64_t) sNow();
-	bx->n_packs = n_packs;
-	bx->n_trans = n_trans;
-	bx->packs = packs;
-	bx->trans = trans;
-
-	uint8_t bitPack[18];
-	u64Packer(bitPack, bx->n);
-	u64Packer(bitPack + 8, bx->time);
-	bitPack[16] = bx->n_packs;
-	bitPack[17] = bx->n_trans;
-
-	if (!(md_ctx = update_sha3_512(bitPack, 18, NULL))) return false;
-
-	// TODO: Do these checksums properly instead of taking a whole chunk of memory
-	if (bx->packs) if (!update_sha3_512(bx->packs, sizeof(pack) * bx->n_packs, md_ctx)) return false;
-	if (bx->trans) if (!update_sha3_512(bx->trans, sizeof(tran) * bx->n_trans, md_ctx)) return false;
-
-	md_val = finish_sha3_512(&shaLen, md_ctx);
-	if (!sha512_copy(bx->crc, md_val, shaLen)) return false;
+	bx.n = n;
+	bx.time = time ? time : (uint64_t) sNow();
+	bx.n_packs = n_packs;
+	bx.n_trans = n_trans;
+	bx.packs = packs;
+	bx.trans = trans;
 
 	// TODO: fix this broken key gen
-	md_val = finish_sha3_512(bx->crc, SHA512_LEN, &shaLen);
-	if (!sha512_copy(bx->key, md_val, shaLen)) return false;
+	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
+	if (key) if (!sha512_cmp(key, md_val)) return false;
+	if (!sha512_copy_free(bx.key, md_val, shaLen)) return false;
+	printf("k_%02X%02X ", bx.key[0], bx.key[1]);
+	if (crc && !sha512_copy(bx.crc, crc, SHA512_LEN)) return false;
 
-	if (LOG) printTime(bx->time);
-	return true;
-}
-
-//TODO: compact blocks once full
-//TODO: validate blocks or merge with newBlock
-bool insertBlock(block *bx, chain *ch)
-{
-	if (!bx || !ch) return false;
-
-	ch->blk.push_back(*bx);
+	if (crc) printf("c_%02X%02X ", crc[0], crc[1]);
+	if (!checkBlock(&bx, crc == NULL)) return false;
+	ch->blk.push_back(bx);
 	if (ch->blk.size() > B_MAX)
 	{
+		// TODO: do some trimming here?
 		printf("Max number of blocks %d exceeded. Currently %lu.\n", B_MAX, ch->blk.size());
 	}
 

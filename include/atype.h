@@ -15,12 +15,13 @@
 
 #define LOG 0                 //!< not sure
 
-#define MAX_U2   0x03U        //!< max size of a  2 bit int
-#define MAX_U4   0x0FU        //!< max size of a  4 bit int
-#define MAX_U6   0x3FU        //!< max size of a  6 bit int
-#define MAX_U8   0xFFUL       //!< max size of an 8 bit int
-#define MAX_U16  0xFFFFUL     //!< max size of a 16 bit int
-#define MAX_U32  0xFFFFFFFFUL //!< max size of a 32 bit int
+#define MAX_U2   0x03U
+#define MAX_U4   0x0FU
+#define MAX_U6   0x3FU
+#define MAX_U8   0xFFUL
+#define MAX_U16  0xFFFFUL
+#define MAX_U32  0xFFFFFFFFUL
+#define MAX_U64  0xFFFFFFFFFFFFFFFFULL
 
 #define B_MAX    5000         //!< max number of blocks
 #define BUF1K    0x400UL
@@ -58,8 +59,8 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
-	uint8_t key[SHA512_LEN]; //!< gen next 512 bits
 	uint8_t crc[SHA512_LEN]; //!< checksum 512 bits
+	uint8_t key[SHA512_LEN]; //!< gen next 512 bits
 	uint64_t n;      //!< block number
 	uint64_t time;   //!< epoch seconds
 	uint8_t  n_packs;//!< number of payloads, 255 per block max
