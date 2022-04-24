@@ -79,23 +79,20 @@ bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *t
 	px->xl = xl;
 	if (!(px->dn = (char *) calloc(ndn, 1))) goto cleanup;
 	if (!(px->tr = (char *) calloc(ntr, 1))) goto cleanup;
-	// TODO: check input for special characters, make it match packToZip
-	// TODO: xt has to be 160 bit checksum
 	strcpy(px->dn, dn);
 	strcpy(px->tr, tr);
 
 	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 	for (i = 0; i < MAGNET_KT_COUNT; ++i)
 	{
-		if (!kt[i]) break;
-		nkt = strlen(kt[i]);
+		if (!kt[i] || 0 == (nkt = strlen(kt[i]))) break;
 		if (nkt > MAGNET_KT_LEN) goto cleanup;
-		if (!(px->kt[i] = (char *) calloc(nkt + 1, 1))) goto cleanup;
-		strcpy(px->kt[i], kt[i]);
+		px->kt[i] = kt[i];
 	}
 
 	return true;
 cleanup:
+	for (i = 0; i < MAGNET_KT_COUNT; i++) if (kt[i]) free(kt[i]);
 	if (px->dn) free(px->dn);
 	if (px->tr) free(px->tr);
 	return false;

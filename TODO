@@ -1,6 +1,4 @@
 CURRENT
-*** Test chain import
-*** Chain audit and compare
 **  Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?

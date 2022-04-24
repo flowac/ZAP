@@ -4,11 +4,10 @@
 #include "alib.h"
 #include "alib_io.h"
 
-// TODO: add kt
 bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 {
 	uint8_t xt[MAGNET_XT_LEN];
-	uint32_t len;
+	uint32_t i, len, nkt;
 	uint64_t xl;
 	char dn[MAX_U8 + 1];
 	char tr[MAX_U8 + 1];
@@ -33,8 +32,23 @@ bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 	memcpy(tr, buf, len);
 	tr[len] = 0;
 
-	// TODO: add kt
+	if (1 != fread(buf, 1, 1, fp)) return false;
+	nkt = buf[0];
+	if (nkt > MAGNET_KT_COUNT) return false;
+
+	for (i = 0; i < nkt; ++i)
+	{
+		if (1 != fread(buf, 1, 1, fp)) return false;
+		len = buf[0];
+		if (!len || len > MAGNET_KT_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
+		if (!(kt[i] = (char *) calloc(len + 1, 1))) goto cleanup;
+		memcpy(kt[i], buf, len);
+	}
+
 	return newPack(px, xt, xl, dn, tr, kt);
+cleanup:
+	for (i = 0; i < MAGNET_KT_COUNT; ++i) if (kt[i]) free(kt[i]);
+	return false;
 }
 
 bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)

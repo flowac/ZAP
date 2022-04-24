@@ -21,27 +21,32 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
-// TODO: add kt
 void packToText(pack *pk, FILE *fp)
 {
 	fprintf(fp, "\t{P\n\t\t");
 	printBytes(fp, pk->xt, 20);
 	fprintf(fp, ","
-			"\n\t\tPlen : %lu,"
-			"\n\t\tPdn  : %s,"
-			"\n\t\tPtr  : %s,"
-			"\n\t\t},\n",
+			"\n\t\tlen : %lu,"
+			"\n\t\tdn  : %s,"
+			"\n\t\ttr  : %s,"
+			"\n\t\tkt  : ",
 			pk->xl, pk->dn, pk->tr);
+	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
+	{
+		if (!pk->kt[i] || !pk->kt[i][0]) break;
+		fprintf(fp, "%s ", pk->kt[i]);
+	}
+	fprintf(fp, "\n\t\t},\n");
 }
 
 void tranToText(tran *tx, FILE *fp)
 {
 	fprintf(fp, "\t{T"
-			"\n\t\tTtime: %lu,"
-			"\n\t\tTid  : %lu,"
-			"\n\t\tTsum : %lu,"
-			"\n\t\tTsrc : %lu,"
-			"\n\t\tTdest: %lu,"
+			"\n\t\ttime: %lu,"
+			"\n\t\tid  : %lu,"
+			"\n\t\tsum : %lu,"
+			"\n\t\tsrc : %lu,"
+			"\n\t\tdest: %lu,"
 			"\n\t\t},\n",
 			tx->time, tx->id, tx->amount, tx->src, tx->dest);
 }
@@ -53,10 +58,10 @@ void blockToText(block *bx, FILE *fp)
 	printBytes(fp, bx->key, SHA512_LEN);
 
 	fprintf(fp,
-			"\n\tBn   : %lu,"
-			"\n\tBgmt : %lu,"
-			"\n\tBpack: %u,"
-			"\n\tBtran: %u,\n",
+			"\n\tn   : %lu,"
+			"\n\tgmt : %lu,"
+			"\n\tpack: %u,"
+			"\n\ttran: %u,\n",
 			bx->n, bx->time, bx->n_packs, bx->n_trans);
 
 	for (uint32_t i = 0; i < bx->n_packs; ++i) packToText(&(bx->packs[i]), fp);
@@ -76,10 +81,9 @@ bool chainToText(chain *ch, const char *dest)
 	return true;
 }
 
-// TODO: add kt
 void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 {
-	uint32_t i = 0, slen;
+	uint32_t i = 0, j, slen, ktPos;
 	if (!pk || !fp || !buf) return;
 
 	buf[i++] = 'P';
@@ -97,6 +101,16 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 	memcpy(buf + i, pk->tr, slen);
 	i += slen;
 
+	ktPos = i++;
+	for (j = 0; j < MAGNET_KT_COUNT; ++j)
+	{
+		if (!pk->kt[j] || !pk->kt[j][0]) break;
+		slen = strlen(pk->kt[j]);
+		buf[i++] = (uint8_t) slen;
+		memcpy(buf + i, pk->kt[j], slen);
+		i += slen;
+	}
+	buf[ktPos] = j;
 	fwrite(buf, 1, i, fp);
 }
 

@@ -46,7 +46,7 @@ void chain_gen(chain *ch, uint64_t size)
 	bool val;
 	uint8_t xt[MAGNET_XT_LEN];
 	char dn[121], tr[121];
-	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
+	char *kt[MAGNET_KT_COUNT];
 
 	for (i = 0; i < size; i++)
 	{
@@ -66,6 +66,14 @@ void chain_gen(chain *ch, uint64_t size)
 				if (k < MAGNET_XT_LEN) xt[k] = rand() % MAX_U8;
 				dn[k] = charset[rand() % 62];
 				tr[k] = charset[rand() % 62];
+			}
+			uint8_t nkt = rand() % MAGNET_KT_COUNT;
+			for (k = 0; k < MAGNET_KT_COUNT; kt[k++] = NULL);
+			for (k = 0; k < nkt; ++k)
+			{
+				uint8_t len = rand() % MAGNET_KT_LEN;
+				kt[k] = (char *) calloc(len + 1, 1);
+				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
 			}
 
 			val = newPack(&packs[j], xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
