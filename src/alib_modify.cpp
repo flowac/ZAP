@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,8 +9,8 @@
 #include "time_fn.h"
 
 // TODO: when calling newBlock, use these queues instead of taking parameters
-static std::queue<pack *> pack_queue;
-static std::queue<tran *> tran_queue;
+static std::queue<pack> pack_queue;
+static std::queue<tran> tran_queue;
 
 uint32_t u64Packer(uint8_t *buf, uint64_t data)
 {
@@ -28,37 +29,6 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 		*data |= (uint64_t) buf[i] << (i * 8);
 	}
 	return 8U;
-}
-
-bool sha512_cmp(uint8_t *left, uint8_t *right)
-{
-	if (!left || !right) return false;
-	return 0 == memcmp(left, right, SHA512_LEN);
-}
-
-bool sha512_cmp_free(uint8_t *left, uint8_t *target)
-{
-	bool ret = sha512_cmp(left, target);
-	if (target) free(target);
-	return ret;
-}
-
-bool sha512_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
-{
-	if (!src || shaLen != SHA512_LEN)
-	{
-		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA512_LEN, shaLen);
-		return false;
-	}
-	memcpy(dest, src, SHA512_LEN);
-	return true;
-}
-
-bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
-{
-	bool ret = sha512_copy(dest, target, shaLen);
-	if (target) free(target);
-	return ret;
 }
 
 void printBlock(block *target)
@@ -109,7 +79,41 @@ bool newTran(tran *tx, uint64_t time, uint64_t id, uint64_t amount, uint64_t src
 	return true;
 }
 
-// TODO: compact blocks once full
+bool newBlock(chain *ch)
+{
+	if (!ch || (pack_queue.empty() && tran_queue.empty())) return false;
+	uint8_t *md_val;
+	uint32_t i, shaLen;
+	block bx;
+
+	bx.n = ch->blk.size() + 1;
+	bx.time = (uint64_t) sNow();
+	bx.n_packs = std::max(pack_queue.size(), MAX_U8);
+	bx.n_trans = std::max(tran_queue.size(), MAX_U8);
+
+	if (!(bx.packs = (pack *) calloc(bx.n_packs, sizeof(pack)))) goto cleanup;
+	for (i = 0; i < bx.n_packs; ++i)
+	{
+		// TODO: fill this in
+	}
+
+	if (!(bx.trans = (tran *) calloc(bx.n_trans, sizeof(tran)))) goto cleanup;
+	for (i = 0; i < bx.n_trans; ++i)
+	{
+	}
+
+	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
+	if (!sha512_copy_free(bx.key, md_val, shaLen)) goto cleanup;
+	if (!checkBlock(&bx, true)) goto cleanup;
+	ch->blk.push_back(bx);
+
+	return trimBlock(ch);
+cleanup:
+	if (bx.packs) free(bx.packs);
+	if (bx.trans) free(bx.trans);
+	return false;
+}
+
 bool insertBlock(chain *ch,
 				 uint64_t n, uint64_t time,
 				 uint32_t n_packs, pack *packs,
@@ -138,12 +142,14 @@ bool insertBlock(chain *ch,
 
 	if (!checkBlock(&bx, crc == NULL)) return false;
 	ch->blk.push_back(bx);
-	if (ch->blk.size() > B_MAX)
-	{
-		// TODO: do some trimming here?
-		printf("Max number of blocks %d exceeded. Currently %lu.\n", B_MAX, ch->blk.size());
-	}
+	return trimBlock(ch);
+}
 
+bool trimBlock(chain *ch)
+{
+	if (ch->blk.size() < B_MAX) return true;
+
+	printf("Max number of blocks %d reached. Currently %lu.\n", B_MAX, ch->blk.size());
 	return true;
 }
 
@@ -162,6 +168,7 @@ void deleteBlock(block *target)
 {
 	for (uint32_t i = 0; i < target->n_packs; ++i) deletePack(&(target->packs[i]));
 	if (target->packs) free(target->packs);
+	for (uint32_t i = 0; i < target->n_trans; ++i) deleteTran(&(target->trans[i]));
 	if (target->trans) free(target->trans);
 }
 
@@ -175,29 +182,29 @@ void deleteChain(chain *target)
 bool enqueuePack(pack *target)
 {
 	if (!target) return false;
-	pack_queue.push(target);
+	pack_queue.push(*target);
 	return true;
 }
 
 bool enqueueTran(tran *target)
 {
 	if (!target) return false;
-	tran_queue.push(target);
+	tran_queue.push(*target);
 	return true;
 }
 
-pack *dequeuePack(void)
+bool dequeuePack(pack *target)
 {
-	if (pack_queue.empty()) return NULL;
-	pack *target = pack_queue.front();
+	if (pack_queue.empty()) return false;
+	*target = pack_queue.front();
 	pack_queue.pop();
-	return target;
+	return true;
 }
 
-tran *dequeueTran(void)
+bool dequeueTran(tran *target)
 {
-	if (tran_queue.empty()) return NULL;
-	tran *target = tran_queue.front();
+	if (tran_queue.empty()) return false;
+	*target = tran_queue.front();
 	tran_queue.pop();
-	return target;
+	return true;
 }

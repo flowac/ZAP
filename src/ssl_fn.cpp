@@ -58,3 +58,34 @@ uint8_t *finish_sha3_512(const void *data, uint32_t size, uint32_t *retLen, EVP_
 {
 	return finish_sha3_512(retLen, update_sha3_512(data, size, md_ctx));
 }
+
+bool sha512_cmp(uint8_t *left, uint8_t *right)
+{
+	if (!left || !right) return false;
+	return 0 == memcmp(left, right, SHA512_LEN);
+}
+
+bool sha512_cmp_free(uint8_t *left, uint8_t *target)
+{
+	bool ret = sha512_cmp(left, target);
+	if (target) free(target);
+	return ret;
+}
+
+bool sha512_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
+{
+	if (!src || shaLen != SHA512_LEN)
+	{
+		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA512_LEN, shaLen);
+		return false;
+	}
+	memcpy(dest, src, SHA512_LEN);
+	return true;
+}
+
+bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
+{
+	bool ret = sha512_copy(dest, target, shaLen);
+	if (target) free(target);
+	return ret;
+}

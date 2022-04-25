@@ -44,4 +44,9 @@ uint8_t *finish_sha3_512(const void *data,
 						 uint32_t *retLen,
 						 EVP_MD_CTX *md_ctx = NULL);
 
+bool sha512_cmp      (uint8_t *left, uint8_t *right);
+bool sha512_cmp_free (uint8_t *left, uint8_t *target);
+bool sha512_copy     (uint8_t *dest, uint8_t *src,    uint32_t shaLen);
+bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen);
+
 #endif //_SSL_FN_H

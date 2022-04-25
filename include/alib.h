@@ -15,11 +15,6 @@
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
 
-bool sha512_cmp      (uint8_t *left, uint8_t *right);
-bool sha512_cmp_free (uint8_t *left, uint8_t *target);
-bool sha512_copy     (uint8_t *dest, uint8_t *src,    uint32_t shaLen);
-bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen);
-
 /**
  * @brief This function will print the relative information of a block
  * 
@@ -50,6 +45,8 @@ bool newTran(tran *tx,
 			 uint64_t src,
 			 uint64_t dest);
 
+bool newBlock(chain *ch);
+
 bool insertBlock(chain *ch,
 				 uint64_t n,
 				 uint64_t time,
@@ -59,6 +56,8 @@ bool insertBlock(chain *ch,
 				 tran *trans,    //transaction array
 				 uint8_t crc[SHA512_LEN] = NULL,
 				 uint8_t key[SHA512_LEN] = NULL);
+
+bool trimBlock(chain *ch);
 
 void deletePack(pack *target);
 
