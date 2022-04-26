@@ -50,10 +50,8 @@ void chain_gen(chain *ch, uint64_t size)
 
 	for (i = 0; i < size; i++)
 	{
-		nPacks = rand() % 50 + 50;
-		pack *packs = (pack *) calloc(nPacks, sizeof(pack));
+		nPacks = rand() % 200 + 50;
 		nTrans = 0;
-		tran *trans = NULL;
 
 		for (j = 0; j < nPacks; j++)
 		{
@@ -77,12 +75,14 @@ void chain_gen(chain *ch, uint64_t size)
 				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
 			}
 
-			val = newPack(&packs[j], xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
+			pack packs;
+			tran trans;
+			val = newPack(&packs, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val) printf("    newPack failed?");
+			else if (!enqueuePack(&packs)) printf("    enqueuePack failed?");
 		}
 
-		val = insertBlock(ch, i, 0, nPacks, packs, nTrans, trans);
-		if (!val) printf("    newBlock failed at %lu?", i);
+		if (!newBlock(ch)) printf("    newBlock failed at %lu?", i);
 	}
 }
 

@@ -88,18 +88,35 @@ bool newBlock(chain *ch)
 
 	bx.n = ch->blk.size() + 1;
 	bx.time = (uint64_t) sNow();
-	bx.n_packs = std::max(pack_queue.size(), MAX_U8);
-	bx.n_trans = std::max(tran_queue.size(), MAX_U8);
+	bx.n_packs = std::min(pack_queue.size(), MAX_U8);
+	bx.n_trans = std::min(tran_queue.size(), MAX_U8);
+	bx.packs = NULL;
+	bx.trans = NULL;
 
-	if (!(bx.packs = (pack *) calloc(bx.n_packs, sizeof(pack)))) goto cleanup;
-	for (i = 0; i < bx.n_packs; ++i)
+	if (bx.n_packs)
 	{
-		// TODO: fill this in
+		if (!(bx.packs = (pack *) calloc(bx.n_packs, sizeof(pack)))) goto cleanup;
+		for (i = 0; i < bx.n_packs; ++i)
+		{
+			if (!dequeuePack(&(bx.packs[i])))
+			{
+				bx.n_packs = i + 1; // this is unlikely, therefore no realloc
+				break;
+			}
+		}
 	}
 
-	if (!(bx.trans = (tran *) calloc(bx.n_trans, sizeof(tran)))) goto cleanup;
-	for (i = 0; i < bx.n_trans; ++i)
+	if (bx.n_trans)
 	{
+		if (!(bx.trans = (tran *) calloc(bx.n_trans, sizeof(tran)))) goto cleanup;
+		for (i = 0; i < bx.n_trans; ++i)
+		{
+			if (!dequeueTran(&(bx.trans[i])))
+			{
+				bx.n_trans = i + 1; // this is unlikely, therefore no realloc;
+				break;
+			}
+		}
 	}
 
 	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);

@@ -45,6 +45,9 @@ bool newTran(tran *tx,
 			 uint64_t src,
 			 uint64_t dest);
 
+/**
+ * @brief THIS IS NOT THREAD SAFE.
+ */
 bool newBlock(chain *ch);
 
 bool insertBlock(chain *ch,
@@ -53,25 +56,20 @@ bool insertBlock(chain *ch,
 				 uint32_t n_packs,//package count
 				 pack *packs,     //package array
 				 uint32_t n_trans,//transaction count
-				 tran *trans,    //transaction array
+				 tran *trans,     //transaction array
 				 uint8_t crc[SHA512_LEN] = NULL,
 				 uint8_t key[SHA512_LEN] = NULL);
 
 bool trimBlock(chain *ch);
 
 void deletePack(pack *target);
-
 void deleteTran(tran *target);
-
 void deleteChain(chain *target);
 
 bool enqueuePack(pack *target);
-
 bool enqueueTran(tran *target);
-
-pack *dequeuePack(void);
-
-tran *dequeueTran(void);
+bool dequeuePack(pack *target);
+bool dequeueTran(tran *target);
 
 /**
  * @brief Generate a block checksum or validate an existing checksum
