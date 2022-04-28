@@ -87,7 +87,7 @@ bool newBlock(chain *ch)
 	block bx;
 
 	bx.n = ch->blk.size() + 1;
-	bx.time = (uint64_t) sNow();
+	bx.time = nsNow();
 	bx.n_packs = std::min(pack_queue.size(), MAX_U8);
 	bx.n_trans = std::min(tran_queue.size(), MAX_U8);
 	bx.packs = NULL;
@@ -145,7 +145,7 @@ bool insertBlock(chain *ch,
 	block bx;
 
 	bx.n = n;
-	bx.time = time ? time : (uint64_t) sNow();
+	bx.time = time ? time : nsNow();
 	bx.n_packs = n_packs;
 	bx.n_trans = n_trans;
 	bx.packs = packs;

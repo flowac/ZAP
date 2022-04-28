@@ -1,5 +1,5 @@
 /**
- * @file alibio.h
+ * @file alib_io.h
  * @brief Functions that deal with i/o of the chain
  */
 #ifndef _ALIB_IO_H

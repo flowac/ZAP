@@ -3,9 +3,15 @@
 
 #include <time.h>
 
-struct tm *get_loc_time();
-time_t sNow();
+struct tm *get_loc_time(void);
 void printTime(time_t time);
+
+/**
+ * @brief Return current time
+ *        Nano seconds stored in lower 30 bits
+ *        Seconds since epoch in upper 34 bits
+ */
+uint64_t nsNow(void);
 
 /**
  * @brief Start LCFS stack timer function

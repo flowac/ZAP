@@ -1,6 +1,7 @@
 #include "atype.h"
 #include "alib.h"
 #include "alib_io.h"
+#include "alib_wallet.h"
 #include "ssl_fn.h"
 #include "time_fn.h"
 #include "log.h"
@@ -174,6 +175,13 @@ int main()
 
 	log_test();
 	chain_test(200);
+
+	uint8_t pub[ED448_LEN];
+	uint8_t priv[ED448_LEN];
+	memset(pub, 0, ED448_LEN);
+	memset(priv, 0, ED448_LEN);
+	newWallet(pub, priv);
+	sendToAddress(pub, priv, 77ULL, 44U);
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();

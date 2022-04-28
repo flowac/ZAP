@@ -20,13 +20,19 @@
 #define MAX_U6   0x3FU
 #define MAX_U8   0xFFUL
 #define MAX_U16  0xFFFFUL
+#define MAX_U30  0x3FFFFFFFUL
 #define MAX_U32  0xFFFFFFFFUL
+#define MAX_U34  0x3FFFFFFFFUL
 #define MAX_U64  0xFFFFFFFFFFFFFFFFULL
 
+#define ONE_BILLION 1000000000
+
 #define B_MAX    5000         //!< max number of blocks
+#define FRAC_MAX 10000        //!< max size of floating point balance
 #define BUF1K    0x400UL
 #define BUF4K    0x1000UL
 
+#define ED448_LEN       57    //!< number of bytes for an ED448 key
 #define SHA512_LEN      64    //!< number of bytes for a SHA3-512
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_KT_COUNT 5     //!< max number of search keywords
@@ -72,8 +78,8 @@ typedef struct {
 typedef struct {
 	uint8_t address[SHA512_LEN]; //!< SHA3-512 checksum
 	//If balance is less than 1, the entry shall be trimmed
-	uint64_t deci; //Decimal value
-	uint64_t frac; //Floating point value
+	uint64_t deci; //Integer value
+	uint16_t frac; //Floating point value, limit of FRAC_MAX
 } balance;
 
 typedef struct {
