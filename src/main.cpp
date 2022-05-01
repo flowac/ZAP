@@ -168,6 +168,33 @@ void chain_test(int size)
 	print_elapsed_time();
 }
 
+void wallet_test()
+{
+	uint64_t deci = 77;
+	uint16_t frac = 44;
+	uint8_t sig[ED448_SIG_LEN];
+	uint8_t pub[ED448_LEN];
+	uint8_t priv[ED448_LEN];
+	uint8_t dest[ED448_LEN];
+	memset(sig, 0, ED448_SIG_LEN);
+	memset(pub, 0, ED448_LEN);
+	memset(priv, 0, ED448_LEN);
+	memset(dest, 0, ED448_LEN);
+
+	const uint64_t msgLen = 10;
+	uint8_t msg[msgLen];
+	u64Packer(msg, deci);
+	msg[8] = frac | MAX_U8;
+	msg[9] = frac >> 8;
+
+	if (!newWallet(pub, priv)) printf("failed wallet\n");
+	else printf("wallet OK\n");
+	if (!sendToAddress(dest, priv, sig, deci, frac)) printf("failed send\n");
+	else printf("send OK\n");
+	if (!verifyMessage(pub, sig, msg, msgLen)) printf("failed verify\n");
+	else printf("verify OK\n");
+}
+
 int main()
 {
 	time_t tm;
@@ -175,13 +202,7 @@ int main()
 
 	log_test();
 	chain_test(200);
-
-	uint8_t pub[ED448_LEN];
-	uint8_t priv[ED448_LEN];
-	memset(pub, 0, ED448_LEN);
-	memset(priv, 0, ED448_LEN);
-	newWallet(pub, priv);
-	sendToAddress(pub, priv, 77ULL, 44U);
+	wallet_test();
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();

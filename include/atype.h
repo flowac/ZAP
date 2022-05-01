@@ -33,6 +33,7 @@
 #define BUF4K    0x1000UL
 
 #define ED448_LEN       57    //!< number of bytes for an ED448 key
+#define ED448_SIG_LEN   (ED448_LEN * 2)
 #define SHA512_LEN      64    //!< number of bytes for a SHA3-512
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_KT_COUNT 5     //!< max number of search keywords
