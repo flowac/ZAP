@@ -200,6 +200,10 @@ int main()
 	time_t tm;
 	srand((unsigned) time(&tm));
 
+	printf("OpenSSL version %lX.%lX.%lX (required was 3.0.0+)\n",
+		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,
+		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
+		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
 	log_test();
 	chain_test(200);
 	wallet_test();
