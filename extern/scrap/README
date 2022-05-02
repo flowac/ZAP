@@ -1,0 +1,6 @@
+This is a scraper that feeds into the torrent info fields.
+You need python 3.
+
+Go on piratebay and browse some categories or search for something.
+Save the page and put it here.
+Run the python script and you will get a pirate.txt with some scraped information.
