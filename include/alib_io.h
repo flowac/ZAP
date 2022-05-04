@@ -39,4 +39,9 @@ bool chainToZip(chain *ch,        //!< Chain to be compressed
 bool chainFromZip(chain *ch,      //!< Chain to be extracted 
 				  const char *dest);//!< Destination file
 
+/**
+ * @brief process new torrents and append to the queue
+ */
+uint32_t importPack(const char *src);
+
 #endif //_ALIB_IO_H

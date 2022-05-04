@@ -208,6 +208,8 @@ int main()
 	chain_test(200);
 	wallet_test();
 
+	importPack("extern/scrap/pirate.txt");
+
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();
 	return 0;

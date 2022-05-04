@@ -128,3 +128,44 @@ cleanup:
 	if (fp) fclose(fp);
 	return ret;
 }
+
+uint32_t importPack(const char *src)
+{
+	uint8_t xt[MAGNET_XT_LEN];
+	uint32_t ret = 0, blen, slen;
+	uint64_t xl;
+	char buf[BUF4K], dn[MAX_U8 + 1], tr[MAX_U8 + 1];
+	char *fio = NULL, *idx, *tok;
+	char *kt[MAGNET_KT_COUNT];
+	FILE *fp = fopen(src, "r");
+
+	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
+	printf("fsize %u\n", blen);
+	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
+	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
+
+	for (idx = fio;; ret++)
+	{
+		if (!(tok = strstr(idx, "size:"))) break;
+		if (!(idx = strchr(tok, '\n'))) break;
+		slen = idx - tok;
+		memcpy(buf, tok, slen);
+		buf[slen] = 0;
+		printf("%s\n", buf);
+		xl = strtol(buf, NULL, 0);
+
+		if (!(tok = strstr(idx, "major:"))) break;
+		if (!(idx = strchr(tok, '\n'))) break;
+		slen = idx - tok;
+		memcpy(buf, tok, slen);
+		buf[slen] = 0;
+		printf("%s\n", buf);
+		//kt[0] = calloc(slen + 1, 1);
+		//memcpy(kt, tok, slen);
+	}
+
+cleanup:
+	if (fp) fclose(fp);
+	if (fio) free(fio);
+	return ret;
+}
