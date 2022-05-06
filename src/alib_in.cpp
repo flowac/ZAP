@@ -134,9 +134,9 @@ uint32_t importPack(const char *src)
 	uint8_t xt[MAGNET_XT_LEN];
 	uint32_t ret = 0, blen, slen;
 	uint64_t xl;
-	char buf[BUF4K], dn[MAX_U8 + 1], tr[MAX_U8 + 1];
-	char *fio = NULL, *idx, *tok;
-	char *kt[MAGNET_KT_COUNT];
+	char buf[BUF1K], dn[MAGNET_DN_LEN + 1], tr[MAGNET_TR_LEN + 1];
+	char *fio = NULL, *idx, *tok, *prev;
+	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
 
 	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
@@ -144,27 +144,78 @@ uint32_t importPack(const char *src)
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
 
-	for (idx = fio;; ret++)
+	for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
+	for (prev = idx = fio;; ret++, prev = idx)
 	{
-		if (!(tok = strstr(idx, "size:"))) break;
-		if (!(idx = strchr(tok, '\n'))) break;
-		slen = idx - tok;
-		memcpy(buf, tok, slen);
-		buf[slen] = 0;
-		printf("%s\n", buf);
-		xl = strtol(buf, NULL, 0);
+		xl = 0;
+		if ((tok = strstr(idx, "size:")))
+		{
+		    tok += 5;
+			if (!(idx = strchr(tok, '\n'))) break;
+			if ((slen = idx - tok) > 19 || tok >= idx) break; // base 10 uin64_t max length
+			memcpy(buf, tok, slen);
+			buf[slen] = 0;
+			xl = strtol(buf, NULL, 0);
+		}
 
-		if (!(tok = strstr(idx, "major:"))) break;
-		if (!(idx = strchr(tok, '\n'))) break;
-		slen = idx - tok;
-		memcpy(buf, tok, slen);
-		buf[slen] = 0;
-		printf("%s\n", buf);
-		//kt[0] = calloc(slen + 1, 1);
-		//memcpy(kt, tok, slen);
+		if ((tok = strstr(idx, "major:")))
+		{
+		    tok += 6;
+			if (!(idx = strchr(tok, '\n'))) break;
+			if ((slen = idx - tok) > MAGNET_KT_LEN || tok >= idx) break;
+			kt[0] = (char *) calloc(slen + 1, 1);
+			memcpy(kt[0], tok, slen);
+		}
+
+		if ((tok = strstr(idx, "minor:")))
+		{
+		    tok += 6;
+			if (!(idx = strchr(tok, '\n'))) break;
+			if ((slen = idx - tok) > MAGNET_KT_LEN || tok >= idx) break;
+			kt[1] = (char *) calloc(slen + 1, 1);
+			memcpy(kt[1], tok, slen);
+		}
+
+		if ((tok = strstr(idx, "name:")))
+		{
+			tok += 5;
+			if (!(idx = strchr(tok, '\n'))) break;
+			if ((slen = idx - tok) > MAGNET_DN_LEN || tok >= idx) break;
+			memcpy(dn, tok, slen);
+		}
+
+		if ((tok = strstr(idx, "magnet:")))
+		{
+			if (!(tok = strstr(idx, "xt="))) break;
+			if (strncmp(tok + 3, "urn:btih:", 9) != 0) break;
+			tok += 12;
+			char buf3[3] = {0, 0, 0};
+			if (!(idx = strchr(tok, '&'))) break;
+			if ((slen = idx - tok) != MAGNET_XT_LEN * 2 || tok >= idx) break;
+			memcpy(buf, tok, slen);
+
+			for (int i = 0; i < (int) slen; ++i)
+			{
+				memcpy(buf3, buf + (i << 1), 2);
+				xt[i] = strtol(buf3, NULL, 16);
+			}
+
+			if (!(tok = strstr(idx, "tr="))) break;
+			tok += 3;
+			if (!(idx = strchr(tok, '\n'))) break;
+			if ((slen = idx - tok) > MAGNET_TR_LEN || tok >= idx) break;
+			memcpy(tr, tok, slen);
+		}
+		pack px;
+		if (newPack(&px, xt, xl, dn, tr, kt)) enqueuePack(&px);
+		else break;
+
+		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
+		if (prev == idx) break;
 	}
 
 cleanup:
+	for (int i = 0; i < MAGNET_KT_COUNT; ++i) if (kt[i]) free(kt[i]);
 	if (fp) fclose(fp);
 	if (fio) free(fio);
 	return ret;

@@ -205,10 +205,9 @@ int main()
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
 	log_test();
+	if (!importPack("extern/scrap/pirate.txt")) printf("Pack import failed\n");
 	chain_test(200);
 	wallet_test();
-
-	importPack("extern/scrap/pirate.txt");
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
 	log_deinit();

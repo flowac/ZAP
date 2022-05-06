@@ -29,6 +29,7 @@
 
 #define B_MAX    5000         //!< max number of blocks
 #define FRAC_MAX 10000        //!< max size of floating point balance
+#define BUF64    0x40U
 #define BUF1K    0x400UL
 #define BUF4K    0x1000UL
 
@@ -38,6 +39,8 @@
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_KT_COUNT 5     //!< max number of search keywords
 #define MAGNET_KT_LEN   16    //!< longest possible search keyword
+#define MAGNET_DN_LEN   128
+#define MAGNET_TR_LEN   1024
 
 /**
  * @brief Holds information about the parameters of the magnet link
@@ -66,8 +69,8 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
-	uint8_t crc[SHA512_LEN]; //!< checksum 512 bits
-	uint8_t key[SHA512_LEN]; //!< gen next 512 bits
+	uint8_t  crc[SHA512_LEN]; //!< checksum 512 bits
+	uint8_t  key[SHA512_LEN]; //!< gen next 512 bits
 	uint64_t n;      //!< block number
 	uint64_t time;   //!< epoch seconds
 	uint8_t  n_packs;//!< number of payloads, 255 per block max

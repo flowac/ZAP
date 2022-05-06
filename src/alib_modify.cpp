@@ -39,11 +39,13 @@ void printBlock(block *target)
 
 bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
 {
+	if (!px || !dn || !tr) return false;
 	uint32_t ndn = strlen(dn);
 	uint32_t ntr = strlen(tr);
 	uint32_t nkt, i;
 
-	if (!ndn || !ntr || ndn > MAX_U8 || ntr > MAX_U8) return false;
+	if (!ndn || !ntr || ndn > MAGNET_DN_LEN || ntr > MAGNET_TR_LEN) return false;
+	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
