@@ -1,4 +1,5 @@
 CURRENT
+*** Compress tracker URLs
 **  Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?
@@ -6,6 +7,7 @@ CURRENT
 FUTURE GOALS
 *** Create a simple search engine
 **  Remove 7zip? 100 times slower than simple compression. Ratios: LZMA = 81%, Ppmd = 79%
+**  Add mechanism to check tracker hashes and reject invalid magnets
 *   Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
 

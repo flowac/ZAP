@@ -39,12 +39,12 @@ void printBlock(block *target)
 
 bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
 {
-	if (!px || !dn || !tr) return false;
-	uint32_t ndn = strlen(dn);
-	uint32_t ntr = strlen(tr);
-	uint32_t nkt, i;
-
-	if (!ndn || !ntr || ndn > MAGNET_DN_LEN || ntr > MAGNET_TR_LEN) return false;
+	uint32_t ndn = 0;
+	uint32_t ntr = 0;
+	uint32_t nkt = 0, i = 0;
+	if (!px || !dn || !tr) goto cleanup;
+	px->dn = px->tr = NULL;
+	if (!(ndn = strlen(dn)) || !(ntr = strlen(tr)) || ndn > MAGNET_DN_LEN || ntr > MAGNET_TR_LEN) goto cleanup;
 	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
@@ -62,11 +62,16 @@ bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *t
 		px->kt[i] = kt[i];
 	}
 
+//	printf("pack %s<\n", dn);
 	return true;
 cleanup:
-	for (i = 0; i < MAGNET_KT_COUNT; i++) if (kt[i]) free(kt[i]);
-	if (px->dn) free(px->dn);
-	if (px->tr) free(px->tr);
+	printf("\nfailed new pack kt[i] %u[%u] %s<\n", nkt, i, dn);
+	if (kt) for (i = 0; i < MAGNET_KT_COUNT; i++) if (kt[i]) free(kt[i]);
+	if (px)
+	{
+		if (px->dn) free(px->dn);
+		if (px->tr) free(px->tr);
+	}
 	return false;
 }
 

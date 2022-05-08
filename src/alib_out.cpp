@@ -97,11 +97,13 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 	i += slen;
 
 	slen = strlen(pk->tr);
-	buf[i++] = (uint8_t) slen;
+	buf[i++] = (uint8_t) (slen >> 8);
+	buf[i++] = (uint8_t) (slen & MAX_U8);
 	memcpy(buf + i, pk->tr, slen);
 	i += slen;
 
-	ktPos = i++;
+	ktPos = i;
+	i++;
 	for (j = 0; j < MAGNET_KT_COUNT; ++j)
 	{
 		if (!pk->kt[j] || !pk->kt[j][0]) break;

@@ -22,7 +22,7 @@ for idx, item in enumerate(root.findAll(id='st')):
     buf += '\ndate:' + extra[2].string
     buf += '\nseeds:' + extra[5].string
     buf += '\nleech:' + extra[6].string
-    buf += '\n' + detail[3]['href'] + '\n'
+    buf += '\n' + detail[3]['href'] + '\nxdi\n'
     fout.write(buf)
 fout.close()
 

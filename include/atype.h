@@ -39,8 +39,8 @@
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_KT_COUNT 5     //!< max number of search keywords
 #define MAGNET_KT_LEN   16    //!< longest possible search keyword
-#define MAGNET_DN_LEN   128
-#define MAGNET_TR_LEN   1024
+#define MAGNET_DN_LEN   128   //!< must not exceed MAX_U8
+#define MAGNET_TR_LEN   1024  //!< must not exceed MAX_U16
 
 /**
  * @brief Holds information about the parameters of the magnet link
