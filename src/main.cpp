@@ -46,7 +46,8 @@ void chain_gen(chain *ch, uint64_t size)
 
 	bool val;
 	uint8_t xt[MAGNET_XT_LEN];
-	char dn[121], tr[121];
+	char dn[121];
+	uint8_t tr[121];
 	char *kt[MAGNET_KT_COUNT];
 
 	for (i = 0; i < size; i++)

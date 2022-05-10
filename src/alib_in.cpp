@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -130,12 +131,99 @@ cleanup:
 	return ret;
 }
 
+/**
+ * @brief: compress tracker links
+ * format: length of escape sequence & (1 << 7) followed by byte array
+ *         0xFF is reserved to seperate trackers
+ *   TODO: Shorten announce, torrent, tracker, .com, .org ?
+ * @return: length of null terminated string
+ */
+typedef enum
+{
+	TR_ZERO  = 1 << 7,
+	TR_START = MAX_U8,
+	TR_ANN   = MAX_U8 - 1,
+	TR_TOR   = MAX_U8 - 2,
+	TR_TRA   = MAX_U8 - 3,
+	TR_COM   = MAX_U8 - 4,
+	TR_ORG   = MAX_U8 - 5,
+	TR_MAX   = MAX_U8 - 6,
+} TRACKER_ESCAPE;
+static uint32_t compressTracker(uint8_t *tr)
+{
+	char buf3[3] = {0, 0, 0};
+	uint8_t buf[MAGNET_TR_LEN];
+	uint32_t ret = 0, len = 0, i, j, k;
+	if (!tr || !(len = strlen(tr))) return 0;
+
+	for (i = 0; i < len; ++i, ++ret)
+	{
+		buf[ret] = buf[i];
+		if (tr[i] == 'u' && (i + 2) < len && tr[i+1] == 'd' && tr[i+2] == 'p')
+		{
+			buf[ret] = MAX_U8;
+			i += 2;
+		}
+		else if (tr[i] == '%')
+		{
+			buf[ret] = TR_ZERO;
+			for (j = i, k = ret; j < len; j += 3)
+			{
+				if (tr[j] != '%') break;
+				if (j + 2 >= len) return 0;
+				memcpy(buf3, buf + j + 1, 2);
+				buf[ret] += 1;
+				if (buf[ret] > TR_MAX) return 0;
+				errno = 0;
+				buf[++k] = (uint8_t) strtol(buf3, NULL, 16);
+				if (errno != 0) return 0;
+			}
+			ret = k;
+			i = j + 2;
+		}
+		else if (tr[i] == 'a' && (i + 7) < len && strncmp(buf + i, "announce", 8) == 0)
+		{
+			buf[ret] = TR_ANN;
+			i += 7;
+		}
+		else if (tr[i] == 't' && (i + 6) < len)
+		{
+			if (strncmp(buf + i, "torrent", 7) == 0)
+				buf[ret] = TR_TOR;
+			else if (strncmp(buf + i, "tracker", 7) == 0)
+				buf[ret] = TR_TRA;
+			i += 6;
+		}
+		else if (tr[i] == '.' && (i + 3) < len)
+		{
+			if (strncmp(buf + i, ".com", 4) == 0)
+				buf[ret] = TR_COM;
+			else if (strncmp(buf + i, ".org", 4) == 0)
+				buf[ret] = TR_ORG;
+			i += 3;
+		}
+	}
+	memcpy(tr, buf, ret);
+	tr[ret] = 0;
+
+	return ret;
+}
+
+/**
+ * @brief: decompress a previously compressed tracker
+ */
+static uint32_t decompressTracker(uint8_t *tr)
+{
+	return 0;
+}
+
 uint32_t importPack(const char *src)
 {
 	uint8_t xt[MAGNET_XT_LEN];
+	uint8_t tr[MAGNET_TR_LEN + 1];
 	uint32_t ret = 0, blen, slen;
 	uint64_t xl;
-	char buf[BUF1K], dn[MAGNET_DN_LEN + 1], tr[MAGNET_TR_LEN + 1];
+	char buf[BUF1K], dn[MAGNET_DN_LEN + 1];
 	char *fio = NULL, *idx, *tok, *prev;
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
@@ -218,6 +306,9 @@ uint32_t importPack(const char *src)
 
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
 		if (prev == idx) break;
+
+		printf("tr[%d]%s<", strlen(tr), tr);
+		printf("%lu<\n", compressTracker(tr));
 	}
 
 cleanup:

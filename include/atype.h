@@ -49,7 +49,7 @@ typedef struct {
 	uint8_t  xt[MAGNET_XT_LEN]; //!< exact topic, 160 bit file hash
 	uint64_t xl; //!< exact length, size of file in bytes
 	char *dn;    //!< display name, filename
-	char *tr;    //!< address tracker, tracker url
+	uint8_t *tr; //!< address tracker, tracker url
 	char *kt[MAGNET_KT_COUNT]; //!< search keywords, upto MAGNET_KT_LEN each
 } pack;
 
