@@ -14,6 +14,7 @@
  */
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
+size_t strlen(const uint8_t *ptr);
 
 /**
  * @brief This function will print the relative information of a block
@@ -35,7 +36,7 @@ bool newPack(pack *px,
              uint8_t xt[MAGNET_XT_LEN],//!< exact topic (file hash)
              uint64_t xl,//!< Exact length (size in bytez)
              char *dn,   //!< Display name
-             char *tr,  //!< tracker url
+             uint8_t *tr,  //!< tracker url
 			 char *kt[MAGNET_KT_COUNT]);
 
 bool newTran(tran *tx,

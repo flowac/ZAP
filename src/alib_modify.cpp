@@ -31,26 +31,39 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 	return 8U;
 }
 
+size_t strlen(const uint8_t *ptr)
+{
+	uint8_t *itr = ptr;
+	size_t len = 0;
+	while (*itr)
+	{
+		++len;
+		++itr;
+	}
+	return len;
+}
+
 void printBlock(block *target)
 {
 	//printTime((time_t) target->time);
 	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
 }
 
-bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *tr, char *kt[MAGNET_KT_COUNT])
+bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
 {
 	uint32_t ndn = 0;
 	uint32_t ntr = 0;
 	uint32_t nkt = 0, i = 0;
 	if (!px || !dn || !tr) goto cleanup;
-	px->dn = px->tr = NULL;
+	px->dn = NULL;
+	px->tr = NULL;
 	if (!(ndn = strlen(dn)) || !(ntr = strlen(tr)) || ndn > MAGNET_DN_LEN || ntr > MAGNET_TR_LEN) goto cleanup;
 	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
 	if (!(px->dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
-	if (!(px->tr = (char *) calloc(ntr + 1, 1))) goto cleanup;
+	if (!(px->tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px->dn, dn, ndn);
 	memcpy(px->tr, tr, ntr);
 
@@ -62,11 +75,9 @@ bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, char *t
 		px->kt[i] = kt[i];
 	}
 
-//	printf("pack %s<\n", dn);
 	return true;
 cleanup:
-	printf("\nfailed new pack kt[i] %u[%u] %s<\n", nkt, i, dn);
-	if (kt) for (i = 0; i < MAGNET_KT_COUNT; i++) if (kt[i]) free(kt[i]);
+	printf("\nfailed new pack kt[i] %u[%u] %s< ndn %u ntr %u %p\n", nkt, i, dn, ndn, ntr, tr);
 	if (px)
 	{
 		if (px->dn) free(px->dn);

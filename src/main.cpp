@@ -79,7 +79,11 @@ void chain_gen(chain *ch, uint64_t size)
 			pack packs;
 			tran trans;
 			val = newPack(&packs, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
-			if (!val) printf("    newPack failed?");
+			if (!val)
+			{
+				for (int x = 0; x < MAGNET_KT_COUNT; ++x) if (kt[x]) free(kt[x]);
+				//printf("    newPack failed?");
+			}
 			else if (!enqueuePack(&packs)) printf("    enqueuePack failed?");
 		}
 

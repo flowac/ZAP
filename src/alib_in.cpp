@@ -7,11 +7,11 @@
 
 bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 {
+	uint8_t tr[MAGNET_TR_LEN + 1];
 	uint8_t xt[MAGNET_XT_LEN];
 	uint32_t i, len, nkt;
 	uint64_t xl;
 	char dn[MAGNET_DN_LEN + 1];
-	char tr[MAGNET_TR_LEN + 1];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	if (!px || !fp || !buf) return false;
 
@@ -153,52 +153,52 @@ static uint32_t compressTracker(uint8_t *tr)
 {
 	char buf3[3] = {0, 0, 0};
 	uint8_t buf[MAGNET_TR_LEN];
-	uint32_t ret = 0, len = 0, i, j, k;
+	uint32_t ret = 0, len = 0, i, j, mark;
 	if (!tr || !(len = strlen(tr))) return 0;
 
 	for (i = 0; i < len; ++i, ++ret)
 	{
-		buf[ret] = buf[i];
+		buf[ret] = tr[i];
 		if (tr[i] == 'u' && (i + 2) < len && tr[i+1] == 'd' && tr[i+2] == 'p')
 		{
-			buf[ret] = MAX_U8;
+			buf[ret] = TR_START;
 			i += 2;
 		}
 		else if (tr[i] == '%')
 		{
 			buf[ret] = TR_ZERO;
-			for (j = i, k = ret; j < len; j += 3)
+			for (j = i, mark = ret; j < len; j += 3)
 			{
 				if (tr[j] != '%') break;
 				if (j + 2 >= len) return 0;
-				memcpy(buf3, buf + j + 1, 2);
-				buf[ret] += 1;
-				if (buf[ret] > TR_MAX) return 0;
+				memcpy(buf3, tr + j + 1, 2);
+
+				buf[mark] += 1;
+				if (buf[mark] > TR_MAX) return 0;
 				errno = 0;
-				buf[++k] = (uint8_t) strtol(buf3, NULL, 16);
+				buf[++ret] = (uint8_t) strtol(buf3, NULL, 16);
 				if (errno != 0) return 0;
 			}
-			ret = k;
-			i = j + 2;
+			i = j - 1;
 		}
-		else if (tr[i] == 'a' && (i + 7) < len && strncmp(buf + i, "announce", 8) == 0)
+		else if (tr[i] == 'a' && (i + 7) < len && memcmp(tr + i, "announce", 8) == 0)
 		{
 			buf[ret] = TR_ANN;
 			i += 7;
 		}
 		else if (tr[i] == 't' && (i + 6) < len)
 		{
-			if (strncmp(buf + i, "torrent", 7) == 0)
+			if (memcmp(tr + i, "torrent", 7) == 0)
 				buf[ret] = TR_TOR;
-			else if (strncmp(buf + i, "tracker", 7) == 0)
+			else if (memcmp(tr + i, "tracker", 7) == 0)
 				buf[ret] = TR_TRA;
 			i += 6;
 		}
 		else if (tr[i] == '.' && (i + 3) < len)
 		{
-			if (strncmp(buf + i, ".com", 4) == 0)
+			if (memcmp(tr + i, ".com", 4) == 0)
 				buf[ret] = TR_COM;
-			else if (strncmp(buf + i, ".org", 4) == 0)
+			else if (memcmp(tr + i, ".org", 4) == 0)
 				buf[ret] = TR_ORG;
 			i += 3;
 		}
@@ -214,6 +214,37 @@ static uint32_t compressTracker(uint8_t *tr)
  */
 static uint32_t decompressTracker(uint8_t *tr)
 {
+	int i, j, trsub;
+	for (i = 0; tr[i]; i++)
+	{
+		trsub = tr[i] - TR_ZERO;
+		if (tr[i] < TR_ZERO) printf("%c", tr[i]);
+		else
+		{
+			if (tr[i] <= TR_MAX)
+			{
+				// escape sequence
+				printf("[");
+				for (j = 0; j < trsub; j++)
+				{
+					printf("%02X", tr[j + i + 1]);
+				}
+				i += trsub;
+				printf("]");
+			}
+			else if (tr[i] == TR_START)
+			{
+				// next link
+				printf("\n>");
+			}
+			else
+			{
+				// dictionary lookup
+				printf("(%02X)", trsub);
+			}
+		}
+	}
+	printf("\n");
 	return 0;
 }
 
@@ -223,28 +254,31 @@ uint32_t importPack(const char *src)
 	uint8_t tr[MAGNET_TR_LEN + 1];
 	uint32_t ret = 0, blen, slen;
 	uint64_t xl;
-	char buf[BUF1K], dn[MAGNET_DN_LEN + 1];
-	char *fio = NULL, *idx, *tok, *prev;
+	char dn[MAGNET_DN_LEN + 1];
+	char *fio = NULL, *idx, *tok;
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
 
 	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
+	fio[blen] = 0;
+	puts(fio);
 
-	for (prev = idx = fio;; ret++, prev = idx)
+	for (idx = fio;; ret++)
 	{
 		xl = 0;
 		dn[0] = 0;
 		tr[0] = 0;
 		if ((tok = strstr(idx, "size:")))
 		{
+			char buf64[BUF64];
 		    tok += 5;
 			if (!(idx = strchr(tok, '\n'))) break;
 			if ((slen = idx - tok) > 19 || tok >= idx) break; // base 10 uin64_t max length
-			memcpy(buf, tok, slen);
-			buf[slen] = 0;
-			xl = strtol(buf, NULL, 0);
+			memcpy(buf64, tok, slen);
+			buf64[slen] = 0;
+			xl = strtol(buf64, NULL, 0);
 		}
 
 		if ((tok = strstr(idx, "major:")))
@@ -280,14 +314,13 @@ uint32_t importPack(const char *src)
 			if (!(tok = strstr(idx, "xt="))) break;
 			if (strncmp(tok + 3, "urn:btih:", 9) != 0) break;
 			tok += 12;
-			char buf3[3] = {0, 0, 0};
 			if (!(idx = strchr(tok, '&'))) break;
 			if ((slen = idx - tok) != MAGNET_XT_LEN * 2 || tok >= idx) break;
-			memcpy(buf, tok, slen);
 
-			for (int i = 0; i < (int) MAGNET_XT_LEN; ++i)
+			char buf3[3] = {0, 0, 0};
+			for (uint32_t i = 0; i < MAGNET_XT_LEN; ++i)
 			{
-				memcpy(buf3, buf + (i << 1), 2);
+				memcpy(buf3, tok + (i << 1), 2);
 				xt[i] = (uint8_t) strtol(buf3, NULL, 16);
 			}
 
@@ -305,10 +338,12 @@ uint32_t importPack(const char *src)
 		else break;
 
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
-		if (prev == idx) break;
 
-		printf("tr[%d]%s<", strlen(tr), tr);
-		printf("%lu<\n", compressTracker(tr));
+		printf("\n%s\n", tr);
+		printf("tr[%ld]<", strlen(tr));
+		int ctr = compressTracker(tr);
+		printf("%u<\n", ctr);
+		decompressTracker(tr);
 	}
 
 cleanup:
