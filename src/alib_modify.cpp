@@ -33,13 +33,8 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 
 size_t strlen(const uint8_t *ptr)
 {
-	uint8_t *itr = ptr;
 	size_t len = 0;
-	while (*itr)
-	{
-		++len;
-		++itr;
-	}
+	for (uint8_t *itr = (uint8_t *)ptr; *itr; ++len, ++itr);
 	return len;
 }
 

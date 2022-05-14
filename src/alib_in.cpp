@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -131,123 +130,6 @@ cleanup:
 	return ret;
 }
 
-/**
- * @brief: compress tracker links
- * format: length of escape sequence & (1 << 7) followed by byte array
- *         0xFF is reserved to seperate trackers
- *   TODO: Shorten announce, torrent, tracker, .com, .org ?
- * @return: length of null terminated string
- */
-typedef enum
-{
-	TR_ZERO  = 1 << 7,
-	TR_START = MAX_U8,
-	TR_ANN   = MAX_U8 - 1,
-	TR_TOR   = MAX_U8 - 2,
-	TR_TRA   = MAX_U8 - 3,
-	TR_COM   = MAX_U8 - 4,
-	TR_ORG   = MAX_U8 - 5,
-	TR_MAX   = MAX_U8 - 6,
-} TRACKER_ESCAPE;
-static uint32_t compressTracker(uint8_t *tr)
-{
-	char buf3[3] = {0, 0, 0};
-	uint8_t buf[MAGNET_TR_LEN];
-	uint32_t ret = 0, len = 0, i, j, mark;
-	if (!tr || !(len = strlen(tr))) return 0;
-
-	for (i = 0; i < len; ++i, ++ret)
-	{
-		buf[ret] = tr[i];
-		if (tr[i] == 'u' && (i + 2) < len && tr[i+1] == 'd' && tr[i+2] == 'p')
-		{
-			buf[ret] = TR_START;
-			i += 2;
-		}
-		else if (tr[i] == '%')
-		{
-			buf[ret] = TR_ZERO;
-			for (j = i, mark = ret; j < len; j += 3)
-			{
-				if (tr[j] != '%') break;
-				if (j + 2 >= len) return 0;
-				memcpy(buf3, tr + j + 1, 2);
-
-				buf[mark] += 1;
-				if (buf[mark] > TR_MAX) return 0;
-				errno = 0;
-				buf[++ret] = (uint8_t) strtol(buf3, NULL, 16);
-				if (errno != 0) return 0;
-			}
-			i = j - 1;
-		}
-		else if (tr[i] == 'a' && (i + 7) < len && memcmp(tr + i, "announce", 8) == 0)
-		{
-			buf[ret] = TR_ANN;
-			i += 7;
-		}
-		else if (tr[i] == 't' && (i + 6) < len)
-		{
-			if (memcmp(tr + i, "torrent", 7) == 0)
-				buf[ret] = TR_TOR;
-			else if (memcmp(tr + i, "tracker", 7) == 0)
-				buf[ret] = TR_TRA;
-			i += 6;
-		}
-		else if (tr[i] == '.' && (i + 3) < len)
-		{
-			if (memcmp(tr + i, ".com", 4) == 0)
-				buf[ret] = TR_COM;
-			else if (memcmp(tr + i, ".org", 4) == 0)
-				buf[ret] = TR_ORG;
-			i += 3;
-		}
-	}
-	memcpy(tr, buf, ret);
-	tr[ret] = 0;
-
-	return ret;
-}
-
-/**
- * @brief: decompress a previously compressed tracker
- */
-static uint32_t decompressTracker(uint8_t *tr)
-{
-	int i, j, trsub;
-	for (i = 0; tr[i]; i++)
-	{
-		trsub = tr[i] - TR_ZERO;
-		if (tr[i] < TR_ZERO) printf("%c", tr[i]);
-		else
-		{
-			if (tr[i] <= TR_MAX)
-			{
-				// escape sequence
-				printf("[");
-				for (j = 0; j < trsub; j++)
-				{
-					printf("%02X", tr[j + i + 1]);
-				}
-				i += trsub;
-				printf("]");
-			}
-			else if (tr[i] == TR_START)
-			{
-				// next link
-				printf("\n>");
-			}
-			else
-			{
-				// dictionary lookup
-				printf("(%02X)", trsub);
-			}
-		}
-	}
-	printf("\n");
-	return 0;
-}
-
 uint32_t importPack(const char *src)
 {
 	uint8_t xt[MAGNET_XT_LEN];
@@ -263,7 +145,6 @@ uint32_t importPack(const char *src)
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
 	fio[blen] = 0;
-	puts(fio);
 
 	for (idx = fio;; ret++)
 	{
@@ -339,8 +220,8 @@ uint32_t importPack(const char *src)
 
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
 
-		printf("\n%s\n", tr);
-		printf("tr[%ld]<", strlen(tr));
+		printf("\n%s", tr);
+		printf("\ntr[%ld]<", strlen(tr));
 		int ctr = compressTracker(tr);
 		printf("%u<\n", ctr);
 		decompressTracker(tr);

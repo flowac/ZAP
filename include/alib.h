@@ -73,6 +73,16 @@ bool dequeuePack(pack *target);
 bool dequeueTran(tran *target);
 
 /**
+ * @brief: compress tracker links
+ * format: length of escape sequence & (1 << 7) followed by byte array
+ *         0xFF is reserved to seperate trackers
+ *   TODO: Shorten announce, torrent, tracker, .com, .org ?
+ * @return: length of null terminated string
+ */
+uint32_t compressTracker(uint8_t *tr);
+uint32_t decompressTracker(uint8_t *tr);
+
+/**
  * @brief Generate a block checksum or validate an existing checksum
  */
 bool checkBlock(block *bx, bool modify = false);
