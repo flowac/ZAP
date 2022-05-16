@@ -18,6 +18,7 @@ uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 	FILE *fp = fopen(src, "rb");
 	uint32_t data_len, file_len = getFilesize(fp);
 	uint8_t *data = (uint8_t *) malloc(BUF4K);
+	uint8_t *ret = NULL;
 
 	if (!data || !fp) goto cleanup;
 	while (file_len > 0)
@@ -27,11 +28,12 @@ uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 		file_len -= data_len;
 		md_ctx = update_sha3_512(data, data_len, md_ctx);
 	}
+	ret = finish_sha3_512(retLen, md_ctx);
 
 cleanup:
 	if (data)   free(data);
 	if (fp)     fclose(fp);
-	return finish_sha3_512(retLen, md_ctx);
+	return ret;
 }
 
 EVP_MD_CTX *update_sha3_512(const void *data, uint32_t size, EVP_MD_CTX *md_ctx)

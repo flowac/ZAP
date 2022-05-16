@@ -17,6 +17,12 @@
 #define LOG_PATH "log"
 static FILE *LOG_FD = NULL;
 
+bool pstat(bool status, const char *msg)
+{
+	printf("[%s] %s\n", status ? "PASS" : "FAIL", msg);
+	return status;
+}
+
 void log_deinit(void)
 {
 	if (!LOG_FD) return;

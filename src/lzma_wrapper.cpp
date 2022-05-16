@@ -99,6 +99,7 @@ static bool open_io_files(const char *in_path, //!< Input path
 	*output = fopen(out_path, "wb+");
 	if (*input && *output) return true;
 
+	printf("Failed to open I/O %s %s", in_path, out_path);
 	if (*input) fclose(*input);
 	if (*output) fclose(*output);
 	return false;
@@ -195,7 +196,7 @@ bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProp
 	printf("  compressing %s -> %s\n", in_path, out_path_local);
 
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	compress_data_incr(input, output, args);
+	compress_data_incr(input, output, args); log_msg("Failed to compress\n");
 
 	fclose(input);
 	fclose(output);
@@ -214,8 +215,7 @@ bool decompress_file(const char *in_path, const char *out_path)
 	printf("  decompressing %s -> %s\n", in_path, out_path_local);
 
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	if (!decompress_data_incr(input, output))
-		log_msg("Failed to decompress\n");
+	if (!decompress_data_incr(input, output)) log_msg("Failed to decompress\n");
 
 	fclose(input);
 	fclose(output);

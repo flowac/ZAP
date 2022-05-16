@@ -23,9 +23,9 @@ bool newWallet(uint8_t pub[ED448_LEN], uint8_t priv[ED448_LEN], const char *seed
 
 	if (EVP_PKEY_get_raw_public_key(key, pub, &pubLen) < 1) goto cleanup;
 	if (EVP_PKEY_get_raw_private_key(key, priv, &privLen) < 1) goto cleanup;
-	printf("pub[%lu] priv[%lu]\n", pubLen, privLen);
-	printBytes(stdout, pub, pubLen, "\n");
-	printBytes(stdout, priv, privLen, "\n");
+//	printf("pub[%lu] priv[%lu]\n", pubLen, privLen);
+//	printBytes(stdout, pub, pubLen, "\n");
+//	printBytes(stdout, priv, privLen, "\n");
 	ret = true;
 
 cleanup:
@@ -53,8 +53,8 @@ bool sendToAddress(uint8_t dest[ED448_LEN], uint8_t src[ED448_LEN], uint8_t sig[
 	if (EVP_DigestSignInit(ctx, NULL, NULL, NULL, key) < 1) goto cleanup;
 	if (EVP_DigestSign(ctx, sig, &sigLen, msg, msgLen) < 1) goto cleanup;
 
-	printf("sig[%lu]\n", sigLen);
-	printBytes(stdout, sig, sigLen, "\n");
+//	printf("sig[%lu]\n", sigLen);
+//	printBytes(stdout, sig, sigLen, "\n");
 	ret = true;
 
 cleanup:

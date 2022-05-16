@@ -34,7 +34,7 @@ bool checkBlock(block *bx, bool modify)
 
 			if (0 == (len = strlen(bx->packs[i].dn))) return false;
 			if (!update_sha3_512(bx->packs[i].dn, len, md_ctx)) return false;
-			if (0 == (len = strlen(bx->packs[i].tr))) return false;
+			if (0 == (len = u8len(bx->packs[i].tr))) return false;
 			if (!update_sha3_512(bx->packs[i].tr, len, md_ctx)) return false;
 
 			for (j = 0; j < MAGNET_KT_COUNT; ++j)

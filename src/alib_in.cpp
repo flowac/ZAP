@@ -6,8 +6,8 @@
 
 bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 {
-	uint8_t tr[MAGNET_TR_LEN + 1];
 	uint8_t xt[MAGNET_XT_LEN];
+	uint8_t tr[MAGNET_TR_LEN + 1];
 	uint32_t i, len, nkt;
 	uint64_t xl;
 	char dn[MAGNET_DN_LEN + 1];
@@ -132,14 +132,15 @@ cleanup:
 
 uint32_t importPack(const char *src)
 {
-	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[MAGNET_TR_LEN + 1];
-	uint32_t ret = 0, blen, slen;
-	uint64_t xl;
 	char dn[MAGNET_DN_LEN + 1];
 	char *fio = NULL, *idx, *tok;
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
+	uint8_t xt[MAGNET_XT_LEN];
+	uint8_t tr[MAGNET_TR_LEN + 1];
+	uint32_t ret = 0, blen, slen;
+	uint64_t xl;
+	pack px;
 
 	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
@@ -214,17 +215,10 @@ uint32_t importPack(const char *src)
 		}
 		else break;
 
-		pack px;
 		if (newPack(&px, xt, xl, dn, tr, kt)) enqueuePack(&px);
 		else break;
 
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
-
-		printf("\n%s", tr);
-		printf("\ntr[%ld]<", strlen(tr));
-		int ctr = compressTracker(tr);
-		printf("%u<\n", ctr);
-		decompressTracker(tr);
 	}
 
 cleanup:

@@ -14,7 +14,8 @@
  */
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
-size_t strlen(const uint8_t *ptr);
+uint32_t u8len(uint8_t *ptr);
+uint32_t u8cmp(uint8_t *ptr, char *str);
 
 /**
  * @brief This function will print the relative information of a block
@@ -33,11 +34,11 @@ void printBlock(block *target);
  * @return True if success
  */
 bool newPack(pack *px,
-             uint8_t xt[MAGNET_XT_LEN],//!< exact topic (file hash)
-             uint64_t xl,//!< Exact length (size in bytez)
-             char *dn,   //!< Display name
-             uint8_t *tr,  //!< tracker url
-			 char *kt[MAGNET_KT_COUNT]);
+             uint8_t xt[MAGNET_XT_LEN], //!< Exact topic (file hash)
+             uint64_t xl,               //!< Exact length (size in bytes)
+             char *dn,                  //!< Display name
+             uint8_t *tr,               //!< Tracker url
+			 char *kt[MAGNET_KT_COUNT]);//!< Search keywords
 
 bool newTran(tran *tx,
 			 uint64_t time,
@@ -71,16 +72,22 @@ bool enqueuePack(pack *target);
 bool enqueueTran(tran *target);
 bool dequeuePack(pack *target);
 bool dequeueTran(tran *target);
+uint32_t packQueueLen(void);
+uint32_t tranQueueLen(void);
 
 /**
  * @brief: compress tracker links
  * format: length of escape sequence & (1 << 7) followed by byte array
  *         0xFF is reserved to seperate trackers
- *   TODO: Shorten announce, torrent, tracker, .com, .org ?
  * @return: length of null terminated string
  */
 uint32_t compressTracker(uint8_t *tr);
-uint32_t decompressTracker(uint8_t *tr);
+/**
+ * @brief: decompress tracker links
+ *         returned pointer must be free'd
+ * @return: length of null terminated returned string
+ */
+uint32_t decompressTracker(uint8_t *tr, char **ret);
 
 /**
  * @brief Generate a block checksum or validate an existing checksum

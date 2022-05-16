@@ -23,6 +23,10 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 
 void packToText(pack *pk, FILE *fp)
 {
+	char *decompTR;
+	bool decompOK = decompressTracker(pk->tr, &decompTR) > 0;
+	if (!decompOK) printf("WARNING: failed to decompressTracker\n");
+
 	fprintf(fp, "\t{P\n\t\t");
 	printBytes(fp, pk->xt, 20);
 	fprintf(fp, ","
@@ -30,13 +34,14 @@ void packToText(pack *pk, FILE *fp)
 			"\n\t\tdn  : %s,"
 			"\n\t\ttr  : %s,"
 			"\n\t\tkt  : ",
-			pk->xl, pk->dn, pk->tr);
+			pk->xl, pk->dn, decompOK ? decompTR : (char *) (pk->tr));
 	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
 	{
 		if (!pk->kt[i] || !pk->kt[i][0]) break;
 		fprintf(fp, "%s ", pk->kt[i]);
 	}
 	fprintf(fp, "\n\t\t},\n");
+	if (decompOK) free(decompTR);
 }
 
 void tranToText(tran *tx, FILE *fp)
@@ -96,7 +101,7 @@ void packToZip(pack *pk, FILE *fp, uint8_t *buf)
 	memcpy(buf + i, pk->dn, slen);
 	i += slen;
 
-	slen = strlen(pk->tr);
+	slen = u8len(pk->tr);
 	buf[i++] = (uint8_t) (slen >> 8);
 	buf[i++] = (uint8_t) (slen & MAX_U8);
 	memcpy(buf + i, pk->tr, slen);

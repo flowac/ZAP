@@ -1,20 +1,16 @@
 CURRENT
-*** Compress tracker URLs
-**  Block compaction
+*** Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?
 
 FUTURE GOALS
 *** Create a simple search engine
-**  Remove 7zip? 100 times slower than simple compression. Ratios: LZMA = 81%, Ppmd = 79%
+**  Double check if 7zip is needed (currently it has good ratios)
 **  Add mechanism to check tracker hashes and reject invalid magnets
 *   Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
 
 NOTES
-    Using about 25MB of memory per 1000 blocks uder current testing conditions
-        About 75 torrents with 75 character length links per block
-        No transactions or balances yet
     Need to check how good block compaction and torrent trimming is
     Estimate amount of active torrents and transaction rates
     Most likely have to use a database instead of doing all ops in memory
@@ -25,5 +21,4 @@ NOTES
 PLANS
     Generate a block index file (allocation table) and use merkle tree
     Determine proof of work method
-        geolocation (distance) to peers (ping?)
-        data transfered (proxy function?)
+        If you claim to have served 1 search, everyone verifies 1 random search?

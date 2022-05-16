@@ -29,6 +29,11 @@
 #define log_msg_custom_errno(msg, x) log_msg("%s %s:%d: %s:%d\n", __FILE__, __FUNCTION__, __LINE__, msg, x)
 
 /**
+ * @brief Print pass or fail of test cases to stdout
+ */
+bool pstat(bool status, const char *msg);
+
+/**
  * @brief De-initialize logger
  */
 void log_deinit(void);

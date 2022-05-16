@@ -31,10 +31,17 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 	return 8U;
 }
 
-size_t strlen(const uint8_t *ptr)
+uint32_t u8len(uint8_t *ptr)
 {
-	size_t len = 0;
-	for (uint8_t *itr = (uint8_t *)ptr; *itr; ++len, ++itr);
+	uint32_t len = 0;
+	for (; *ptr; ++len, ++ptr);
+	return len;
+}
+
+uint32_t u8cmp(uint8_t *ptr, char *str)
+{
+	uint32_t len = 0;
+	for (; *str; ++len, ++ptr, ++str) if (*ptr != *str) return 0;
 	return len;
 }
 
@@ -46,20 +53,21 @@ void printBlock(block *target)
 
 bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
 {
-	uint32_t ndn = 0;
-	uint32_t ntr = 0;
-	uint32_t nkt = 0, i = 0;
-	if (!px || !dn || !tr) goto cleanup;
+	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
+	if (!px || !xt || !dn || !tr) goto cleanup;
 	px->dn = NULL;
 	px->tr = NULL;
-	if (!(ndn = strlen(dn)) || !(ntr = strlen(tr)) || ndn > MAGNET_DN_LEN || ntr > MAGNET_TR_LEN) goto cleanup;
+
+	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
+	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
+	if (!(ntr = compressTracker(tr))) goto cleanup;
 	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
 
 	memcpy(px->xt, xt, MAGNET_XT_LEN);
 	px->xl = xl;
 	if (!(px->dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
-	if (!(px->tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px->dn, dn, ndn);
+	if (!(px->tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px->tr, tr, ntr);
 
 	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
@@ -237,4 +245,14 @@ bool dequeueTran(tran *target)
 	*target = tran_queue.front();
 	tran_queue.pop();
 	return true;
+}
+
+uint32_t packQueueLen(void)
+{
+	return pack_queue.size();
+}
+
+uint32_t tranQueueLen(void)
+{
+	return tran_queue.size();
 }

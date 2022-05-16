@@ -13,6 +13,9 @@
 #include <string.h>
 #include <time.h>
 
+#define TEST_TRACKER_LEN MAGNET_TR_LEN
+static const char *test_tracker = "udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce";
+
 /* Test if log.c log_msg is working correctly
  *
  */
@@ -25,8 +28,9 @@ void checksum_test(const char *src)
 {
 	uint32_t i, len;
 	uint8_t *sum = check_sha3_512_from_file(src, &len);
+	if (!pstat(sum != NULL, "Checksum test")) return;
 
-	printf("%-14s [%02d]: ", src, len);
+	printf("[INFO] %-14s [%02d]: ", src, len);
 	for (i = 0; i < len; i++)
 	{
 		printf("%02x", sum[i]);
@@ -46,9 +50,10 @@ void chain_gen(chain *ch, uint64_t size)
 
 	bool val;
 	uint8_t xt[MAGNET_XT_LEN];
+	uint8_t tr[TEST_TRACKER_LEN];
 	char dn[121];
-	uint8_t tr[121];
 	char *kt[MAGNET_KT_COUNT];
+	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
 
 	for (i = 0; i < size; i++)
 	{
@@ -59,13 +64,11 @@ void chain_gen(chain *ch, uint64_t size)
 		{
 			memset(xt, 0, MAGNET_XT_LEN);
 			memset(dn, 0, 121);
-			memset(tr, 0, 121);
 			k = rand() % 70 + 40;
 			for (; k >= 0; --k)
 			{
 				if (k < MAGNET_XT_LEN) xt[k] = rand() % MAX_U8;
 				dn[k] = charset[rand() % 62];
-				tr[k] = charset[rand() % 62];
 			}
 			uint8_t nkt = rand() % MAGNET_KT_COUNT;
 			for (k = 0; k < MAGNET_KT_COUNT; kt[k++] = NULL);
@@ -110,22 +113,16 @@ void chain_test(int size)
 	chainToText(&ch, txtFile);
 	print_elapsed_time();
 
-	printf("\nWrite to zip\n");
+	printf("\nWrite to zip 1\n");
 	start_timer();
 	chainToZip(&ch, zaaFile);
 	print_elapsed_time();
 
-	printf("\nAudit: ");
-	if (auditChain(&ch))
-		printf("OK\n");
-	else
-		printf("FAIL\n");
-
+	pstat(auditChain(&ch), "Chain audit");
 	checksum_test(zaaFile);
 
-	printf("\nImport 1\n");
 	start_timer();
-	if (!chainFromZip(&cin1, zaaFile)) printf("> failed!\n");
+	pstat(chainFromZip(&cin1, zaaFile), "Chain import");
 	print_elapsed_time();
 
 	printf("\nWrite to zip 2\n");
@@ -133,34 +130,31 @@ void chain_test(int size)
 	chainToZip(&cin1, za2File);
 	print_elapsed_time();
 
-	printf("\nAudit: ");
-	if (auditChain(&cin1))
-		printf("OK\n");
-	else
-		printf("FAIL\n");
+	pstat(auditChain(&cin1), "Chain audit");
 
 	uint64_t ccomp = compareChain(&ch, &cin1);
-	printf("Chain compare status %lu (%s)\n", ccomp, ccomp == MAX_U64 ? "OK" : "BAD");
+	if (!pstat(ccomp == MAX_U64, "Chain compare"))
+		printf("[INFO] Difference at %lu\n", ccomp);
 	deleteChain(&ch);
 	deleteChain(&cin1);
 	checksum_test(za2File);
 
 #if 0
-	printf("\n7zip zip\n");
+	printf("\n7zip benchmark\n");
 	start_timer();
-	compress_file(zaaFile, "temp.zaa.zip");
+	compress_file(zaaFile, "temp.zaa.7z");
 	print_elapsed_time();
 
 	start_timer();
-	decompress_file("temp.zaa.zip", "temp.zaa.unz");
+	decompress_file("temp.zaa.7z", "temp.zaa.unz");
 	print_elapsed_time();
 
 	start_timer();
-	compress_file(zaaFile, "temp.zaa.zip2", &slow_props);
+	compress_file(zaaFile, "temp.zaa.slow.7z", &slow_props);
 	print_elapsed_time();
 
 	start_timer();
-	decompress_file("temp.zaa.zip2", "temp.zaa.unz2");
+	decompress_file("temp.zaa.slow.7z", "temp.zaa.slow.unz");
 	print_elapsed_time();
 
 	start_timer();
@@ -170,6 +164,27 @@ void chain_test(int size)
 #endif
 
 	print_elapsed_time();
+}
+
+void tracker_test()
+{
+	char *tr3;
+	uint8_t tr2[TEST_TRACKER_LEN];
+	uint32_t len, clen, dlen;
+
+	if ((len = strlen(test_tracker)) >= TEST_TRACKER_LEN)
+	{
+		printf("[ERROR] Tracker size limit reached [%u/%u]. Test aborted.\n", len, TEST_TRACKER_LEN);
+		return;
+	}
+	memcpy(tr2, test_tracker, len + 1);
+
+	pstat((clen = compressTracker(tr2)) > 0, "Compress tracker");
+	pstat((dlen = decompressTracker(tr2, &tr3)) > 0, "Decompress tracker");
+	if (!pstat(len == dlen && memcmp(test_tracker, tr3, len) == 0, "Compare trackers"))
+		printf("[INFO] Original: %s\n[INFO] Decomped: %s\n", test_tracker, tr3);
+	printf("[INFO] Tracker size: %u,  compressed: %u,  decompressed: %u\n", len, clen, dlen);
+	if (dlen) free(tr3);
 }
 
 void wallet_test()
@@ -191,12 +206,9 @@ void wallet_test()
 	msg[8] = frac | MAX_U8;
 	msg[9] = frac >> 8;
 
-	if (!newWallet(pub, priv)) printf("failed wallet\n");
-	else printf("wallet OK\n");
-	if (!sendToAddress(dest, priv, sig, deci, frac)) printf("failed send\n");
-	else printf("send OK\n");
-	if (!verifyMessage(pub, sig, msg, msgLen)) printf("failed verify\n");
-	else printf("verify OK\n");
+	pstat(newWallet(pub, priv), "Wallet");
+	pstat(sendToAddress(dest, priv, sig, deci, frac), "Send");
+	pstat(verifyMessage(pub, sig, msg, msgLen), "Verify");
 }
 
 int main()
@@ -204,12 +216,13 @@ int main()
 	time_t tm;
 	srand((unsigned) time(&tm));
 
-	printf("OpenSSL version %lX.%lX.%lX (required was 3.0.0+)\n",
+	printf("[INFO] OpenSSL version %lX.%lX.%lX (required was 3.0.0+)\n",
 		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
 	log_test();
-	if (!importPack("extern/scrap/pirate.txt")) printf("Pack import failed\n");
+	tracker_test();
+	pstat(importPack("extern/scrap/pirate.txt"), "Pack import");
 	chain_test(200);
 	wallet_test();
 
