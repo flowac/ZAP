@@ -77,37 +77,32 @@ uint32_t compressTracker(uint8_t *tr)
 	return ret;
 }
 
-static inline bool reallocTracker(char **ptr, uint32_t len, uint32_t *size)
-{
-	if (len + TMAX >= *size) [[unlikely]]
-	{
-		*size += MAX_U8;
-		if (!(*ptr = (char *) realloc(*ptr, *size))) return false;
-	}
-	return true;
-}
-
-uint32_t decompressTracker(uint8_t *tr, char **ret)
+uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 {
 	int i, j;
-	uint32_t retLen = 0, allocLen = 0;
+	uint32_t retLen = 0;
 
-	for (i = 0, *ret = NULL; tr[i]; ++i)
+	for (i = 0; tr[i]; ++i)
 	{
-		if (!reallocTracker(ret, retLen, &allocLen)) return 0;
 		if (tr[i] < TZERO)
-			(*ret)[retLen++] = tr[i];
+		{
+			if (retLen + 1 >= MAGNET_TR_LEN) return 0;
+			ret[retLen++] = tr[i];
+		}
 		else if (tr[i] <= MAX_U8 - TMAX)
 		{
 			for (j = tr[i++] - TZERO; j > 0; ++i, --j)
 			{
-				retLen += sprintf(*ret + retLen, "%%%02X", tr[i]);
-				if (!reallocTracker(ret, retLen, &allocLen)) return 0;
+				if (retLen + 3 >= MAGNET_TR_LEN) return 0;
+				retLen += sprintf(ret + retLen, "%%%02X", tr[i]);
 			}
 			--i;
 		}
 		else
-			retLen += sprintf(*ret + retLen, tlist[MAX_U8 - tr[i]]);
+		{
+			if (retLen + strlen(tlist[MAX_U8 - tr[i]]) >= MAGNET_TR_LEN) return 0;
+			retLen += sprintf(ret + retLen, tlist[MAX_U8 - tr[i]]);
+		}
 	}
 	ret[retLen] = 0;
 	return retLen;

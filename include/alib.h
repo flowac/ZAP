@@ -76,18 +76,16 @@ uint32_t packQueueLen(void);
 uint32_t tranQueueLen(void);
 
 /**
- * @brief: compress tracker links
- * format: length of escape sequence & (1 << 7) followed by byte array
- *         0xFF is reserved to seperate trackers
- * @return: length of null terminated string
+ * @brief: Compress tracker links in place
+ *         Original buffer can be modified even if compress failed
+ * @return: Length of null terminated string
  */
 uint32_t compressTracker(uint8_t *tr);
 /**
- * @brief: decompress tracker links
- *         returned pointer must be free'd
- * @return: length of null terminated returned string
+ * @brief: Decompress tracker links
+ * @return: Length of null terminated returned string
  */
-uint32_t decompressTracker(uint8_t *tr, char **ret);
+uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
 
 /**
  * @brief Generate a block checksum or validate an existing checksum

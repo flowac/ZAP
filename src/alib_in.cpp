@@ -7,7 +7,7 @@
 bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 {
 	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[MAGNET_TR_LEN + 1];
+	uint8_t tr[MAGNET_TR_LEN];
 	uint32_t i, len, nkt;
 	uint64_t xl;
 	char dn[MAGNET_DN_LEN + 1];
@@ -29,7 +29,7 @@ bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
 	if (2 != fread(buf, 1, 2, fp)) return false;
 	len = buf[0] << 8;
 	len += buf[1];
-	if (len > MAGNET_TR_LEN || len != fread(buf, 1, len, fp)) return false;
+	if (len >= MAGNET_TR_LEN || len != fread(buf, 1, len, fp)) return false;
 	memcpy(tr, buf, len);
 	tr[len] = 0;
 
@@ -132,12 +132,12 @@ cleanup:
 
 uint32_t importPack(const char *src)
 {
-	char dn[MAGNET_DN_LEN + 1];
+	char dn[MAGNET_DN_LEN];
 	char *fio = NULL, *idx, *tok;
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
 	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[MAGNET_TR_LEN + 1];
+	uint8_t tr[MAGNET_TR_LEN];
 	uint32_t ret = 0, blen, slen;
 	uint64_t xl;
 	pack px;
@@ -167,7 +167,7 @@ uint32_t importPack(const char *src)
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) > MAGNET_KT_LEN || tok >= idx) break;
+			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
 			kt[0] = (char *) calloc(slen + 1, 1);
 			memcpy(kt[0], tok, slen);
 		}
@@ -176,7 +176,7 @@ uint32_t importPack(const char *src)
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) > MAGNET_KT_LEN || tok >= idx) break;
+			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
 			kt[1] = (char *) calloc(slen + 1, 1);
 			memcpy(kt[1], tok, slen);
 		}
@@ -185,7 +185,7 @@ uint32_t importPack(const char *src)
 		{
 			tok += 5;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) > MAGNET_DN_LEN || tok >= idx) break;
+			if ((slen = idx - tok) >= MAGNET_DN_LEN || tok >= idx) break;
 			memcpy(dn, tok, slen);
 			dn[slen] = 0;
 		}
@@ -209,7 +209,7 @@ uint32_t importPack(const char *src)
 			if (!(tok = strstr(idx, "tr="))) break;
 			tok += 3;
 			if (!(idx = strstr(tok, "\nxdi"))) break;
-			if ((slen = idx - tok) > MAGNET_TR_LEN || tok >= idx) break;
+			if ((slen = idx - tok) >= MAGNET_TR_LEN || tok >= idx) break;
 			memcpy(tr, tok, slen);
 			tr[slen] = 0;
 		}

@@ -13,7 +13,6 @@
 #include <string.h>
 #include <time.h>
 
-#define TEST_TRACKER_LEN MAGNET_TR_LEN
 static const char *test_tracker = "udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce";
 
 /* Test if log.c log_msg is working correctly
@@ -50,7 +49,7 @@ void chain_gen(chain *ch, uint64_t size)
 
 	bool val;
 	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[TEST_TRACKER_LEN];
+	uint8_t tr[MAGNET_TR_LEN];
 	char dn[121];
 	char *kt[MAGNET_KT_COUNT];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
@@ -168,23 +167,22 @@ void chain_test(int size)
 
 void tracker_test()
 {
-	char *tr3;
-	uint8_t tr2[TEST_TRACKER_LEN];
+	char tr3[MAGNET_TR_LEN];
+	uint8_t tr2[MAGNET_TR_LEN];
 	uint32_t len, clen, dlen;
 
-	if ((len = strlen(test_tracker)) >= TEST_TRACKER_LEN)
+	if ((len = strlen(test_tracker)) >= MAGNET_TR_LEN)
 	{
-		printf("[ERROR] Tracker size limit reached [%u/%u]. Test aborted.\n", len, TEST_TRACKER_LEN);
+		printf("[ERROR] Tracker size limit reached [%u/%u]. Test aborted.\n", len, MAGNET_TR_LEN);
 		return;
 	}
 	memcpy(tr2, test_tracker, len + 1);
 
 	pstat((clen = compressTracker(tr2)) > 0, "Compress tracker");
-	pstat((dlen = decompressTracker(tr2, &tr3)) > 0, "Decompress tracker");
-	if (!pstat(len == dlen && memcmp(test_tracker, tr3, len) == 0, "Compare trackers"))
+	pstat((dlen = decompressTracker(tr2, tr3)) > 0, "Decompress tracker");
+	if (!pstat(len == dlen && memcmp(test_tracker, tr3, len + 1) == 0, "Compare trackers"))
 		printf("[INFO] Original: %s\n[INFO] Decomped: %s\n", test_tracker, tr3);
 	printf("[INFO] Tracker size: %u,  compressed: %u,  decompressed: %u\n", len, clen, dlen);
-	if (dlen) free(tr3);
 }
 
 void wallet_test()

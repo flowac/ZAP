@@ -23,8 +23,8 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 
 void packToText(pack *pk, FILE *fp)
 {
-	char *decompTR;
-	bool decompOK = decompressTracker(pk->tr, &decompTR) > 0;
+	char decompTR[MAGNET_TR_LEN];
+	bool decompOK = decompressTracker(pk->tr, decompTR) > 0;
 	if (!decompOK) printf("WARNING: failed to decompressTracker\n");
 
 	fprintf(fp, "\t{P\n\t\t");
@@ -41,7 +41,6 @@ void packToText(pack *pk, FILE *fp)
 		fprintf(fp, "%s ", pk->kt[i]);
 	}
 	fprintf(fp, "\n\t\t},\n");
-	if (decompOK) free(decompTR);
 }
 
 void tranToText(tran *tx, FILE *fp)
