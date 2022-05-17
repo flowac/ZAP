@@ -178,7 +178,7 @@ static void set_decomp_out_file_name(const char *in_path, //!< Input path
 	if (out_path == NULL) {
 		snprintf(out_path_local, PATH_MAX, "%s", in_path);
 		char *tmp = strstr(out_path_local, ".7z");
-		tmp[0] = '\0';
+		*tmp = 0;
 	} else {
 		snprintf(out_path_local, PATH_MAX, "%s", out_path);
 	}
@@ -196,7 +196,7 @@ bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProp
 	printf("  compressing %s -> %s\n", in_path, out_path_local);
 
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	compress_data_incr(input, output, args); log_msg("Failed to compress\n");
+	if (!compress_data_incr(input, output, args)) log_msg("Failed to compress\n");
 
 	fclose(input);
 	fclose(output);
@@ -254,9 +254,9 @@ int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 	}
 	write_data((void *) &o_stream, props_header, props_size);
 	if (rt == SZ_OK) rt = LzmaEnc_Encode(enc_hand,
-                                             &(o_stream.out_stream),
-                                             &(i_stream.in_stream),
-                                             NULL, &g_Alloc, &g_Alloc);
+										 &(o_stream.out_stream),
+										 &(i_stream.in_stream),
+										 NULL, &g_Alloc, &g_Alloc);
 	LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
 	return 1;
 
@@ -304,8 +304,8 @@ int decompress_data_incr(FILE *input, FILE *output)
 				fin_mode = LZMA_FINISH_END;
 			}
 			rt = LzmaDec_DecodeToBuf(&state, out_buff + out_pos,
-                                                 &out_processed, in_buff + in_pos,
-                                                 &in_processed, fin_mode, &status);
+									 &out_processed, in_buff + in_pos,
+									 &in_processed, fin_mode, &status);
 			in_pos += in_processed;
 			out_pos += out_processed;
 			file_size -= out_processed;

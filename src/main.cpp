@@ -223,7 +223,7 @@ int main()
 	log_test();
 	tracker_test();
 	pstat(importPack("extern/scrap/pirate.txt"), "Pack import");
-	chain_test(200);
+	chain_test(100);
 	wallet_test();
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives

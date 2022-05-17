@@ -36,26 +36,25 @@ const char *tlist[TMAX] =
 uint32_t compressTracker(uint8_t *tr)
 {
 	char buf3[3] = {0, 0, 0};
-	uint8_t buf[MAGNET_TR_LEN];
 	uint32_t ret = 0, len = 0, i, j, mark;
 	if (!(len = u8len(tr))) return 0;
 
 	for (i = 0; i < len; ++i, ++ret)
 	{
 		if (ret >= MAGNET_TR_LEN) [[unlikely]] return 0;
-		buf[ret] = tr[i];
+		tr[ret] = tr[i];
 		if (tr[i] == '%')
 		{
-			buf[ret] = TZERO;
+			tr[ret] = TZERO;
 			for (mark = ret; i < len && tr[i] == '%'; i += 3)
 			{
 				if (i + 2 >= len) return 0;
 				memcpy(buf3, tr + i + 1, 2);
 
-				buf[mark]++;
-				if (buf[mark] > MAX_U8 - TMAX) return 0;
+				tr[mark]++;
+				if (tr[mark] > MAX_U8 - TMAX) return 0;
 				errno = 0;
-				buf[++ret] = (uint8_t) strtol(buf3, NULL, 16);
+				tr[++ret] = (uint8_t) strtol(buf3, NULL, 16);
 				if (errno != 0) return 0;
 			}
 			--i;
@@ -66,14 +65,13 @@ uint32_t compressTracker(uint8_t *tr)
 			{
 				if ((mark = u8cmp(tr + i, (char *) (tlist[j]))))
 				{
-					buf[ret] = MAX_U8 - j;
+					tr[ret] = MAX_U8 - j;
 					i += mark - 1;
 					break;
 				}
 			}
 		}
 	}
-	memcpy(tr, buf, ret);
 	tr[ret] = 0;
 
 	return ret;
