@@ -5,12 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO: remove this check once github CI is at OpenSSL 3.0
-#if OPENSSL_VERSION_MAJOR < 3
-void *EVP_PKEY_CTX_new_from_name(void *a, void *b, void *c){return NULL;}
-void *EVP_PKEY_Q_keygen(void *a, void *b, void *c){return NULL;}
-#endif
-
 uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 {
 	if (!src || !retLen) return NULL;

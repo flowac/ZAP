@@ -40,7 +40,7 @@ bool checkBlock(block *bx, bool modify)
 			for (j = 0; j < MAGNET_KT_COUNT; ++j)
 			{
 				if (!bx->packs[i].kt[j] || 0 == (len = strlen(bx->packs[i].kt[j]))) break;
-				if (!update_sha3_512(bx->packs[i].tr, len, md_ctx)) return false;
+				if (!update_sha3_512(bx->packs[i].kt[j], len, md_ctx)) return false;
 			}
 		}
 	}

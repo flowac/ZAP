@@ -121,7 +121,8 @@ bool newBlock(chain *ch)
 		{
 			if (!dequeuePack(&(bx.packs[i])))
 			{
-				bx.n_packs = i + 1; // this is unlikely, therefore no realloc
+				bx.n_packs = ++i;
+				bx.packs = (pack *) realloc(bx.packs, sizeof(pack) * bx.n_packs);
 				break;
 			}
 		}
@@ -134,7 +135,8 @@ bool newBlock(chain *ch)
 		{
 			if (!dequeueTran(&(bx.trans[i])))
 			{
-				bx.n_trans = i + 1; // this is unlikely, therefore no realloc;
+				bx.n_trans = ++i;
+				bx.trans = (tran *) realloc(bx.trans, sizeof(tran) * bx.n_trans);
 				break;
 			}
 		}
