@@ -57,12 +57,12 @@ typedef struct {
  * @brief Holds information about a transaction
  */
 typedef struct {
-	uint64_t time;
 	uint64_t id;
-	uint64_t amount;
-	// TODO: change all of the below into 256 bit uint8_t
-	uint64_t src;
-	uint64_t dest;
+	uint64_t deci; //Integer value
+	uint16_t frac; //Floating point value, limit of FRAC_MAX
+	uint8_t  src[ED448_LEN];
+	uint8_t  dest[ED448_LEN];
+	uint8_t  sig[ED448_SIG_LEN];
 } tran;
 
 /**

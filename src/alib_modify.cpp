@@ -12,9 +12,23 @@
 static std::queue<pack> pack_queue;
 static std::queue<tran> tran_queue;
 
+uint32_t u16Packer(uint8_t *buf, uint16_t data)
+{
+	buf[0] = data & MAX_U8;
+	buf[1] = (data >> 8) & MAX_U8;
+	return 2U;
+}
+
+uint32_t u16Unpack(uint8_t *buf, uint16_t *data)
+{
+	*data = buf[0];
+	*data |= buf[1] << 8;
+	return 2U;
+}
+
 uint32_t u64Packer(uint8_t *buf, uint64_t data)
 {
-	for (uint32_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < 8; i++)
 	{
 		buf[i] = (data >> (i * 8)) & MAX_U8;
 	}
@@ -24,7 +38,7 @@ uint32_t u64Packer(uint8_t *buf, uint64_t data)
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
 {
 	*data = 0;
-	for (uint32_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < 8; i++)
 	{
 		*data |= (uint64_t) buf[i] << (i * 8);
 	}
@@ -89,14 +103,18 @@ cleanup:
 	return false;
 }
 
-bool newTran(tran *tx, uint64_t time, uint64_t id, uint64_t amount, uint64_t src, uint64_t dest)
+bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
+			 uint8_t src[ED448_LEN], uint8_t dest[ED448_LEN], uint8_t sig[ED448_SIG_LEN])
 {
-	// TODO: add error checks
-	tx->time = time;
+	if (!tx || !id || !(deci || frac) || !src || !dest || !sig) return false;
+
+	// TODO: verify sig
 	tx->id = id;
-	tx->amount = amount;
-	tx->src = src;
-	tx->dest = dest;
+	tx->deci = deci;
+	tx->frac = frac;
+	memcpy(tx->src, src, ED448_LEN);
+	memcpy(tx->dest, dest, ED448_LEN);
+	memcpy(tx->sig, sig, ED448_SIG_LEN);
 	return true;
 }
 
@@ -144,7 +162,7 @@ bool newBlock(chain *ch)
 
 	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
 	if (!sha512_copy_free(bx.key, md_val, shaLen)) goto cleanup;
-	if (!checkBlock(&bx, true)) goto cleanup;
+	if (!checkBlock(&bx, true, ch->blk.empty() ? NULL : ch->blk.back().crc)) goto cleanup;
 	ch->blk.push_back(bx);
 
 	return trimBlock(ch);
@@ -180,7 +198,7 @@ bool insertBlock(chain *ch,
 	if (!sha512_copy_free(bx.key, md_val, shaLen)) return false;
 	if (crc && !sha512_copy(bx.crc, crc, SHA512_LEN)) return false;
 
-	if (!checkBlock(&bx, crc == NULL)) return false;
+	if (!checkBlock(&bx, crc == NULL, ch->blk.empty() ? NULL : ch->blk.back().crc)) return false;
 	ch->blk.push_back(bx);
 	return trimBlock(ch);
 }

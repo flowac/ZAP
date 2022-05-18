@@ -55,18 +55,27 @@ cleanup:
 
 bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 {
-	uint64_t time, id, amount, src, dest;
+	uint8_t  src[ED448_LEN];
+	uint8_t  dest[ED448_LEN];
+	uint8_t  sig[ED448_SIG_LEN];
+	uint16_t frac;
+	uint64_t id, deci;
 	if (!tx || !fp || !buf) return false;
 
-	if (41 != fread(buf, 1, 41, fp)) return false;
+	if (19 != fread(buf, 1, 19, fp)) return false;
 	if (buf[0] != 'T') return false;
-	u64Unpack(buf + 1,  &time);
-	u64Unpack(buf + 9,  &id);
-	u64Unpack(buf + 17, &amount);
-	u64Unpack(buf + 25, &src);
-	u64Unpack(buf + 33, &dest);
+	u64Unpack(buf + 1,  &id);
+	u64Unpack(buf + 9,  &deci);
+	u16Unpack(buf + 17, &frac);
 
-	return newTran(tx, time, id, amount, src, dest);
+	if (ED448_LEN != fread(buf, 1, ED448_LEN, fp)) return false;
+	memcpy(src, buf, ED448_LEN);
+	if (ED448_LEN != fread(buf, 1, ED448_LEN, fp)) return false;
+	memcpy(dest, buf, ED448_LEN);
+	if (ED448_SIG_LEN != fread(buf, 1, ED448_SIG_LEN, fp)) return false;
+	memcpy(sig, buf, ED448_SIG_LEN);
+
+	return newTran(tx, id, frac, deci, src, dest, sig);
 }
 
 bool blockFromZip(chain *ch, FILE *fp, uint8_t *buf)

@@ -46,13 +46,13 @@ void packToText(pack *pk, FILE *fp)
 void tranToText(tran *tx, FILE *fp)
 {
 	fprintf(fp, "\t{T"
-			"\n\t\ttime: %lu,"
 			"\n\t\tid  : %lu,"
-			"\n\t\tsum : %lu,"
-			"\n\t\tsrc : %lu,"
-			"\n\t\tdest: %lu,"
-			"\n\t\t},\n",
-			tx->time, tx->id, tx->amount, tx->src, tx->dest);
+			"\n\t\tsum : %lu.%u,"
+			"\n\t\tsrc : ",
+			tx->id, tx->deci, tx->frac);
+	printBytes(fp, tx->src, ED448_LEN, ",\n\t\tdest: ");
+	printBytes(fp, tx->dest, ED448_LEN, ",\n\t\tsig : ");
+	printBytes(fp, tx->sig, ED448_SIG_LEN, ",\n\t\t},\n");
 }
 
 void blockToText(block *bx, FILE *fp)
@@ -126,13 +126,13 @@ void tranToZip(tran *tx, FILE *fp, uint8_t *buf)
 	if (!tx || !fp || !buf) return;
 
 	buf[i++] = 'T';
-	i += u64Packer(buf + i, tx->time);
 	i += u64Packer(buf + i, tx->id);
-	i += u64Packer(buf + i, tx->amount);
-	i += u64Packer(buf + i, tx->src);
-	i += u64Packer(buf + i, tx->dest);
-
+	i += u64Packer(buf + i, tx->deci);
+	i += u16Packer(buf + i, tx->frac);
 	fwrite(buf, 1, i, fp);
+	fwrite(tx->src, 1, ED448_LEN, fp);
+	fwrite(tx->dest, 1, ED448_LEN, fp);
+	fwrite(tx->sig, 1, ED448_SIG_LEN, fp);
 }
 
 void blockToZip(block *bx, FILE *fp, uint8_t *buf)

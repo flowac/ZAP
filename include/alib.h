@@ -10,8 +10,10 @@
 #include "atype.h"
 
 /**
- * @brief Packs uint64_t into uint8_t buffer little endian style
+ * @brief Packs uint??_t into uint8_t buffer little endian style
  */
+uint32_t u16Packer(uint8_t *buf, uint16_t data);
+uint32_t u16Unpack(uint8_t *buf, uint16_t *data);
 uint32_t u64Packer(uint8_t *buf, uint64_t data);
 uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
 uint32_t u8len(uint8_t *ptr);
@@ -41,11 +43,12 @@ bool newPack(pack *px,
 			 char *kt[MAGNET_KT_COUNT]);//!< Search keywords
 
 bool newTran(tran *tx,
-			 uint64_t time,
 			 uint64_t id,
-			 uint64_t amount,
-			 uint64_t src,
-			 uint64_t dest);
+			 uint64_t deci,
+			 uint16_t frac,
+			 uint8_t src[ED448_LEN],
+			 uint8_t dest[ED448_LEN],
+			 uint8_t sig[ED448_SIG_LEN]);
 
 /**
  * @brief THIS IS NOT THREAD SAFE.
@@ -90,7 +93,7 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
 /**
  * @brief Generate a block checksum or validate an existing checksum
  */
-bool checkBlock(block *bx, bool modify = false);
+bool checkBlock(block *bx, bool modify, uint8_t crc[SHA512_LEN]);
 
 /**
  * @brief Validate content against internal checksums

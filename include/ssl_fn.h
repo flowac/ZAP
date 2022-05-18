@@ -6,8 +6,8 @@
 // TODO: remove this check once github CI is at OpenSSL 3.0
 #include <openssl/opensslv.h>
 #if OPENSSL_VERSION_MAJOR < 3
-void *EVP_PKEY_CTX_new_from_name(void *a, void *b, void *c){return NULL;}
-void *EVP_PKEY_Q_keygen(void *a, void *b, void *c){return NULL;}
+void *EVP_PKEY_CTX_new_from_name(void *a, void *b, void *c);
+void *EVP_PKEY_Q_keygen(void *a, void *b, void *c);
 #endif
 
 /**
