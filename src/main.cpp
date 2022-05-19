@@ -26,7 +26,7 @@ void log_test()
 void checksum_test(const char *src)
 {
 	uint32_t i, len;
-	uint8_t *sum = check_sha3_512_from_file(src, &len);
+	uint8_t *sum = check_sha3_from_file(src, &len);
 	if (!pstat(sum != NULL, "Checksum test")) return;
 
 	printf("[INFO] %-14s [%02d]: ", src, len);

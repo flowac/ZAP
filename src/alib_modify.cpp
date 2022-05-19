@@ -160,8 +160,8 @@ bool newBlock(chain *ch)
 		}
 	}
 
-	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
-	if (!sha512_copy_free(bx.key, md_val, shaLen)) goto cleanup;
+	md_val = finish_sha3(&(bx.n), 8, &shaLen);
+	if (!sha3_copy_free(bx.key, md_val, shaLen)) goto cleanup;
 	if (!checkBlock(&bx, true, ch->blk.empty() ? NULL : ch->blk.back().crc)) goto cleanup;
 	ch->blk.push_back(bx);
 
@@ -176,8 +176,8 @@ bool insertBlock(chain *ch,
 				 uint64_t n, uint64_t time,
 				 uint32_t n_packs, pack *packs,
 				 uint32_t n_trans, tran *trans,
-				 uint8_t crc[SHA512_LEN],
-				 uint8_t key[SHA512_LEN])
+				 uint8_t crc[SHA3_LEN],
+				 uint8_t key[SHA3_LEN])
 {
 	if (!ch || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
 	if (ch->blk.size() != 0 && n != (ch->blk.back().n + 1)) return false;
@@ -193,10 +193,10 @@ bool insertBlock(chain *ch,
 	bx.trans = trans;
 
 	// TODO: fix this broken key gen
-	md_val = finish_sha3_512(&(bx.n), 8, &shaLen);
-	if (key) if (!sha512_cmp(key, md_val)) return false;
-	if (!sha512_copy_free(bx.key, md_val, shaLen)) return false;
-	if (crc && !sha512_copy(bx.crc, crc, SHA512_LEN)) return false;
+	md_val = finish_sha3(&(bx.n), 8, &shaLen);
+	if (key) if (!sha3_cmp(key, md_val)) return false;
+	if (!sha3_copy_free(bx.key, md_val, shaLen)) return false;
+	if (crc && !sha3_copy(bx.crc, crc, SHA3_LEN)) return false;
 
 	if (!checkBlock(&bx, crc == NULL, ch->blk.empty() ? NULL : ch->blk.back().crc)) return false;
 	ch->blk.push_back(bx);

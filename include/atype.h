@@ -35,7 +35,7 @@
 
 #define ED448_LEN       57    //!< number of bytes for an ED448 key
 #define ED448_SIG_LEN   (ED448_LEN * 2)
-#define SHA512_LEN      64    //!< number of bytes for a SHA3-512
+#define SHA3_LEN        48    //!< number of bytes for a SHA3-384
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_KT_COUNT 5     //!< max number of search keywords
 #define MAGNET_KT_LEN   16    //!< longest possible search keyword
@@ -69,8 +69,8 @@ typedef struct {
  * @brief Holds information about a block
  */
 typedef struct {
-	uint8_t  crc[SHA512_LEN]; //!< checksum 512 bits
-	uint8_t  key[SHA512_LEN]; //!< gen next 512 bits
+	uint8_t  crc[SHA3_LEN]; //!< checksum 512 bits
+	uint8_t  key[SHA3_LEN]; //!< gen next 512 bits
 	uint64_t n;      //!< block number
 	uint64_t time;   //!< epoch seconds
 	uint8_t  n_packs;//!< number of payloads, 255 per block max
@@ -80,7 +80,7 @@ typedef struct {
 } block;
 
 typedef struct {
-	uint8_t address[SHA512_LEN]; //!< SHA3-512 checksum
+	uint8_t address[SHA3_LEN]; //!< SHA3-512 checksum
 	//If balance is less than 1, the entry shall be trimmed
 	uint64_t deci; //Integer value
 	uint16_t frac; //Floating point value, limit of FRAC_MAX

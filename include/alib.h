@@ -62,8 +62,8 @@ bool insertBlock(chain *ch,
 				 pack *packs,     //package array
 				 uint32_t n_trans,//transaction count
 				 tran *trans,     //transaction array
-				 uint8_t crc[SHA512_LEN] = NULL,
-				 uint8_t key[SHA512_LEN] = NULL);
+				 uint8_t crc[SHA3_LEN] = NULL,
+				 uint8_t key[SHA3_LEN] = NULL);
 
 bool trimBlock(chain *ch);
 
@@ -93,7 +93,7 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
 /**
  * @brief Generate a block checksum or validate an existing checksum
  */
-bool checkBlock(block *bx, bool modify, uint8_t crc[SHA512_LEN]);
+bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN]);
 
 /**
  * @brief Validate content against internal checksums

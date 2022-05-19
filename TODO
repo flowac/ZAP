@@ -1,5 +1,4 @@
 CURRENT
-*** Change digest to ED448
 *** Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?

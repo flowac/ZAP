@@ -81,17 +81,17 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 bool blockFromZip(chain *ch, FILE *fp, uint8_t *buf)
 {
 	if (!ch || !fp || !buf) return false;
-	uint8_t crc[SHA512_LEN], key[SHA512_LEN];
+	uint8_t crc[SHA3_LEN], key[SHA3_LEN];
 	uint32_t i = 0, nRead, n_packs, n_trans;
 	uint64_t n, time;
 	pack *packs = NULL;
 	tran *trans = NULL;
 
-	nRead = 1 + 2 * SHA512_LEN;
+	nRead = 1 + 2 * SHA3_LEN;
 	if (nRead != fread(buf, 1, nRead, fp)) return false;
 	if (buf[0] != 'B') return false;
-	memcpy(crc, buf + 1, SHA512_LEN);
-	memcpy(key, buf + 1 + SHA512_LEN, SHA512_LEN);
+	memcpy(crc, buf + 1, SHA3_LEN);
+	memcpy(key, buf + 1 + SHA3_LEN, SHA3_LEN);
 
 	if (18 != fread(buf, 1, 18, fp)) return false;
 	u64Unpack(buf, &n);

@@ -12,7 +12,7 @@ void *EVP_PKEY_CTX_new_from_name(void *a, void *b, void *c){return NULL;}
 void *EVP_PKEY_Q_keygen(void *a, void *b, void *c){return NULL;}
 #endif
 
-uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
+uint8_t *check_sha3_from_file(const char *src, uint32_t *retLen)
 {
 	if (!src || !retLen) return NULL;
 	EVP_MD_CTX *md_ctx = NULL;
@@ -27,9 +27,9 @@ uint8_t *check_sha3_512_from_file(const char *src, uint32_t *retLen)
 		memset(data, 0, BUF4K);
 		data_len = fread(data, 1, BUF4K, fp);
 		file_len -= data_len;
-		md_ctx = update_sha3_512(data, data_len, md_ctx);
+		md_ctx = update_sha3(data, data_len, md_ctx);
 	}
-	ret = finish_sha3_512(retLen, md_ctx);
+	ret = finish_sha3(retLen, md_ctx);
 
 cleanup:
 	if (data)   free(data);
@@ -37,20 +37,20 @@ cleanup:
 	return ret;
 }
 
-EVP_MD_CTX *update_sha3_512(const void *data, uint32_t size, EVP_MD_CTX *md_ctx)
+EVP_MD_CTX *update_sha3(const void *data, uint32_t size, EVP_MD_CTX *md_ctx)
 {
 	EVP_MD_CTX *local_ctx = md_ctx;
 
 	if (!data || !size) goto cleanup;
 	if (!local_ctx && !(local_ctx = EVP_MD_CTX_new())) goto cleanup;
-	if (!md_ctx) EVP_DigestInit_ex(local_ctx, EVP_sha3_512(), NULL);
+	if (!md_ctx) EVP_DigestInit_ex(local_ctx, EVP_sha3_384(), NULL);
 	EVP_DigestUpdate(local_ctx, data, size);
 
 cleanup:
 	return local_ctx;
 }
 
-uint8_t *finish_sha3_512(uint32_t *retLen, EVP_MD_CTX *md_ctx)
+uint8_t *finish_sha3(uint32_t *retLen, EVP_MD_CTX *md_ctx)
 {
 	uint8_t *md_val = NULL;
 
@@ -63,38 +63,38 @@ cleanup:
 	return md_val;
 }
 
-uint8_t *finish_sha3_512(const void *data, uint32_t size, uint32_t *retLen, EVP_MD_CTX *md_ctx)
+uint8_t *finish_sha3(const void *data, uint32_t size, uint32_t *retLen, EVP_MD_CTX *md_ctx)
 {
-	return finish_sha3_512(retLen, update_sha3_512(data, size, md_ctx));
+	return finish_sha3(retLen, update_sha3(data, size, md_ctx));
 }
 
-bool sha512_cmp(uint8_t *left, uint8_t *right)
+bool sha3_cmp(uint8_t *left, uint8_t *right)
 {
 	if (!left || !right) return false;
-	return 0 == memcmp(left, right, SHA512_LEN);
+	return 0 == memcmp(left, right, SHA3_LEN);
 }
 
-bool sha512_cmp_free(uint8_t *left, uint8_t *target)
+bool sha3_cmp_free(uint8_t *left, uint8_t *target)
 {
-	bool ret = sha512_cmp(left, target);
+	bool ret = sha3_cmp(left, target);
 	if (target) free(target);
 	return ret;
 }
 
-bool sha512_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
+bool sha3_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
 {
-	if (!src || shaLen != SHA512_LEN)
+	if (!src || shaLen != SHA3_LEN)
 	{
-		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA512_LEN, shaLen);
+		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA3_LEN, shaLen);
 		return false;
 	}
-	memcpy(dest, src, SHA512_LEN);
+	memcpy(dest, src, SHA3_LEN);
 	return true;
 }
 
-bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
+bool sha3_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
 {
-	bool ret = sha512_copy(dest, target, shaLen);
+	bool ret = sha3_copy(dest, target, shaLen);
 	if (target) free(target);
 	return ret;
 }

@@ -15,8 +15,8 @@ void *EVP_PKEY_Q_keygen(void *a, void *b, void *c);
  *
  * @return NULL - failure
  */
-uint8_t *check_sha3_512_from_file(const char *src,
-								  uint32_t *retLen);
+uint8_t *check_sha3_from_file(const char *src,
+							  uint32_t *retLen);
 
 /**
  * @brief Begin or update checksum procedure
@@ -25,9 +25,9 @@ uint8_t *check_sha3_512_from_file(const char *src,
  *
  * @return NULL - failure
  */
-EVP_MD_CTX *update_sha3_512(const void *data,
-							uint32_t size,
-							EVP_MD_CTX *md_ctx = NULL);
+EVP_MD_CTX *update_sha3(const void *data,
+						uint32_t size,
+						EVP_MD_CTX *md_ctx = NULL);
 
 /**
  * @brief Finalize checksum procedure
@@ -36,8 +36,8 @@ EVP_MD_CTX *update_sha3_512(const void *data,
  *
  * @return NULL - failure
  */
-uint8_t *finish_sha3_512(uint32_t *retLen,
-						 EVP_MD_CTX *md_ctx);
+uint8_t *finish_sha3(uint32_t *retLen,
+					 EVP_MD_CTX *md_ctx);
 
 /**
  * @brief Finalize checksum procedure
@@ -46,14 +46,14 @@ uint8_t *finish_sha3_512(uint32_t *retLen,
  *
  * @return NULL - failure
  */
-uint8_t *finish_sha3_512(const void *data,
-						 uint32_t size,
-						 uint32_t *retLen,
-						 EVP_MD_CTX *md_ctx = NULL);
+uint8_t *finish_sha3(const void *data,
+					 uint32_t size,
+					 uint32_t *retLen,
+					 EVP_MD_CTX *md_ctx = NULL);
 
-bool sha512_cmp      (uint8_t *left, uint8_t *right);
-bool sha512_cmp_free (uint8_t *left, uint8_t *target);
-bool sha512_copy     (uint8_t *dest, uint8_t *src,    uint32_t shaLen);
-bool sha512_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen);
+bool sha3_cmp      (uint8_t *left, uint8_t *right);
+bool sha3_cmp_free (uint8_t *left, uint8_t *target);
+bool sha3_copy     (uint8_t *dest, uint8_t *src,    uint32_t shaLen);
+bool sha3_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen);
 
 #endif //_SSL_FN_H
