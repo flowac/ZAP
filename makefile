@@ -21,7 +21,7 @@ SDIR = src
 SOURCES = $(wildcard $(SDIR)/*.cpp)
 OBJ := $(SOURCES:$(SDIR)/%.cpp=$(ODIR)/%.o)
 
-LIBS += -lssl -lcrypto -lpthread
+LIBS += -lssl -lcrypto
 FLAGS += -O2
 FLAGS += -Wall -fpermissive -Iinclude -I$(SSL_INC) -I$(7Z_DIR)
 ARGS_EXTERN = all

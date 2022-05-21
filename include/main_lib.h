@@ -1,5 +1,5 @@
 /**
- * @file alib.h
+ * @file main_lib.h
  * @brief Functions that deal with the initialization of
  * the block structure
  */
@@ -7,7 +7,7 @@
 #define _ALIB_H
 
 #include <cstddef>
-#include "atype.h"
+#include "types.h"
 
 /**
  * @brief Packs uint??_t into uint8_t buffer little endian style
@@ -58,13 +58,12 @@ bool newBlock(chain *ch);
 bool insertBlock(chain *ch,
 				 uint64_t n,
 				 uint64_t time,
-				 uint32_t n_packs,//package count
-				 pack *packs,     //package array
 				 uint32_t n_trans,//transaction count
 				 tran *trans,     //transaction array
 				 uint8_t crc[SHA3_LEN] = NULL,
 				 uint8_t key[SHA3_LEN] = NULL);
 
+uint32_t procPack(chain *ch);
 bool trimBlock(chain *ch);
 
 void deletePack(pack *target);
@@ -98,7 +97,7 @@ bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN]);
 /**
  * @brief Validate content against internal checksums
  */
-bool auditChain(chain *ch);
+bool auditChain(chain *ch, uint8_t pak_crc[SHA3_LEN]);
 
 /**
  * @brief Compare two chains

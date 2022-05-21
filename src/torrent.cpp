@@ -1,9 +1,15 @@
+#include <algorithm>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "alib.h"
+#include "main_lib.h"
+#include "log.h"
+#include "ssl_fn.h"
+#include "time_fn.h"
+
+static std::queue<pack> pack_queue;
 
 typedef enum
 {
@@ -106,4 +112,74 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 	}
 	ret[retLen] = 0;
 	return retLen;
+}
+
+bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
+{
+	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
+	if (!px || !xt || !dn || !tr) goto cleanup;
+	px->dn = NULL;
+	px->tr = NULL;
+
+	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
+	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
+	if (!(ntr = compressTracker(tr))) goto cleanup;
+	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
+
+	memcpy(px->xt, xt, MAGNET_XT_LEN);
+	px->xl = xl;
+	if (!(px->dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
+	memcpy(px->dn, dn, ndn);
+	if (!(px->tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
+	memcpy(px->tr, tr, ntr);
+
+	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
+	for (i = 0; i < MAGNET_KT_COUNT; ++i)
+	{
+		if (!kt[i] || 0 == (nkt = strlen(kt[i]))) break;
+		if (nkt > MAGNET_KT_LEN) goto cleanup;
+		px->kt[i] = kt[i];
+	}
+
+	return true;
+cleanup:
+	printf("\nfailed new pack kt[i] %u[%u] %s< ndn %u ntr %u %p\n", nkt, i, dn, ndn, ntr, tr);
+	if (px)
+	{
+		if (px->dn) free(px->dn);
+		if (px->tr) free(px->tr);
+	}
+	return false;
+}
+
+uint32_t procPack(chain *ch)
+{
+	return 0;
+}
+
+void deletePack(pack *target)
+{
+	if (target->dn) free(target->dn);
+	if (target->tr) free(target->tr);
+	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
+}
+ 
+bool enqueuePack(pack *target)
+{
+	if (!target) return false;
+	pack_queue.push(*target);
+	return true;
+}
+
+bool dequeuePack(pack *target)
+{
+	if (pack_queue.empty()) return false;
+	*target = pack_queue.front();
+	pack_queue.pop();
+	return true;
+}
+
+uint32_t packQueueLen(void)
+{
+	return pack_queue.size();
 }

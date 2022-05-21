@@ -3,13 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "alib.h"
+#include "main_lib.h"
 #include "log.h"
 #include "ssl_fn.h"
 #include "time_fn.h"
 
-// TODO: when calling newBlock, use these queues instead of taking parameters
-static std::queue<pack> pack_queue;
 static std::queue<tran> tran_queue;
 
 uint32_t u16Packer(uint8_t *buf, uint16_t data)
@@ -62,45 +60,7 @@ uint32_t u8cmp(uint8_t *ptr, char *str)
 void printBlock(block *target)
 {
 	//printTime((time_t) target->time);
-	printf("B%04lu %lu P%u T%u\n", target->n, target->time, target->n_packs, target->n_trans);
-}
-
-bool newPack(pack *px, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
-{
-	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
-	if (!px || !xt || !dn || !tr) goto cleanup;
-	px->dn = NULL;
-	px->tr = NULL;
-
-	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
-	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
-	if (!(ntr = compressTracker(tr))) goto cleanup;
-	for (int i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
-
-	memcpy(px->xt, xt, MAGNET_XT_LEN);
-	px->xl = xl;
-	if (!(px->dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
-	memcpy(px->dn, dn, ndn);
-	if (!(px->tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
-	memcpy(px->tr, tr, ntr);
-
-	for (i = 0; i < MAGNET_KT_COUNT; ++i) px->kt[i] = NULL;
-	for (i = 0; i < MAGNET_KT_COUNT; ++i)
-	{
-		if (!kt[i] || 0 == (nkt = strlen(kt[i]))) break;
-		if (nkt > MAGNET_KT_LEN) goto cleanup;
-		px->kt[i] = kt[i];
-	}
-
-	return true;
-cleanup:
-	printf("\nfailed new pack kt[i] %u[%u] %s< ndn %u ntr %u %p\n", nkt, i, dn, ndn, ntr, tr);
-	if (px)
-	{
-		if (px->dn) free(px->dn);
-		if (px->tr) free(px->tr);
-	}
-	return false;
+	printf("B%04lu %lu T%u\n", target->n, target->time, target->n_trans);
 }
 
 bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
@@ -120,31 +80,15 @@ bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 
 bool newBlock(chain *ch)
 {
-	if (!ch || (pack_queue.empty() && tran_queue.empty())) return false;
+	if (!ch || tran_queue.empty()) return false;
 	uint8_t *md_val;
 	uint32_t i, shaLen;
 	block bx;
 
 	bx.n = ch->blk.size() + 1;
 	bx.time = nsNow();
-	bx.n_packs = std::min(pack_queue.size(), MAX_U8);
 	bx.n_trans = std::min(tran_queue.size(), MAX_U8);
-	bx.packs = NULL;
 	bx.trans = NULL;
-
-	if (bx.n_packs)
-	{
-		if (!(bx.packs = (pack *) calloc(bx.n_packs, sizeof(pack)))) goto cleanup;
-		for (i = 0; i < bx.n_packs; ++i)
-		{
-			if (!dequeuePack(&(bx.packs[i])))
-			{
-				bx.n_packs = ++i;
-				bx.packs = (pack *) realloc(bx.packs, sizeof(pack) * bx.n_packs);
-				break;
-			}
-		}
-	}
 
 	if (bx.n_trans)
 	{
@@ -167,19 +111,17 @@ bool newBlock(chain *ch)
 
 	return trimBlock(ch);
 cleanup:
-	if (bx.packs) free(bx.packs);
 	if (bx.trans) free(bx.trans);
 	return false;
 }
 
 bool insertBlock(chain *ch,
 				 uint64_t n, uint64_t time,
-				 uint32_t n_packs, pack *packs,
 				 uint32_t n_trans, tran *trans,
 				 uint8_t crc[SHA3_LEN],
 				 uint8_t key[SHA3_LEN])
 {
-	if (!ch || n_packs > MAX_U8 || n_trans > MAX_U8) return false;
+	if (!ch || n_trans > MAX_U8) return false;
 	if (ch->blk.size() != 0 && n != (ch->blk.back().n + 1)) return false;
 	uint8_t *md_val;
 	uint32_t shaLen;
@@ -187,9 +129,7 @@ bool insertBlock(chain *ch,
 
 	bx.n = n;
 	bx.time = time ? time : nsNow();
-	bx.n_packs = n_packs;
 	bx.n_trans = n_trans;
-	bx.packs = packs;
 	bx.trans = trans;
 
 	// TODO: fix this broken key gen
@@ -211,21 +151,12 @@ bool trimBlock(chain *ch)
 	return true;
 }
 
-void deletePack(pack *target)
-{
-	if (target->dn) free(target->dn);
-	if (target->tr) free(target->tr);
-	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
-}
- 
 void deleteTran(tran *target)
 {
 }
 
 void deleteBlock(block *target)
 {
-	for (uint32_t i = 0; i < target->n_packs; ++i) deletePack(&(target->packs[i]));
-	if (target->packs) free(target->packs);
 	for (uint32_t i = 0; i < target->n_trans; ++i) deleteTran(&(target->trans[i]));
 	if (target->trans) free(target->trans);
 }
@@ -237,25 +168,10 @@ void deleteChain(chain *target)
 	target->blk.clear();
 }
 
-bool enqueuePack(pack *target)
-{
-	if (!target) return false;
-	pack_queue.push(*target);
-	return true;
-}
-
 bool enqueueTran(tran *target)
 {
 	if (!target) return false;
 	tran_queue.push(*target);
-	return true;
-}
-
-bool dequeuePack(pack *target)
-{
-	if (pack_queue.empty()) return false;
-	*target = pack_queue.front();
-	pack_queue.pop();
 	return true;
 }
 
@@ -265,11 +181,6 @@ bool dequeueTran(tran *target)
 	*target = tran_queue.front();
 	tran_queue.pop();
 	return true;
-}
-
-uint32_t packQueueLen(void)
-{
-	return pack_queue.size();
 }
 
 uint32_t tranQueueLen(void)

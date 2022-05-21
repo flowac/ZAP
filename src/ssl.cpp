@@ -1,9 +1,9 @@
-#include "alib_io.h"
-#include "ssl_fn.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "file_io.h"
+#include "ssl_fn.h"
 
 // TODO: remove this check once github CI is at OpenSSL 3.0
 #include <openssl/opensslv.h>
@@ -83,9 +83,9 @@ bool sha3_cmp_free(uint8_t *left, uint8_t *target)
 
 bool sha3_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
 {
-	if (!src || shaLen != SHA3_LEN)
+	if (!dest || !src || shaLen != SHA3_LEN)
 	{
-		printf("SHA3-512 for crc failed. Bytes expected=%d, actual=%u\n", SHA3_LEN, shaLen);
+		printf("SHA3-%u for crc failed. Bytes expected=%d, actual=%u\n", 8 * SHA3_LEN, SHA3_LEN, shaLen);
 		return false;
 	}
 	memcpy(dest, src, SHA3_LEN);

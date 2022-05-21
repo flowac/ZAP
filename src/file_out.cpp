@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "alib.h"
-#include "alib_io.h"
+#include "main_lib.h"
+#include "file_io.h"
 
 uint32_t getFilesize(FILE *fp)
 {
@@ -64,11 +64,9 @@ void blockToText(block *bx, FILE *fp)
 	fprintf(fp,
 			"\n\tn   : %lu,"
 			"\n\tgmt : %lu,"
-			"\n\tpack: %u,"
 			"\n\ttran: %u,\n",
-			bx->n, bx->time, bx->n_packs, bx->n_trans);
+			bx->n, bx->time, bx->n_trans);
 
-	for (uint32_t i = 0; i < bx->n_packs; ++i) packToText(&(bx->packs[i]), fp);
 	for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
 
 	fprintf(fp, "},\n");
@@ -147,11 +145,9 @@ void blockToZip(block *bx, FILE *fp, uint8_t *buf)
 	i += SHA3_LEN;
 	i += u64Packer(buf + i, bx->n);
 	i += u64Packer(buf + i, bx->time);
-	buf[i++] = bx->n_packs & MAX_U8;
 	buf[i++] = bx->n_trans & MAX_U8;
 	fwrite(buf, 1, i, fp);
 
-	for (i = 0; i < bx->n_packs; i++) packToZip(&(bx->packs[i]), fp, buf);
 	for (i = 0; i < bx->n_trans; i++) tranToZip(&(bx->trans[i]), fp, buf);
 }
 

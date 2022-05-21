@@ -73,9 +73,7 @@ typedef struct {
 	uint8_t  key[SHA3_LEN]; //!< gen next 512 bits
 	uint64_t n;      //!< block number
 	uint64_t time;   //!< epoch seconds
-	uint8_t  n_packs;//!< number of payloads, 255 per block max
 	uint8_t  n_trans;//!< number of transactions, 255 per block max
-	pack *packs;
 	tran *trans;
 } block;
 
@@ -89,6 +87,7 @@ typedef struct {
 typedef struct {
 	std::vector<balance> bal;
 	std::vector<block> blk;
+	std::vector<pack> pak;
 } chain;
 
 #endif //_ATYPE_H

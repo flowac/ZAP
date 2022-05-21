@@ -1,12 +1,12 @@
 /**
- * @file alib_io.h
+ * @file file_io.h
  * @brief Functions that deal with i/o of the chain
  */
 #ifndef _ALIB_IO_H
 #define _ALIB_IO_H
 
-#include "atype.h"
 #include <stdio.h>
+#include "types.h"
 
 /**
  * @brief Get remaining size of the file

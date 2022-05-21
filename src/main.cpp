@@ -1,7 +1,6 @@
-#include "atype.h"
-#include "alib.h"
-#include "alib_io.h"
-#include "alib_wallet.h"
+#include "main_lib.h"
+#include "file_io.h"
+#include "wallet.h"
 #include "ssl_fn.h"
 #include "time_fn.h"
 #include "log.h"
@@ -99,6 +98,7 @@ void chain_test(int size)
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
 	const char *txtFile = "temp.txt"; // chainToText output
 	chain ch, cin1, cin2;
+	uint8_t pak_crc[SHA3_LEN];
 
 	start_timer();
 
@@ -117,7 +117,9 @@ void chain_test(int size)
 	chainToZip(&ch, zaaFile);
 	print_elapsed_time();
 
-	pstat(auditChain(&ch), "Chain audit");
+	pstat(auditChain(&ch, pak_crc), "Chain audit");
+	printf("[INFO] Pack checksum: ");
+	printBytes(stdout, pak_crc, SHA3_LEN, "\n");
 	checksum_test(zaaFile);
 
 	start_timer();
@@ -129,7 +131,9 @@ void chain_test(int size)
 	chainToZip(&cin1, za2File);
 	print_elapsed_time();
 
-	pstat(auditChain(&cin1), "Chain audit");
+	pstat(auditChain(&cin1, pak_crc), "Chain audit");
+	printf("[INFO] Pack checksum: ");
+	printBytes(stdout, pak_crc, SHA3_LEN, "\n");
 
 	uint64_t ccomp = compareChain(&ch, &cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))

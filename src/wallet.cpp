@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "alib.h"
-#include "alib_io.h"
-#include "alib_wallet.h"
+#include "main_lib.h"
+#include "file_io.h"
+#include "wallet.h"
 #include "ssl_fn.h"
 #include "time_fn.h"
 
