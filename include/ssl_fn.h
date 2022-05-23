@@ -32,12 +32,12 @@ EVP_MD_CTX *update_sha3(const void *data,
 /**
  * @brief Finalize checksum procedure
  *
- * The EVP_MD_CTX will always be free'd
+ * The EVP_MD_CTX will always be free'd and set to NULL
  *
  * @return NULL - failure
  */
 uint8_t *finish_sha3(uint32_t *retLen,
-					 EVP_MD_CTX *md_ctx);
+					 EVP_MD_CTX **md_ctx);
 
 /**
  * @brief Finalize checksum procedure

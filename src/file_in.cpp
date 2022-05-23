@@ -4,53 +4,64 @@
 #include "main_lib.h"
 #include "file_io.h"
 
-bool packFromZip(pack *px, FILE *fp, uint8_t *buf)
+bool packFromZip(chain *ch, const char *src, uint8_t *buf)
 {
-	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[MAGNET_TR_LEN];
-	uint32_t i, len, nkt;
-	uint64_t xl;
+	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
-	if (!px || !fp || !buf) return false;
+	FILE *fp = fopen(src, "rb");
+	uint8_t xt[MAGNET_XT_LEN];
+	uint8_t tr[MAGNET_TR_LEN];
+	uint32_t j, len, nkt;
+	uint64_t i, nPacks, xl;
+	if (!fp || !buf) goto cleanup;
 
-	len = 9 + MAGNET_XT_LEN;
-	if (len != fread(buf, 1, len, fp)) return false;
-	if (buf[0] != 'P') return false;
-	memcpy(xt, buf + 1, MAGNET_XT_LEN);
-	u64Unpack(buf + 1 + MAGNET_XT_LEN, &xl);
+	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
+	if (buf[0] != 'C') goto cleanup;
+	u64Unpack(buf + 1, &nPacks);
 
-	if (1 != fread(buf, 1, 1, fp)) return false;
-	len = buf[0];
-	if (len > MAGNET_DN_LEN || len != fread(buf, 1, len, fp)) return false;
-	memcpy(dn, buf, len);
-	dn[len] = 0;
-
-	if (2 != fread(buf, 1, 2, fp)) return false;
-	len = buf[0] << 8;
-	len += buf[1];
-	if (len >= MAGNET_TR_LEN || len != fread(buf, 1, len, fp)) return false;
-	memcpy(tr, buf, len);
-	tr[len] = 0;
-
-	if (1 != fread(buf, 1, 1, fp)) return false;
-	nkt = buf[0];
-	if (nkt > MAGNET_KT_COUNT) return false;
-
-	for (i = 0; i < nkt; ++i)
+	for (i = 0; i < nPacks; ++i)
 	{
+		len = 9 + MAGNET_XT_LEN;
+		if (len != fread(buf, 1, len, fp)) goto cleanup;
+		if (buf[0] != 'P') goto cleanup;
+		memcpy(xt, buf + 1, MAGNET_XT_LEN);
+		u64Unpack(buf + 1 + MAGNET_XT_LEN, &xl);
+
 		if (1 != fread(buf, 1, 1, fp)) goto cleanup;
 		len = buf[0];
-		if (!len || len > MAGNET_KT_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
-		if (!(kt[i] = (char *) calloc(len + 1, 1))) goto cleanup;
-		memcpy(kt[i], buf, len);
-		kt[i][len] = 0;
-	}
+		if (len > MAGNET_DN_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
+		memcpy(dn, buf, len);
+		dn[len] = 0;
 
-	return newPack(px, xt, xl, dn, tr, kt);
+		if (2 != fread(buf, 1, 2, fp)) goto cleanup;
+		len = buf[0] << 8;
+		len += buf[1];
+		if (len >= MAGNET_TR_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
+		memcpy(tr, buf, len);
+		tr[len] = 0;
+
+		if (1 != fread(buf, 1, 1, fp)) goto cleanup;
+		nkt = buf[0];
+		if (nkt > MAGNET_KT_COUNT) goto cleanup;
+
+		for (j = 0; j < nkt; ++j)
+		{
+			if (1 != fread(buf, 1, 1, fp)) goto cleanup;
+			len = buf[0];
+			if (!len || len > MAGNET_KT_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
+			if (!(kt[j] = (char *) calloc(len + 1, 1))) goto cleanup;
+			memcpy(kt[j], buf, len);
+			kt[j][len] = 0;
+		}
+
+		if ((ret = newPack(ch, xt, xl, dn, tr, kt))) for (j = 0; j < nkt; ++j) kt[j] = NULL;
+		else goto cleanup;
+	}
 cleanup:
-	for (i = 0; i < MAGNET_KT_COUNT; ++i) if (kt[i]) free(kt[i]);
-	return false;
+	if (fp) fclose(fp);
+	for (j = 0; j < MAGNET_KT_COUNT; ++j) if (kt[j]) free(kt[j]);
+	return ret;
 }
 
 bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
@@ -60,7 +71,7 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	uint8_t  sig[ED448_SIG_LEN];
 	uint16_t frac;
 	uint64_t id, deci;
-	if (!tx || !fp || !buf) return false;
+	if (!fp || !buf) return false;
 
 	if (19 != fread(buf, 1, 19, fp)) return false;
 	if (buf[0] != 'T') return false;
@@ -78,63 +89,61 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	return newTran(tx, id, frac, deci, src, dest, sig);
 }
 
-bool blockFromZip(chain *ch, FILE *fp, uint8_t *buf)
-{
-	if (!ch || !fp || !buf) return false;
-	uint8_t crc[SHA3_LEN], key[SHA3_LEN];
-	uint32_t i = 0, nRead, n_trans;
-	uint64_t n, time;
-	tran *trans = NULL;
-
-	nRead = 1 + 2 * SHA3_LEN;
-	if (nRead != fread(buf, 1, nRead, fp)) return false;
-	if (buf[0] != 'B') return false;
-	memcpy(crc, buf + 1, SHA3_LEN);
-	memcpy(key, buf + 1 + SHA3_LEN, SHA3_LEN);
-
-	if (17 != fread(buf, 1, 17, fp)) return false;
-	u64Unpack(buf, &n);
-	u64Unpack(buf + 8, &time);
-	n_trans = buf[16];
-	if (n_trans) trans = (tran *) calloc(n_trans, sizeof(tran));
-
-	for (i = 0; i < n_trans; i++) if (!tranFromZip(&(trans[i]), fp, buf)) goto cleanup;
-
-	return insertBlock(ch, n, time, n_trans, trans, crc, key);
-cleanup:
-	if (trans) free(trans);
-	return false;
-}
-
-bool chainFromZip(chain *ch, const char *dest)
+bool blockFromZip(chain *ch, const char *src, uint8_t *buf)
 {
 	bool ret = false;
-	FILE *fp = NULL;
-	uint8_t buf[BUF1K];
-	uint64_t chainLen;
-	if (!ch || !dest || !(fp = fopen(dest, "rb"))) goto cleanup;
+	FILE *fp = fopen(src, "rb");;
+	tran *trans = NULL;
+	uint8_t crc[SHA3_LEN], key[SHA3_LEN];
+	uint32_t j, nRead;
+	uint64_t nBlocks, i, n, nTrans, time;
+	if (!ch || !fp || !buf) goto cleanup;
 
-	memset(buf, 0, BUF1K);
 	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
 	if (buf[0] != 'C') goto cleanup;
-	u64Unpack(buf + 1, &chainLen);
+	u64Unpack(buf + 1, &nBlocks);
 
-	for (uint64_t i = 0; i < chainLen; ++i)
+	for (i = 0; i < nBlocks; ++i)
 	{
-		if (!blockFromZip(ch, fp, buf))
-		{
-			deleteChain(ch);
-			goto cleanup;
-		}
-	}
+		nRead = 1 + 2 * SHA3_LEN;
+		if (nRead != fread(buf, 1, nRead, fp)) goto cleanup;
+		if (buf[0] != 'B') goto cleanup;
+		memcpy(crc, buf + 1, SHA3_LEN);
+		memcpy(key, buf + 1 + SHA3_LEN, SHA3_LEN);
 
-	ret = true;
+		if (17 != fread(buf, 1, 17, fp)) goto cleanup;
+		u64Unpack(buf, &n);
+		u64Unpack(buf + 8, &time);
+		if ((nTrans = buf[16]))
+		{
+			trans = (tran *) calloc(nTrans, sizeof(tran));
+			for (j = 0; j < nTrans; ++j) if (!tranFromZip(&(trans[j]), fp, buf)) goto cleanup;
+		}
+
+		if ((ret = insertBlock(ch, n, time, nTrans, trans, crc, key))) trans = NULL;
+		else goto cleanup;
+	}
 cleanup:
 	if (fp) fclose(fp);
+	if (trans) free(trans);
 	return ret;
 }
 
-uint32_t importPack(const char *src)
+bool chainFromZip(chain *ch, const char *block_file, const char *pack_file)
+{
+	uint8_t buf[BUF1K];
+	if (!ch || !block_file || !pack_file) return false;
+
+	if (!blockFromZip(ch, block_file, buf) || !packFromZip(ch, pack_file, buf))
+	{
+		deleteChain(ch);
+		return false;
+	}
+
+	return true;
+}
+
+uint32_t importPack(chain *ch, const char *src)
 {
 	char dn[MAGNET_DN_LEN];
 	char *fio = NULL, *idx, *tok;
@@ -144,9 +153,8 @@ uint32_t importPack(const char *src)
 	uint8_t tr[MAGNET_TR_LEN];
 	uint32_t ret = 0, blen, slen;
 	uint64_t xl;
-	pack px;
 
-	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
+	if (!ch || !fp || !(blen = getFilesize(fp))) goto cleanup;
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
 	fio[blen] = 0;
@@ -219,9 +227,7 @@ uint32_t importPack(const char *src)
 		}
 		else break;
 
-		if (newPack(&px, xt, xl, dn, tr, kt)) enqueuePack(&px);
-		else break;
-
+		if (!newPack(ch, xt, xl, dn, tr, kt)) break;
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
 	}
 

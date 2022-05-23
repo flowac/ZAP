@@ -1,4 +1,6 @@
 CURRENT
+*** Pack merkle tree
+*** Transaction signiture
 *** Block compaction
 **  Fix package and transaction checksums
 *   Delta generation logic?

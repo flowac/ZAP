@@ -21,30 +21,41 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
-void packToText(pack *pk, FILE *fp)
+void packToText(chain *ch, const char *dest)
 {
+	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
-	bool decompOK = decompressTracker(pk->tr, decompTR) > 0;
-	if (!decompOK) printf("WARNING: failed to decompressTracker\n");
+	FILE *fp = fopen(dest, "w");
+	uint64_t i;
+	if (!ch || !fp) goto cleanup;
 
-	fprintf(fp, "\t{P\n\t\t");
-	printBytes(fp, pk->xt, 20);
-	fprintf(fp, ","
-			"\n\t\tlen : %lu,"
-			"\n\t\tdn  : %s,"
-			"\n\t\ttr  : %s,"
-			"\n\t\tkt  : ",
-			pk->xl, pk->dn, decompOK ? decompTR : (char *) (pk->tr));
-	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
+	for (i = 0; i < ch->pak.size(); ++i)
 	{
-		if (!pk->kt[i] || !pk->kt[i][0]) break;
-		fprintf(fp, "%s ", pk->kt[i]);
+		decompOK = decompressTracker(ch->pak[i].tr, decompTR) > 0;
+		if (!decompOK) printf("[WARN] failed to decompressTracker\n");
+
+		fprintf(fp, "{P\n\t");
+		printBytes(fp, ch->pak[i].xt, 20);
+		fprintf(fp, ","
+				"\n\tlen : %lu,"
+				"\n\tdn  : %s,"
+				"\n\ttr  : %s,"
+				"\n\tkt  : ",
+				ch->pak[i].xl, ch->pak[i].dn, decompOK ? decompTR : (char *) (ch->pak[i].tr));
+		for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
+		{
+			if (!ch->pak[i].kt[i] || !ch->pak[i].kt[i][0]) break;
+			fprintf(fp, "%s ", ch->pak[i].kt[i]);
+		}
+		fprintf(fp, "\n}\n");
 	}
-	fprintf(fp, "\n\t\t},\n");
+cleanup:
+	if (fp) fclose(fp);
 }
 
 void tranToText(tran *tx, FILE *fp)
 {
+	if (!tx || !fp) return;
 	fprintf(fp, "\t{T"
 			"\n\t\tid  : %lu,"
 			"\n\t\tsum : %lu.%u,"
@@ -55,73 +66,94 @@ void tranToText(tran *tx, FILE *fp)
 	printBytes(fp, tx->sig, ED448_SIG_LEN, ",\n\t\t},\n");
 }
 
-void blockToText(block *bx, FILE *fp)
+void blockToText(chain *ch, const char *dest)
 {
-	fprintf(fp, "{B\n");
-	printBytes(fp, bx->crc, SHA3_LEN, "\n");
-	printBytes(fp, bx->key, SHA3_LEN);
+	FILE *fp = fopen(dest, "w");
+	uint32_t j;
+	uint64_t i;
+	if (!ch || !fp) goto cleanup;
 
-	fprintf(fp,
-			"\n\tn   : %lu,"
-			"\n\tgmt : %lu,"
-			"\n\ttran: %u,\n",
-			bx->n, bx->time, bx->n_trans);
+	fprintf(fp, "C %lu\n", ch->blk.size());
+	for (i = 0; i < ch->blk.size(); ++i)
+	{
+		fprintf(fp, "{B\n");
+		printBytes(fp, ch->blk[i].crc, SHA3_LEN, "\n");
+		printBytes(fp, ch->blk[i].key, SHA3_LEN);
 
-	for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
+		fprintf(fp,
+				"\n\tn   : %lu,"
+				"\n\tgmt : %lu,"
+				"\n\ttran: %u,\n",
+				ch->blk[i].n, ch->blk[i].time, ch->blk[i].n_trans);
 
-	fprintf(fp, "},\n");
+		for (j = 0; j < ch->blk[i].n_trans; ++j) tranToText(&(ch->blk[i].trans[j]), fp);
+		fprintf(fp, "},\n");
+	}
+cleanup:
+	if (fp) fclose(fp);
 }
 
-bool chainToText(chain *ch, const char *dest)
+bool chainToText(chain *ch, const char *block_file, const char *pack_file)
 {
-	FILE *fp;
-	if (!ch || !dest || !(fp = fopen(dest, "w"))) return false;
-
-	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToText(&(ch->blk[i]), fp);
-
-	fclose(fp);
+	if (!ch || !block_file || !pack_file) return false;
+	blockToText(ch, block_file);
+	packToText(ch, pack_file);
 	return true;
 }
 
-void packToZip(pack *pk, FILE *fp, uint8_t *buf)
+bool packToZip(chain *ch, const char *dest, uint8_t *buf)
 {
-	uint32_t i = 0, j, slen, ktPos;
-	if (!pk || !fp || !buf) return;
+	bool ret = false;
+	FILE *fp = fopen(dest, "wb");
+	uint32_t j, k, slen, ktPos;
+	uint64_t i;
+	if (!ch || !fp || !buf) goto cleanup;
 
-	buf[i++] = 'P';
-	memcpy(buf + i, pk->xt, MAGNET_XT_LEN);
-	i += MAGNET_XT_LEN;
-	i += u64Packer(buf + i, pk->xl);
+	buf[0] = 'C';
+	u64Packer(buf + 1, ch->pak.size());
+	fwrite(buf, 1, 9, fp);
 
-	slen = strlen(pk->dn);
-	buf[i++] = (uint8_t) slen;
-	memcpy(buf + i, pk->dn, slen);
-	i += slen;
-
-	slen = u8len(pk->tr);
-	buf[i++] = (uint8_t) (slen >> 8);
-	buf[i++] = (uint8_t) (slen & MAX_U8);
-	memcpy(buf + i, pk->tr, slen);
-	i += slen;
-
-	ktPos = i;
-	i++;
-	for (j = 0; j < MAGNET_KT_COUNT; ++j)
+	for (i = 0; i < ch->pak.size(); ++i)
 	{
-		if (!pk->kt[j] || !pk->kt[j][0]) break;
-		slen = strlen(pk->kt[j]);
-		buf[i++] = (uint8_t) slen;
-		memcpy(buf + i, pk->kt[j], slen);
-		i += slen;
+		j = 0;
+		buf[j++] = 'P';
+		memcpy(buf + j, ch->pak[i].xt, MAGNET_XT_LEN);
+		j += MAGNET_XT_LEN;
+		j += u64Packer(buf + j, ch->pak[i].xl);
+
+		slen = strlen(ch->pak[i].dn);
+		buf[j++] = (uint8_t) slen;
+		memcpy(buf + j, ch->pak[i].dn, slen);
+		j += slen;
+
+		slen = u8len(ch->pak[i].tr);
+		buf[j++] = (uint8_t) (slen >> 8);
+		buf[j++] = (uint8_t) (slen & MAX_U8);
+		memcpy(buf + j, ch->pak[i].tr, slen);
+		j += slen;
+
+		ktPos = j++;
+		for (k = 0; k < MAGNET_KT_COUNT; ++k)
+		{
+			if (!ch->pak[i].kt[k] || !ch->pak[i].kt[k][0]) break;
+			slen = strlen(ch->pak[i].kt[k]);
+			buf[j++] = (uint8_t) slen;
+			memcpy(buf + j, ch->pak[i].kt[k], slen);
+			j += slen;
+		}
+		buf[ktPos] = k;
+		fwrite(buf, 1, j, fp);
 	}
-	buf[ktPos] = j;
-	fwrite(buf, 1, i, fp);
+	ret = true;
+cleanup:
+	if (fp) fclose(fp);
+	return ret;
 }
 
-void tranToZip(tran *tx, FILE *fp, uint8_t *buf)
+bool tranToZip(tran *tx, FILE *fp, uint8_t *buf)
 {
 	uint32_t i = 0;
-	if (!tx || !fp || !buf) return;
+	if (!tx || !fp || !buf) return false;
 
 	buf[i++] = 'T';
 	i += u64Packer(buf + i, tx->id);
@@ -131,39 +163,46 @@ void tranToZip(tran *tx, FILE *fp, uint8_t *buf)
 	fwrite(tx->src, 1, ED448_LEN, fp);
 	fwrite(tx->dest, 1, ED448_LEN, fp);
 	fwrite(tx->sig, 1, ED448_SIG_LEN, fp);
+	return true;
 }
 
-void blockToZip(block *bx, FILE *fp, uint8_t *buf)
+bool blockToZip(chain *ch, const char *dest, uint8_t *buf)
 {
-	uint32_t i = 0;
-	if (!bx || !fp || !buf) return;
+	bool ret = false;
+	FILE *fp = fopen(dest, "wb");
+	uint32_t j, k;
+	uint64_t i;
+	if (!ch || !fp || !buf) goto cleanup;
 
-	buf[i++] = 'B';
-	memcpy(buf + i, bx->crc, SHA3_LEN);
-	i += SHA3_LEN;
-	memcpy(buf + i, bx->key, SHA3_LEN);
-	i += SHA3_LEN;
-	i += u64Packer(buf + i, bx->n);
-	i += u64Packer(buf + i, bx->time);
-	buf[i++] = bx->n_trans & MAX_U8;
-	fwrite(buf, 1, i, fp);
-
-	for (i = 0; i < bx->n_trans; i++) tranToZip(&(bx->trans[i]), fp, buf);
-}
-
-bool chainToZip(chain *ch, const char *dest)
-{
-	FILE *fp;
-	uint8_t buf[BUF1K];
-	if (!ch || !dest || !(fp = fopen(dest, "wb"))) return false;
-
-	memset(buf, 0, BUF1K);
 	buf[0] = 'C';
 	u64Packer(buf + 1, ch->blk.size());
 	fwrite(buf, 1, 9, fp);
 
-	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToZip(&(ch->blk[i]), fp, buf);
+	for (i = 0; i < ch->blk.size(); ++i)
+	{
+		j = 0;
+		buf[j++] = 'B';
+		memcpy(buf + j, ch->blk[i].crc, SHA3_LEN);
+		j += SHA3_LEN;
+		memcpy(buf + j, ch->blk[i].key, SHA3_LEN);
+		j += SHA3_LEN;
+		j += u64Packer(buf + j, ch->blk[i].n);
+		j += u64Packer(buf + j, ch->blk[i].time);
+		buf[j++] = ch->blk[i].n_trans & MAX_U8;
+		fwrite(buf, 1, j, fp);
 
-	fclose(fp);
+		for (k = 0; k < ch->blk[i].n_trans; ++k) if (!tranToZip(&(ch->blk[i].trans[k]), fp, buf)) goto cleanup;
+	}
+	ret = true;
+cleanup:
+	if (fp) fclose(fp);
+	return ret;
+}
+
+bool chainToZip(chain *ch, const char *block_file, const char *pack_file)
+{
+	uint8_t buf[BUF1K];
+	if (!ch || !block_file || !pack_file) return false;
+	if (!blockToZip(ch, block_file, buf) || !packToZip(ch, pack_file, buf)) return false;
 	return true;
 }

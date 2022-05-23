@@ -49,13 +49,18 @@ void chain_gen(chain *ch, uint64_t size)
 	bool val;
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
+	uint8_t src[ED448_LEN], dest[ED448_LEN], sig[ED448_SIG_LEN];
 	char dn[121];
 	char *kt[MAGNET_KT_COUNT];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
+	memset(src, 0, ED448_LEN);
+	memset(dest, 0, ED448_LEN);
+	memset(sig, 0, ED448_SIG_LEN);
 
 	for (i = 0; i < size; i++)
 	{
 		nPacks = rand() % 200 + 50;
+		//TODO: tranactions are broken, can't import properly
 		nTrans = 0;
 
 		for (j = 0; j < nPacks; j++)
@@ -77,15 +82,17 @@ void chain_gen(chain *ch, uint64_t size)
 				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
 			}
 
-			pack packs;
-			tran trans;
-			val = newPack(&packs, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
+			val = newPack(ch, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val)
 			{
 				for (int x = 0; x < MAGNET_KT_COUNT; ++x) if (kt[x]) free(kt[x]);
 				//printf("    newPack failed?");
 			}
-			else if (!enqueuePack(&packs)) printf("    enqueuePack failed?");
+		}
+
+		for (j = 0; j < nTrans; j++)
+		{
+			val = newTran(NULL, 1337, 42, 8008, src, dest, sig);
 		}
 
 		if (!newBlock(ch)) printf("    newBlock failed at %lu?", i);
@@ -96,12 +103,15 @@ void chain_test(int size)
 {
 	const char *zaaFile = "temp.zaa"; // chainToZip file
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
-	const char *txtFile = "temp.txt"; // chainToText output
-	chain ch, cin1, cin2;
+	const char *blkText = "temp.txt"; // chainToText output
+	const char *torFile = "temp.tor"; // trackers
+	const char *torText = "temp.tor.txt";
+	chain ch, cin1;
 	uint8_t pak_crc[SHA3_LEN];
 
 	start_timer();
 
+	pstat(importPack(&ch, "extern/scrap/pirate.txt"), "Pack import");
 	printf("\nGenerate\n");
 	start_timer();
 	chain_gen(&ch, size);
@@ -109,26 +119,27 @@ void chain_test(int size)
 
 	printf("\nWrite to file\n");
 	start_timer();
-	chainToText(&ch, txtFile);
+	chainToText(&ch, blkText, torText);
 	print_elapsed_time();
 
 	printf("\nWrite to zip 1\n");
 	start_timer();
-	chainToZip(&ch, zaaFile);
+	chainToZip(&ch, zaaFile, torFile);
 	print_elapsed_time();
 
 	pstat(auditChain(&ch, pak_crc), "Chain audit");
 	printf("[INFO] Pack checksum: ");
 	printBytes(stdout, pak_crc, SHA3_LEN, "\n");
 	checksum_test(zaaFile);
+	checksum_test(torFile);
 
 	start_timer();
-	pstat(chainFromZip(&cin1, zaaFile), "Chain import");
+	pstat(chainFromZip(&cin1, zaaFile, torFile), "Chain import");
 	print_elapsed_time();
 
 	printf("\nWrite to zip 2\n");
 	start_timer();
-	chainToZip(&cin1, za2File);
+	chainToZip(&cin1, za2File, torFile);
 	print_elapsed_time();
 
 	pstat(auditChain(&cin1, pak_crc), "Chain audit");
@@ -141,6 +152,7 @@ void chain_test(int size)
 	deleteChain(&ch);
 	deleteChain(&cin1);
 	checksum_test(za2File);
+	checksum_test(torFile);
 
 #if 0
 	printf("\n7zip benchmark\n");
@@ -224,7 +236,6 @@ int main()
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
 	log_test();
 	tracker_test();
-	pstat(importPack("extern/scrap/pirate.txt"), "Pack import");
 	chain_test(100);
 	wallet_test();
 

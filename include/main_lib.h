@@ -35,8 +35,8 @@ void printBlock(block *target);
  * This fn will allocate a pack struct, and all of its parameters
  * @return True if success
  */
-bool newPack(pack *px,
-             uint8_t xt[MAGNET_XT_LEN], //!< Exact topic (file hash)
+bool newPack(chain *ch,
+			 uint8_t xt[MAGNET_XT_LEN], //!< Exact topic (file hash)
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
              uint8_t *tr,               //!< Tracker url
@@ -63,18 +63,14 @@ bool insertBlock(chain *ch,
 				 uint8_t crc[SHA3_LEN] = NULL,
 				 uint8_t key[SHA3_LEN] = NULL);
 
-uint32_t procPack(chain *ch);
 bool trimBlock(chain *ch);
 
 void deletePack(pack *target);
 void deleteTran(tran *target);
 void deleteChain(chain *target);
 
-bool enqueuePack(pack *target);
 bool enqueueTran(tran *target);
-bool dequeuePack(pack *target);
 bool dequeueTran(tran *target);
-uint32_t packQueueLen(void);
 uint32_t tranQueueLen(void);
 
 /**

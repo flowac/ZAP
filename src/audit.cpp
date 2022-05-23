@@ -37,7 +37,7 @@ bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN])
 	}
 
 	if (crc && !update_sha3(crc, SHA3_LEN, md_ctx)) goto cleanup;
-	md_val = finish_sha3(&shaLen, md_ctx);
+	md_val = finish_sha3(&shaLen, &md_ctx);
 	if (modify)	return sha3_copy_free(bx->crc, md_val, shaLen);
 	return sha3_cmp_free(bx->crc, md_val);
 cleanup:
@@ -60,26 +60,31 @@ bool auditChain(chain *ch, uint8_t pak_crc[SHA3_LEN])
 		if (!checkBlock(&(ch->blk[i]), false, i ? ch->blk[i-1].crc : NULL)) goto cleanup;
 	}
 
-	for (i = 0; i < ch->pak.size() && (px = &(ch->pak[i])); ++i)
+	if (ch->pak.empty()) memset(pak_crc, 0, SHA3_LEN);
+	else
 	{
-		if (!(md_ctx = update_sha3(px->xt, MAGNET_XT_LEN, NULL))) goto cleanup;
-		if (!update_sha3(&(px->xl), 8, md_ctx)) goto cleanup;
-
-		if (0 == (len = strlen(px->dn))) goto cleanup;
-		if (!update_sha3(px->dn, len, md_ctx)) goto cleanup;
-		if (0 == (len = u8len(px->tr))) goto cleanup;
-		if (!update_sha3(px->tr, len, md_ctx)) goto cleanup;
-
-		for (j = 0; j < MAGNET_KT_COUNT; ++j)
+		for (i = 0; i < ch->pak.size(); ++i)
 		{
-			if (!px->kt[j] || 0 == (len = strlen(ch->pak[i].kt[j]))) break;
-			if (!update_sha3(px->kt[j], len, md_ctx)) goto cleanup;
-		}
-	}
-	md_val = finish_sha3(&shaLen, md_ctx);
-	if (!sha3_copy_free(pak_crc, md_val, shaLen)) goto cleanup;
+			px = &(ch->pak[i]);
+			if (!(md_ctx = update_sha3(px->xt, MAGNET_XT_LEN, md_ctx))) goto cleanup;
+			if (!update_sha3(&(px->xl), 8, md_ctx)) goto cleanup;
 
-	ret = true;
+			if (0 == (len = strlen(px->dn))) goto cleanup;
+			if (!update_sha3(px->dn, len, md_ctx)) goto cleanup;
+			if (0 == (len = u8len(px->tr))) goto cleanup;
+			if (!update_sha3(px->tr, len, md_ctx)) goto cleanup;
+
+			for (j = 0; j < MAGNET_KT_COUNT; ++j)
+			{
+				if (!px->kt[j] || 0 == (len = strlen(ch->pak[i].kt[j]))) break;
+				if (!update_sha3(px->kt[j], len, md_ctx)) goto cleanup;
+			}
+		}
+		if (!(md_val = finish_sha3(&shaLen, &md_ctx))) goto cleanup;
+		if (!sha3_copy_free(pak_crc, md_val, shaLen)) goto cleanup;
+		ret = true;
+	}
+
 cleanup:
 	if (md_ctx) EVP_MD_CTX_free(md_ctx);
 	return ret;

@@ -66,21 +66,28 @@ void printBlock(block *target)
 bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 			 uint8_t src[ED448_LEN], uint8_t dest[ED448_LEN], uint8_t sig[ED448_SIG_LEN])
 {
-	if (!tx || !id || !(deci || frac) || !src || !dest || !sig) return false;
+	tran ltx;
+	if (!id || !(deci || frac) || !src || !dest || !sig) return false;
 
 	// TODO: verify sig
-	tx->id = id;
-	tx->deci = deci;
-	tx->frac = frac;
-	memcpy(tx->src, src, ED448_LEN);
-	memcpy(tx->dest, dest, ED448_LEN);
-	memcpy(tx->sig, sig, ED448_SIG_LEN);
-	return true;
+	ltx.id = id;
+	ltx.deci = deci;
+	ltx.frac = frac;
+	memcpy(ltx.src, src, ED448_LEN);
+	memcpy(ltx.dest, dest, ED448_LEN);
+	memcpy(ltx.sig, sig, ED448_SIG_LEN);
+
+	if (tx)
+	{
+		*tx = ltx;
+		return true;
+	}
+	else return enqueueTran(&ltx);
 }
 
 bool newBlock(chain *ch)
 {
-	if (!ch || tran_queue.empty()) return false;
+	if (!ch || (false && tran_queue.empty())) return false;
 	uint8_t *md_val;
 	uint32_t i, shaLen;
 	block bx;
@@ -97,13 +104,12 @@ bool newBlock(chain *ch)
 		{
 			if (!dequeueTran(&(bx.trans[i])))
 			{
-				bx.n_trans = ++i;
+				bx.n_trans = i;
 				bx.trans = (tran *) realloc(bx.trans, sizeof(tran) * bx.n_trans);
 				break;
 			}
 		}
 	}
-
 	md_val = finish_sha3(&(bx.n), 8, &shaLen);
 	if (!sha3_copy_free(bx.key, md_val, shaLen)) goto cleanup;
 	if (!checkBlock(&bx, true, ch->blk.empty() ? NULL : ch->blk.back().crc)) goto cleanup;
@@ -157,15 +163,19 @@ void deleteTran(tran *target)
 
 void deleteBlock(block *target)
 {
+	if (!target) return;
 	for (uint32_t i = 0; i < target->n_trans; ++i) deleteTran(&(target->trans[i]));
 	if (target->trans) free(target->trans);
 }
 
 void deleteChain(chain *target)
 {
+	uint64_t i;
 	target->bal.clear();
-	for (uint64_t i = 0; i < target->blk.size(); ++i) deleteBlock(&(target->blk[i]));
+	for (i = 0; i < target->blk.size(); ++i) deleteBlock(&(target->blk[i]));
 	target->blk.clear();
+	for (i = 0; i < target->pak.size(); ++i) deletePack(&(target->pak[i]));
+	target->pak.clear();
 }
 
 bool enqueueTran(tran *target)

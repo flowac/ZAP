@@ -14,24 +14,24 @@ void *EVP_PKEY_Q_keygen(void *a, void *b, void *c){return NULL;}
 
 uint8_t *check_sha3_from_file(const char *src, uint32_t *retLen)
 {
-	if (!src || !retLen) return NULL;
 	EVP_MD_CTX *md_ctx = NULL;
 	FILE *fp = fopen(src, "rb");
 	uint32_t data_len, file_len = getFilesize(fp);
 	uint8_t *data = (uint8_t *) malloc(BUF4K);
 	uint8_t *ret = NULL;
 
-	if (!data || !fp) goto cleanup;
+	if (!retLen || !data || !fp) goto cleanup;
 	while (file_len > 0)
 	{
 		memset(data, 0, BUF4K);
 		data_len = fread(data, 1, BUF4K, fp);
 		file_len -= data_len;
-		md_ctx = update_sha3(data, data_len, md_ctx);
+		if (!(md_ctx = update_sha3(data, data_len, md_ctx))) goto cleanup;
 	}
-	ret = finish_sha3(retLen, md_ctx);
+	ret = finish_sha3(retLen, &md_ctx);
 
 cleanup:
+	if (md_ctx) EVP_MD_CTX_free(md_ctx);
 	if (data)   free(data);
 	if (fp)     fclose(fp);
 	return ret;
@@ -50,22 +50,24 @@ cleanup:
 	return local_ctx;
 }
 
-uint8_t *finish_sha3(uint32_t *retLen, EVP_MD_CTX *md_ctx)
+uint8_t *finish_sha3(uint32_t *retLen, EVP_MD_CTX **md_ctx)
 {
 	uint8_t *md_val = NULL;
 
-	if (!retLen || !md_ctx) goto cleanup;
+	if (!retLen || !md_ctx || !(*md_ctx)) goto cleanup;
 	if (!(md_val = (uint8_t *) calloc(EVP_MAX_MD_SIZE, 1))) goto cleanup;
-	EVP_DigestFinal_ex(md_ctx, md_val, retLen);
+	EVP_DigestFinal_ex(*md_ctx, md_val, retLen);
 
 cleanup:
-	if (md_ctx) EVP_MD_CTX_free(md_ctx);
+	if (md_ctx && *md_ctx) EVP_MD_CTX_free(*md_ctx);
+	*md_ctx = NULL;
 	return md_val;
 }
 
 uint8_t *finish_sha3(const void *data, uint32_t size, uint32_t *retLen, EVP_MD_CTX *md_ctx)
 {
-	return finish_sha3(retLen, update_sha3(data, size, md_ctx));
+	EVP_MD_CTX *local_ctx = update_sha3(data, size, md_ctx);
+	return finish_sha3(retLen, &local_ctx);
 }
 
 bool sha3_cmp(uint8_t *left, uint8_t *right)

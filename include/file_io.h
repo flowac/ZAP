@@ -25,23 +25,26 @@ void printBytes(FILE *fp,
  * @brief convert the entire chain into a file
  */
 bool chainToText(chain *ch,        //!< Chain to write
-				 const char *dest);//!< Destination file
+				 const char *block_file,
+				 const char *pack_file);
 
 /**
  * @brief compress the entire chain
  */
 bool chainToZip(chain *ch,        //!< Chain to be compressed
-				const char *dest);//!< Destination file
+				const char *block_file,
+				const char *pack_file);
 
 /**
  * @brief extract the entire chain
  */
 bool chainFromZip(chain *ch,      //!< Chain to be extracted 
-				  const char *dest);//!< Destination file
+				  const char *block_file,
+				  const char *pack_file);
 
 /**
  * @brief process new torrents and append to the queue
  */
-uint32_t importPack(const char *src);
+uint32_t importPack(chain *ch, const char *src);
 
 #endif //_ALIB_IO_H
