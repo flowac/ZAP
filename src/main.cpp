@@ -107,7 +107,6 @@ void chain_test(int size)
 	const char *torFile = "temp.tor"; // trackers
 	const char *torText = "temp.tor.txt";
 	chain ch, cin1;
-	uint8_t pak_crc[SHA3_LEN];
 
 	start_timer();
 
@@ -127,9 +126,7 @@ void chain_test(int size)
 	chainToZip(&ch, zaaFile, torFile);
 	print_elapsed_time();
 
-	pstat(auditChain(&ch, pak_crc), "Chain audit");
-	printf("[INFO] Pack checksum: ");
-	printBytes(stdout, pak_crc, SHA3_LEN, "\n");
+	pstat(auditChain(&ch), "Chain audit");
 	checksum_test(zaaFile);
 	checksum_test(torFile);
 
@@ -142,9 +139,7 @@ void chain_test(int size)
 	chainToZip(&cin1, za2File, torFile);
 	print_elapsed_time();
 
-	pstat(auditChain(&cin1, pak_crc), "Chain audit");
-	printf("[INFO] Pack checksum: ");
-	printBytes(stdout, pak_crc, SHA3_LEN, "\n");
+	pstat(auditChain(&cin1), "Chain audit");
 
 	uint64_t ccomp = compareChain(&ch, &cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))

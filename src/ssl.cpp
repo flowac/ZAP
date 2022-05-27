@@ -100,3 +100,58 @@ bool sha3_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
 	if (target) free(target);
 	return ret;
 }
+
+EVP_MD_CTX *update_shake(const void *data, uint32_t size, EVP_MD_CTX *md_ctx)
+{
+	EVP_MD_CTX *local_ctx = md_ctx;
+
+	if (!data || !size) goto cleanup;
+	if (!local_ctx && !(local_ctx = EVP_MD_CTX_new())) goto cleanup;
+	if (!md_ctx) EVP_DigestInit_ex(local_ctx, EVP_shake128(), NULL);
+	EVP_DigestUpdate(local_ctx, data, size);
+
+cleanup:
+	return local_ctx;
+}
+
+uint8_t *finish_shake(uint32_t *retLen, EVP_MD_CTX **md_ctx)
+{
+	return finish_sha3(retLen, md_ctx);
+}
+
+uint8_t *finish_shake(const void *data, uint32_t size, uint32_t *retLen, EVP_MD_CTX *md_ctx)
+{
+	EVP_MD_CTX *local_ctx = update_shake(data, size, md_ctx);
+	return finish_shake(retLen, &local_ctx);
+}
+
+bool shake_cmp(uint8_t *left, uint8_t *right)
+{
+	if (!left || !right) return false;
+	return 0 == memcmp(left, right, SHAKE_LEN);
+}
+
+bool shake_cmp_free(uint8_t *left, uint8_t *target)
+{
+	bool ret = shake_cmp(left, target);
+	if (target) free(target);
+	return ret;
+}
+
+bool shake_copy(uint8_t *dest, uint8_t *src, uint32_t shaLen)
+{
+	if (!dest || !src || shaLen != SHAKE_LEN)
+	{
+		printf("SHAKE%u for crc failed. Bytes expected=%d, actual=%u\n", 8 * SHAKE_LEN, SHAKE_LEN, shaLen);
+		return false;
+	}
+	memcpy(dest, src, SHAKE_LEN);
+	return true;
+}
+
+bool shake_copy_free(uint8_t *dest, uint8_t *target, uint32_t shaLen)
+{
+	bool ret = shake_copy(dest, target, shaLen);
+	if (target) free(target);
+	return ret;
+}

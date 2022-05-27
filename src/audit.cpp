@@ -36,23 +36,45 @@ bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN])
 		}
 	}
 
+	// Previous block hash for the merkle tree
 	if (crc && !update_sha3(crc, SHA3_LEN, md_ctx)) goto cleanup;
-	md_val = finish_sha3(&shaLen, &md_ctx);
-	if (modify)	return sha3_copy_free(bx->crc, md_val, shaLen);
+	if (!(md_val = finish_sha3(&shaLen, &md_ctx))) goto cleanup;
+	if (modify) return sha3_copy_free(bx->crc, md_val, shaLen);
 	return sha3_cmp_free(bx->crc, md_val);
 cleanup:
 	if (md_ctx) EVP_MD_CTX_free(md_ctx);
 	return false;
 }
 
-bool auditChain(chain *ch, uint8_t pak_crc[SHA3_LEN])
+bool checkPack(pack *px, bool modify)
+{
+	uint8_t *md_val = NULL;
+	uint32_t i, len, shaLen;
+	EVP_MD_CTX *md_ctx = NULL;
+
+	if (!px || !px->dn || !px->tr) goto cleanup;
+	if (!(md_ctx = update_shake(px->xt, MAGNET_XT_LEN, NULL))) goto cleanup;
+	if (!(update_shake(&(px->xl), 8, md_ctx))) goto cleanup;
+	if (!(update_shake(px->dn, strlen(px->dn), md_ctx))) goto cleanup;
+	if (!(update_shake(px->tr, u8len(px->tr), md_ctx))) goto cleanup;
+	for (i = 0; i < MAGNET_KT_COUNT; ++i)
+	{
+		if (!px->kt[i] || !(len = strlen(px->kt[i]))) break;
+		if (!(update_shake(px->kt[i], len, md_ctx))) goto cleanup;
+	}
+
+	if (!(md_val = finish_shake(&shaLen, &md_ctx))) goto cleanup;
+	if (modify) return shake_copy_free(px->crc, md_val, shaLen);
+	return shake_cmp_free(px->crc, md_val);
+cleanup:
+	if (md_ctx) EVP_MD_CTX_free(md_ctx);
+	return false;
+}
+
+bool auditChain(chain *ch)
 {
 	bool ret = false;
-	uint8_t *md_val = NULL;
-	uint32_t shaLen, j, len;
 	uint64_t i;
-	EVP_MD_CTX *md_ctx = NULL;
-	pack *px;
 
 	// TODO: add balance checks
 	for (i = 0; i < ch->blk.size(); ++i)
@@ -60,33 +82,16 @@ bool auditChain(chain *ch, uint8_t pak_crc[SHA3_LEN])
 		if (!checkBlock(&(ch->blk[i]), false, i ? ch->blk[i-1].crc : NULL)) goto cleanup;
 	}
 
-	if (ch->pak.empty()) memset(pak_crc, 0, SHA3_LEN);
-	else
+	if (!ch->pak.empty())
 	{
 		for (i = 0; i < ch->pak.size(); ++i)
 		{
-			px = &(ch->pak[i]);
-			if (!(md_ctx = update_sha3(px->xt, MAGNET_XT_LEN, md_ctx))) goto cleanup;
-			if (!update_sha3(&(px->xl), 8, md_ctx)) goto cleanup;
-
-			if (0 == (len = strlen(px->dn))) goto cleanup;
-			if (!update_sha3(px->dn, len, md_ctx)) goto cleanup;
-			if (0 == (len = u8len(px->tr))) goto cleanup;
-			if (!update_sha3(px->tr, len, md_ctx)) goto cleanup;
-
-			for (j = 0; j < MAGNET_KT_COUNT; ++j)
-			{
-				if (!px->kt[j] || 0 == (len = strlen(ch->pak[i].kt[j]))) break;
-				if (!update_sha3(px->kt[j], len, md_ctx)) goto cleanup;
-			}
+			if (!checkPack(&(ch->pak[i]), false)) goto cleanup;
 		}
-		if (!(md_val = finish_sha3(&shaLen, &md_ctx))) goto cleanup;
-		if (!sha3_copy_free(pak_crc, md_val, shaLen)) goto cleanup;
-		ret = true;
 	}
 
+	ret = true;
 cleanup:
-	if (md_ctx) EVP_MD_CTX_free(md_ctx);
 	return ret;
 }
 

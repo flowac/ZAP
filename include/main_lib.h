@@ -89,11 +89,12 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
  * @brief Generate a block checksum or validate an existing checksum
  */
 bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN]);
+bool checkPack(pack *px, bool modify);
 
 /**
  * @brief Validate content against internal checksums
  */
-bool auditChain(chain *ch, uint8_t pak_crc[SHA3_LEN]);
+bool auditChain(chain *ch);
 
 /**
  * @brief Compare two chains

@@ -114,9 +114,7 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 bool newPack(chain *ch, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
 {
 	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
-	pack px;
-	px.dn = NULL;
-	px.tr = NULL;
+	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .kt = {0}};
 	if (!ch || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
@@ -138,6 +136,7 @@ bool newPack(chain *ch, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 		px.kt[i] = kt[i];
 	}
 
+	if (!checkPack(&px, true)) goto cleanup;
 	ch->pak.push_back(px);
 	return true;
 cleanup:
