@@ -19,8 +19,8 @@ uint32_t u16Packer(uint8_t *buf, uint16_t data)
 
 uint32_t u16Unpack(uint8_t *buf, uint16_t *data)
 {
-	*data = buf[0];
-	*data |= buf[1] << 8;
+	*data = (uint16_t) buf[0];
+	*data |= (uint16_t) buf[1] << 8;
 	return 2U;
 }
 
@@ -66,23 +66,21 @@ void printBlock(block *target)
 bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 			 uint8_t src[ED448_LEN], uint8_t dest[ED448_LEN], uint8_t sig[ED448_SIG_LEN])
 {
-	tran ltx;
+	tran ltx, *ptx;
 	if (!id || !(deci || frac) || !src || !dest || !sig) return false;
 
 	// TODO: verify sig
-	ltx.id = id;
-	ltx.deci = deci;
-	ltx.frac = frac;
-	memcpy(ltx.src, src, ED448_LEN);
-	memcpy(ltx.dest, dest, ED448_LEN);
-	memcpy(ltx.sig, sig, ED448_SIG_LEN);
+	if (tx) ptx = tx;
+	else ptx = &ltx;
+	ptx->id = id;
+	ptx->deci = deci;
+	ptx->frac = frac;
+	memcpy(ptx->src,  src,  ED448_LEN);
+	memcpy(ptx->dest, dest, ED448_LEN);
+	memcpy(ptx->sig,  sig,  ED448_SIG_LEN);
 
-	if (tx)
-	{
-		*tx = ltx;
-		return true;
-	}
-	else return enqueueTran(&ltx);
+	if (tx) return true;
+	return enqueueTran(ptx);
 }
 
 bool newBlock(chain *ch)
@@ -92,7 +90,7 @@ bool newBlock(chain *ch)
 	uint32_t i, shaLen;
 	block bx;
 
-	bx.n = ch->blk.size() + 1;
+	bx.n = ch->blk.empty() ? 1 : ch->blk.back().n + 1;
 	bx.time = nsNow();
 	bx.n_trans = std::min(tran_queue.size(), MAX_U8);
 	bx.trans = NULL;

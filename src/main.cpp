@@ -53,15 +53,14 @@ void chain_gen(chain *ch, uint64_t size)
 	char dn[121];
 	char *kt[MAGNET_KT_COUNT];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
-	memset(src, 0, ED448_LEN);
-	memset(dest, 0, ED448_LEN);
-	memset(sig, 0, ED448_SIG_LEN);
+	memset(src,  0xC0, ED448_LEN);
+	memset(dest, 0xFF, ED448_LEN);
+	memset(sig,  0xEE, ED448_SIG_LEN);
 
 	for (i = 0; i < size; i++)
 	{
 		nPacks = rand() % 200 + 50;
-		//TODO: tranactions are broken, can't import properly
-		nTrans = 0;
+		nTrans = 20;
 
 		for (j = 0; j < nPacks; j++)
 		{

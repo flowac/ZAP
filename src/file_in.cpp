@@ -86,7 +86,7 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	if (ED448_SIG_LEN != fread(buf, 1, ED448_SIG_LEN, fp)) return false;
 	memcpy(sig, buf, ED448_SIG_LEN);
 
-	return newTran(tx, id, frac, deci, src, dest, sig);
+	return newTran(tx, id, deci, frac, src, dest, sig);
 }
 
 bool blockFromZip(chain *ch, const char *src, uint8_t *buf)

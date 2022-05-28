@@ -1,14 +1,12 @@
 CURRENT
-*** Pack merkle tree
-*** Transaction signiture
-*** Block compaction
-**  Fix package and transaction checksums
+*** Create a simple search engine
+**  Add mechanism to check tracker hashes and reject invalid magnets
 *   Delta generation logic?
+*   Transaction signiture
+*   Block compaction
 
 FUTURE GOALS
-*** Create a simple search engine
 **  Double check if 7zip is needed (currently it has good ratios)
-**  Add mechanism to check tracker hashes and reject invalid magnets
 *   Make log macros thread safe (strerror_s ?)
     Move comments over to doxygen
 
