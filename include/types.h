@@ -9,9 +9,11 @@
 #ifndef _ATYPE_H
 #define _ATYPE_H
 
-#include <queue>
+#include <cstdint>
+#include <map>
+#include <string>
 #include <vector>
-#include <stdint.h>
+
 
 #define LOG 0                 //!< not sure
 
@@ -55,6 +57,11 @@ typedef struct {
 	char    *kt[MAGNET_KT_COUNT]; //!< search keywords, upto MAGNET_KT_LEN each
 } pack;
 
+typedef struct category{
+	std::vector<uint32_t> idx;
+	std::map<std::string, struct category> child;
+} category;
+
 /**
  * @brief Holds information about a transaction
  */
@@ -81,15 +88,18 @@ typedef struct {
 
 typedef struct {
 	uint8_t address[SHA3_LEN]; //!< SHA3 checksum
-	//If balance is less than 1, the entry shall be trimmed
-	uint64_t deci; //Integer value
-	uint16_t frac; //Floating point value, limit of FRAC_MAX
+	uint64_t deci; //!< Integer value
+	uint16_t frac; //!< Floating point value, limit of FRAC_MAX
 } balance;
 
 typedef struct {
 	std::vector<balance> bal;
-	std::vector<block> blk;
-	std::vector<pack> pak;
+	std::vector<block>   blk;
 } chain;
+
+typedef struct {
+	std::map<std::string, category> cat; //!< categorized
+	std::vector<pack> pak; //!< raw unsorted data
+} torDB;
 
 #endif //_ATYPE_H

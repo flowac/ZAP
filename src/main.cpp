@@ -38,7 +38,7 @@ void checksum_test(const char *src)
 	if (sum) free(sum);
 }
 
-void chain_gen(chain *ch, uint64_t size)
+void chain_gen(chain *ch, torDB *td, uint64_t size)
 {
 	int32_t j, k;
 	int32_t nPacks;
@@ -81,7 +81,7 @@ void chain_gen(chain *ch, uint64_t size)
 				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
 			}
 
-			val = newPack(ch, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
+			val = newPack(td, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val)
 			{
 				for (int x = 0; x < MAGNET_KT_COUNT; ++x) if (kt[x]) free(kt[x]);
@@ -106,45 +106,54 @@ void chain_test(int size)
 	const char *torFile = "temp.tor"; // trackers
 	const char *torText = "temp.tor.txt";
 	chain ch, cin1;
+	torDB td, tin1;
 
 	start_timer();
 
-	pstat(importPack(&ch, "extern/scrap/pirate.txt"), "Pack import");
+	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
 	printf("\nGenerate\n");
 	start_timer();
-	chain_gen(&ch, size);
+	chain_gen(&ch, &td, size);
 	print_elapsed_time();
 
 	printf("\nWrite to file\n");
 	start_timer();
-	chainToText(&ch, blkText, torText);
+	chainToText(&ch, blkText);
+	torDBToText(&td, torText);
 	print_elapsed_time();
 
 	printf("\nWrite to zip 1\n");
 	start_timer();
-	chainToZip(&ch, zaaFile, torFile);
+	chainToZip(&ch, zaaFile);
+	torDBToZip(&td, torFile);
 	print_elapsed_time();
 
 	pstat(auditChain(&ch), "Chain audit");
+	pstat(auditTorDB(&td), "TorDB audit");
 	checksum_test(zaaFile);
 	checksum_test(torFile);
 
 	start_timer();
-	pstat(chainFromZip(&cin1, zaaFile, torFile), "Chain import");
+	pstat(chainFromZip(&cin1, zaaFile), "Chain import");
+	pstat(torDBFromZip(&tin1, torFile), "TorDB import");
 	print_elapsed_time();
 
 	printf("\nWrite to zip 2\n");
 	start_timer();
-	chainToZip(&cin1, za2File, torFile);
+	chainToZip(&cin1, za2File);
+	torDBToZip(&tin1, torFile);
 	print_elapsed_time();
 
 	pstat(auditChain(&cin1), "Chain audit");
+	pstat(auditTorDB(&tin1), "TorDB audit");
 
 	uint64_t ccomp = compareChain(&ch, &cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))
 		printf("[INFO] Difference at %lu\n", ccomp);
 	deleteChain(&ch);
 	deleteChain(&cin1);
+	deleteTorDB(&td);
+	deleteTorDB(&tin1);
 	checksum_test(za2File);
 	checksum_test(torFile);
 

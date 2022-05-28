@@ -4,17 +4,18 @@
 #include "main_lib.h"
 #include "file_io.h"
 
-bool packFromZip(chain *ch, const char *src, uint8_t *buf)
+bool torDBFromZip(torDB *td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "rb");
+	uint8_t buf[BUF1K];
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
 	uint32_t j, len, nkt;
 	uint64_t i, nPacks, xl;
-	if (!fp || !buf) goto cleanup;
+	if (!fp) goto cleanup;
 
 	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
 	if (buf[0] != 'C') goto cleanup;
@@ -55,7 +56,7 @@ bool packFromZip(chain *ch, const char *src, uint8_t *buf)
 			kt[j][len] = 0;
 		}
 
-		if ((ret = newPack(ch, xt, xl, dn, tr, kt))) for (j = 0; j < nkt; ++j) kt[j] = NULL;
+		if ((ret = newPack(td, xt, xl, dn, tr, kt))) for (j = 0; j < nkt; ++j) kt[j] = NULL;
 		else goto cleanup;
 	}
 cleanup:
@@ -89,15 +90,17 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	return newTran(tx, id, deci, frac, src, dest, sig);
 }
 
-bool blockFromZip(chain *ch, const char *src, uint8_t *buf)
+bool chainFromZip(chain *ch, const char *src)
 {
 	bool ret = false;
 	FILE *fp = fopen(src, "rb");;
 	tran *trans = NULL;
-	uint8_t crc[SHA3_LEN], key[SHA3_LEN];
+	uint8_t buf[BUF1K];
+	uint8_t crc[SHA3_LEN];
+	uint8_t key[SHA3_LEN];
 	uint32_t j, nRead;
 	uint64_t nBlocks, i, n, nTrans, time;
-	if (!ch || !fp || !buf) goto cleanup;
+	if (!ch || !fp) goto cleanup;
 
 	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
 	if (buf[0] != 'C') goto cleanup;
@@ -129,37 +132,24 @@ cleanup:
 	return ret;
 }
 
-bool chainFromZip(chain *ch, const char *block_file, const char *pack_file)
+bool torDBFromTxt(torDB *td, const char *src)
 {
-	uint8_t buf[BUF1K];
-	if (!ch || !block_file || !pack_file) return false;
-
-	if (!blockFromZip(ch, block_file, buf) || !packFromZip(ch, pack_file, buf))
-	{
-		deleteChain(ch);
-		return false;
-	}
-
-	return true;
-}
-
-uint32_t importPack(chain *ch, const char *src)
-{
+	bool ret = false;
 	char dn[MAGNET_DN_LEN];
 	char *fio = NULL, *idx, *tok;
 	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
 	FILE *fp = fopen(src, "r");
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
-	uint32_t ret = 0, blen, slen;
+	uint32_t blen, slen;
 	uint64_t xl;
 
-	if (!ch || !fp || !(blen = getFilesize(fp))) goto cleanup;
+	if (!td || !fp || !(blen = getFilesize(fp))) goto cleanup;
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
 	fio[blen] = 0;
 
-	for (idx = fio;; ret++)
+	for (idx = fio;;)
 	{
 		xl = 0;
 		dn[0] = 0;
@@ -227,10 +217,11 @@ uint32_t importPack(chain *ch, const char *src)
 		}
 		else break;
 
-		if (!newPack(ch, xt, xl, dn, tr, kt)) break;
+		if (!newPack(td, xt, xl, dn, tr, kt)) break;
 		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
 	}
 
+	ret = true;
 cleanup:
 	for (int i = 0; i < MAGNET_KT_COUNT; ++i) if (kt[i]) free(kt[i]);
 	if (fp) fclose(fp);

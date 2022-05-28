@@ -5,46 +5,18 @@
 #ifndef _ALIB_IO_H
 #define _ALIB_IO_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "types.h"
 
-/**
- * @brief Get remaining size of the file
- */
 uint32_t getFilesize(FILE *fp);
+void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix = NULL);
 
-/**
- * @brief Print the raw data to a stream as hex
- */
-void printBytes(FILE *fp,
-				uint8_t *data,
-				uint32_t len,
-				const char *suffix = NULL);
-
-/**
- * @brief convert the entire chain into a file
- */
-bool chainToText(chain *ch,        //!< Chain to write
-				 const char *block_file,
-				 const char *pack_file);
-
-/**
- * @brief compress the entire chain
- */
-bool chainToZip(chain *ch,        //!< Chain to be compressed
-				const char *block_file,
-				const char *pack_file);
-
-/**
- * @brief extract the entire chain
- */
-bool chainFromZip(chain *ch,      //!< Chain to be extracted 
-				  const char *block_file,
-				  const char *pack_file);
-
-/**
- * @brief process new torrents and append to the queue
- */
-uint32_t importPack(chain *ch, const char *src);
+void chainToText (chain *ch, const char *dest);
+bool chainToZip  (chain *ch, const char *dest);
+bool chainFromZip(chain *ch, const char *src);
+void torDBToText (torDB *td, const char *dest);
+bool torDBToZip  (torDB *td, const char *dest);
+bool torDBFromZip(torDB *td, const char *src);
+bool torDBFromTxt(torDB *td, const char *src);
 
 #endif //_ALIB_IO_H

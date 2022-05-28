@@ -1,12 +1,9 @@
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "main_lib.h"
-#include "log.h"
-#include "ssl_fn.h"
-#include "time_fn.h"
 
 typedef enum
 {
@@ -111,11 +108,33 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 	return retLen;
 }
 
-bool newPack(chain *ch, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
+bool processPack(torDB *td, pack *px)
+{
+	uint64_t left, mid, right;
+	uint32_t i;
+	if (!td || !px) return false;
+
+	return true;
+	for (i = 0; i < MAGNET_KT_COUNT; ++i)
+	{
+	}
+
+	do
+	{
+		left = 0;
+		right = td->pak.size();
+		mid = (left + right) >> 1;
+	}
+	while (left != right);
+
+	return true;
+}
+
+bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
 {
 	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
 	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .kt = {0}};
-	if (!ch || !xt || !dn || !tr) goto cleanup;
+	if (!td || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
 	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
@@ -137,8 +156,8 @@ bool newPack(chain *ch, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	}
 
 	if (!checkPack(&px, true)) goto cleanup;
-	ch->pak.push_back(px);
-	return true;
+	td->pak.push_back(px);
+	return processPack(td, &px);
 cleanup:
 	printf("\nfailed new pack kt[i] %u[%u] %s< ndn %u ntr %u %p\n", nkt, i, dn, ndn, ntr, tr);
 	if (px.dn) free(px.dn);
@@ -146,10 +165,24 @@ cleanup:
 	return false;
 }
 
-void deletePack(pack *target)
+std::map<uint32_t, typename std::list<std::string>> searchTorDB(torDB *td, char *kt[MAGNET_KT_COUNT], const char *str)
+{
+	std::map<uint32_t, typename std::list<std::string>> result;
+
+	return result;
+}
+
+inline void deletePack(pack *target)
 {
 	if (!target) return;
 	if (target->dn) free(target->dn);
 	if (target->tr) free(target->tr);
 	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
+}
+
+void deleteTorDB(torDB *target)
+{
+	target->cat.clear();
+	for (uint64_t i = 0; i < target->pak.size(); ++i) deletePack(&(target->pak[i]));
+	target->pak.clear();
 }

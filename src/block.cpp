@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <queue>
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,6 +59,26 @@ uint32_t u8cmp(uint8_t *ptr, char *str)
 	return len;
 }
 
+bool enqueueTran(tran *target)
+{
+	if (!target) return false;
+	tran_queue.push(*target);
+	return true;
+}
+
+bool dequeueTran(tran *target)
+{
+	if (tran_queue.empty()) return false;
+	*target = tran_queue.front();
+	tran_queue.pop();
+	return true;
+}
+
+uint32_t tranQueueLen(void)
+{
+	return tran_queue.size();
+}
+
 void printBlock(block *target)
 {
 	//printTime((time_t) target->time);
@@ -81,6 +103,14 @@ bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 
 	if (tx) return true;
 	return enqueueTran(ptx);
+}
+
+bool trimBlock(chain *ch)
+{
+	if (ch->blk.size() < B_MAX) return true;
+
+	printf("Max number of blocks %d reached. Currently %lu.\n", B_MAX, ch->blk.size());
+	return true;
 }
 
 bool newBlock(chain *ch)
@@ -147,19 +177,11 @@ bool insertBlock(chain *ch,
 	return trimBlock(ch);
 }
 
-bool trimBlock(chain *ch)
-{
-	if (ch->blk.size() < B_MAX) return true;
-
-	printf("Max number of blocks %d reached. Currently %lu.\n", B_MAX, ch->blk.size());
-	return true;
-}
-
-void deleteTran(tran *target)
+inline void deleteTran(tran *target)
 {
 }
 
-void deleteBlock(block *target)
+inline void deleteBlock(block *target)
 {
 	if (!target) return;
 	for (uint32_t i = 0; i < target->n_trans; ++i) deleteTran(&(target->trans[i]));
@@ -172,26 +194,4 @@ void deleteChain(chain *target)
 	target->bal.clear();
 	for (i = 0; i < target->blk.size(); ++i) deleteBlock(&(target->blk[i]));
 	target->blk.clear();
-	for (i = 0; i < target->pak.size(); ++i) deletePack(&(target->pak[i]));
-	target->pak.clear();
-}
-
-bool enqueueTran(tran *target)
-{
-	if (!target) return false;
-	tran_queue.push(*target);
-	return true;
-}
-
-bool dequeueTran(tran *target)
-{
-	if (tran_queue.empty()) return false;
-	*target = tran_queue.front();
-	tran_queue.pop();
-	return true;
-}
-
-uint32_t tranQueueLen(void)
-{
-	return tran_queue.size();
 }

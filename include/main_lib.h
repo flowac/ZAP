@@ -7,6 +7,8 @@
 #define _ALIB_H
 
 #include <cstddef>
+#include <list>
+
 #include "types.h"
 
 /**
@@ -35,7 +37,7 @@ void printBlock(block *target);
  * This fn will allocate a pack struct, and all of its parameters
  * @return True if success
  */
-bool newPack(chain *ch,
+bool newPack(torDB *td,
 			 uint8_t xt[MAGNET_XT_LEN], //!< Exact topic (file hash)
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
@@ -63,15 +65,10 @@ bool insertBlock(chain *ch,
 				 uint8_t crc[SHA3_LEN] = NULL,
 				 uint8_t key[SHA3_LEN] = NULL);
 
-bool trimBlock(chain *ch);
+std::map<uint32_t, typename std::list<std::string>> searchTorDB(torDB *td, char *kt[MAGNET_KT_COUNT], const char *str);
 
-void deletePack(pack *target);
-void deleteTran(tran *target);
 void deleteChain(chain *target);
-
-bool enqueueTran(tran *target);
-bool dequeueTran(tran *target);
-uint32_t tranQueueLen(void);
+void deleteTorDB(torDB *target);
 
 /**
  * @brief: Compress tracker links in place
@@ -86,14 +83,15 @@ uint32_t compressTracker(uint8_t *tr);
 uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
 
 /**
- * @brief Generate a block checksum or validate an existing checksum
+ * @brief Generate or validate a checksum
  */
-bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN]);
 bool checkPack(pack *px, bool modify);
+bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN]);
 
 /**
  * @brief Validate content against internal checksums
  */
+bool auditTorDB(torDB *td);
 bool auditChain(chain *ch);
 
 /**

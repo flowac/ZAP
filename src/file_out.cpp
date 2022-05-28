@@ -21,31 +21,31 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
-void packToText(chain *ch, const char *dest)
+void torDBToText(torDB *td, const char *dest)
 {
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
 	FILE *fp = fopen(dest, "w");
 	uint64_t i;
-	if (!ch || !fp) goto cleanup;
+	if (!td || !fp) goto cleanup;
 
-	for (i = 0; i < ch->pak.size(); ++i)
+	for (i = 0; i < td->pak.size(); ++i)
 	{
-		decompOK = decompressTracker(ch->pak[i].tr, decompTR) > 0;
+		decompOK = decompressTracker(td->pak[i].tr, decompTR) > 0;
 		if (!decompOK) printf("[WARN] failed to decompressTracker\n");
 
 		fprintf(fp, "{P\n\t");
-		printBytes(fp, ch->pak[i].xt, 20);
+		printBytes(fp, td->pak[i].xt, 20);
 		fprintf(fp, ","
 				"\n\tlen : %lu,"
 				"\n\tdn  : %s,"
 				"\n\ttr  : %s,"
 				"\n\tkt  : ",
-				ch->pak[i].xl, ch->pak[i].dn, decompOK ? decompTR : (char *) (ch->pak[i].tr));
+				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr));
 		for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
 		{
-			if (!ch->pak[i].kt[i] || !ch->pak[i].kt[i][0]) break;
-			fprintf(fp, "%s ", ch->pak[i].kt[i]);
+			if (!td->pak[i].kt[i] || !td->pak[i].kt[i][0]) break;
+			fprintf(fp, "%s ", td->pak[i].kt[i]);
 		}
 		fprintf(fp, "\n}\n");
 	}
@@ -66,7 +66,7 @@ void tranToText(tran *tx, FILE *fp)
 	printBytes(fp, tx->sig, ED448_SIG_LEN, ",\n\t\t},\n");
 }
 
-void blockToText(chain *ch, const char *dest)
+void chainToText(chain *ch, const char *dest)
 {
 	FILE *fp = fopen(dest, "w");
 	uint32_t j;
@@ -93,52 +93,45 @@ cleanup:
 	if (fp) fclose(fp);
 }
 
-bool chainToText(chain *ch, const char *block_file, const char *pack_file)
-{
-	if (!ch || !block_file || !pack_file) return false;
-	blockToText(ch, block_file);
-	packToText(ch, pack_file);
-	return true;
-}
-
-bool packToZip(chain *ch, const char *dest, uint8_t *buf)
+bool torDBToZip(torDB *td, const char *dest)
 {
 	bool ret = false;
 	FILE *fp = fopen(dest, "wb");
+	uint8_t buf[BUF1K];
 	uint32_t j, k, slen, ktPos;
 	uint64_t i;
-	if (!ch || !fp || !buf) goto cleanup;
+	if (!td || !fp) goto cleanup;
 
 	buf[0] = 'C';
-	u64Packer(buf + 1, ch->pak.size());
+	u64Packer(buf + 1, td->pak.size());
 	fwrite(buf, 1, 9, fp);
 
-	for (i = 0; i < ch->pak.size(); ++i)
+	for (i = 0; i < td->pak.size(); ++i)
 	{
 		j = 0;
 		buf[j++] = 'P';
-		memcpy(buf + j, ch->pak[i].xt, MAGNET_XT_LEN);
+		memcpy(buf + j, td->pak[i].xt, MAGNET_XT_LEN);
 		j += MAGNET_XT_LEN;
-		j += u64Packer(buf + j, ch->pak[i].xl);
+		j += u64Packer(buf + j, td->pak[i].xl);
 
-		slen = strlen(ch->pak[i].dn);
+		slen = strlen(td->pak[i].dn);
 		buf[j++] = (uint8_t) slen;
-		memcpy(buf + j, ch->pak[i].dn, slen);
+		memcpy(buf + j, td->pak[i].dn, slen);
 		j += slen;
 
-		slen = u8len(ch->pak[i].tr);
+		slen = u8len(td->pak[i].tr);
 		buf[j++] = (uint8_t) (slen >> 8);
 		buf[j++] = (uint8_t) (slen & MAX_U8);
-		memcpy(buf + j, ch->pak[i].tr, slen);
+		memcpy(buf + j, td->pak[i].tr, slen);
 		j += slen;
 
 		ktPos = j++;
 		for (k = 0; k < MAGNET_KT_COUNT; ++k)
 		{
-			if (!ch->pak[i].kt[k] || !ch->pak[i].kt[k][0]) break;
-			slen = strlen(ch->pak[i].kt[k]);
+			if (!td->pak[i].kt[k] || !td->pak[i].kt[k][0]) break;
+			slen = strlen(td->pak[i].kt[k]);
 			buf[j++] = (uint8_t) slen;
-			memcpy(buf + j, ch->pak[i].kt[k], slen);
+			memcpy(buf + j, td->pak[i].kt[k], slen);
 			j += slen;
 		}
 		buf[ktPos] = k;
@@ -166,13 +159,14 @@ bool tranToZip(tran *tx, FILE *fp, uint8_t *buf)
 	return true;
 }
 
-bool blockToZip(chain *ch, const char *dest, uint8_t *buf)
+bool chainToZip(chain *ch, const char *dest)
 {
 	bool ret = false;
 	FILE *fp = fopen(dest, "wb");
+	uint8_t buf[BUF1K];
 	uint32_t j, k;
 	uint64_t i;
-	if (!ch || !fp || !buf) goto cleanup;
+	if (!ch || !fp) goto cleanup;
 
 	buf[0] = 'C';
 	u64Packer(buf + 1, ch->blk.size());
@@ -197,12 +191,4 @@ bool blockToZip(chain *ch, const char *dest, uint8_t *buf)
 cleanup:
 	if (fp) fclose(fp);
 	return ret;
-}
-
-bool chainToZip(chain *ch, const char *block_file, const char *pack_file)
-{
-	uint8_t buf[BUF1K];
-	if (!ch || !block_file || !pack_file) return false;
-	if (!blockToZip(ch, block_file, buf) || !packToZip(ch, pack_file, buf)) return false;
-	return true;
 }

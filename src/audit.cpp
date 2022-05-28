@@ -7,6 +7,38 @@
 #include "ssl_fn.h"
 #include "time_fn.h"
 
+bool checkPack(pack *px, bool modify)
+{
+	uint8_t *md_val = NULL;
+	uint32_t i, len, shaLen;
+	EVP_MD_CTX *md_ctx = NULL;
+
+	if (!px || !px->dn || !px->tr) goto cleanup;
+	if (!(md_ctx = update_shake(px->xt, MAGNET_XT_LEN, NULL))) goto cleanup;
+	if (!(update_shake(&(px->xl), 8, md_ctx))) goto cleanup;
+	if (!(update_shake(px->dn, strlen(px->dn), md_ctx))) goto cleanup;
+	if (!(update_shake(px->tr,  u8len(px->tr), md_ctx))) goto cleanup;
+	for (i = 0; i < MAGNET_KT_COUNT; ++i)
+	{
+		if (!px->kt[i] || !(len = strlen(px->kt[i]))) break;
+		if (!(update_shake(px->kt[i], len, md_ctx))) goto cleanup;
+	}
+
+	if (!(md_val = finish_shake(&shaLen, &md_ctx))) goto cleanup;
+	if (modify) return shake_copy_free(px->crc, md_val, shaLen);
+	return shake_cmp_free(px->crc, md_val);
+cleanup:
+	if (md_ctx) EVP_MD_CTX_free(md_ctx);
+	return false;
+}
+
+bool auditTorDB(torDB *td)
+{
+	for (uint64_t i = 0; i < td->pak.size(); ++i)
+		if (!checkPack(&(td->pak[i]), false)) return false;
+	return true;
+}
+
 bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN])
 {
 	uint8_t bitPack[18], *md_val = NULL;
@@ -30,9 +62,9 @@ bool checkBlock(block *bx, bool modify, uint8_t crc[SHA3_LEN])
 			u64Packer(bitPack + 8, bx->trans[i].deci);
 			u16Packer(bitPack + 16, bx->trans[i].frac);
 			if (!update_sha3(bitPack, 18, md_ctx)) goto cleanup;
-			if (!update_sha3(bx->trans[i].src, ED448_LEN, md_ctx)) goto cleanup;
+			if (!update_sha3(bx->trans[i].src,  ED448_LEN, md_ctx)) goto cleanup;
 			if (!update_sha3(bx->trans[i].dest, ED448_LEN, md_ctx)) goto cleanup;
-			if (!update_sha3(bx->trans[i].sig, ED448_SIG_LEN, md_ctx)) goto cleanup;
+			if (!update_sha3(bx->trans[i].sig,  ED448_SIG_LEN, md_ctx)) goto cleanup;
 		}
 	}
 
@@ -46,53 +78,12 @@ cleanup:
 	return false;
 }
 
-bool checkPack(pack *px, bool modify)
-{
-	uint8_t *md_val = NULL;
-	uint32_t i, len, shaLen;
-	EVP_MD_CTX *md_ctx = NULL;
-
-	if (!px || !px->dn || !px->tr) goto cleanup;
-	if (!(md_ctx = update_shake(px->xt, MAGNET_XT_LEN, NULL))) goto cleanup;
-	if (!(update_shake(&(px->xl), 8, md_ctx))) goto cleanup;
-	if (!(update_shake(px->dn, strlen(px->dn), md_ctx))) goto cleanup;
-	if (!(update_shake(px->tr, u8len(px->tr), md_ctx))) goto cleanup;
-	for (i = 0; i < MAGNET_KT_COUNT; ++i)
-	{
-		if (!px->kt[i] || !(len = strlen(px->kt[i]))) break;
-		if (!(update_shake(px->kt[i], len, md_ctx))) goto cleanup;
-	}
-
-	if (!(md_val = finish_shake(&shaLen, &md_ctx))) goto cleanup;
-	if (modify) return shake_copy_free(px->crc, md_val, shaLen);
-	return shake_cmp_free(px->crc, md_val);
-cleanup:
-	if (md_ctx) EVP_MD_CTX_free(md_ctx);
-	return false;
-}
-
 bool auditChain(chain *ch)
 {
-	bool ret = false;
-	uint64_t i;
-
 	// TODO: add balance checks
-	for (i = 0; i < ch->blk.size(); ++i)
-	{
-		if (!checkBlock(&(ch->blk[i]), false, i ? ch->blk[i-1].crc : NULL)) goto cleanup;
-	}
-
-	if (!ch->pak.empty())
-	{
-		for (i = 0; i < ch->pak.size(); ++i)
-		{
-			if (!checkPack(&(ch->pak[i]), false)) goto cleanup;
-		}
-	}
-
-	ret = true;
-cleanup:
-	return ret;
+	for (uint64_t i = 0; i < ch->blk.size(); ++i)
+		if (!checkBlock(&(ch->blk[i]), false, i ? ch->blk[i-1].crc : NULL)) return false;
+	return true;
 }
 
 uint64_t compareChain(chain *left, chain *right)
