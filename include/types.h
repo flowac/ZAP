@@ -27,6 +27,7 @@
 #define MAX_U34  0x3FFFFFFFFUL
 #define MAX_U64  0xFFFFFFFFFFFFFFFFULL
 
+#define ONE_MILLION 1000000
 #define ONE_BILLION 1000000000
 
 #define B_MAX    5000         //!< max number of blocks
@@ -39,8 +40,10 @@
 #define ED448_SIG_LEN   (ED448_LEN * 2)
 #define SHA3_LEN        48    //!< number of bytes for a SHA3-384
 #define SHAKE_LEN       16    //!< number of bytes for a SHAKE-128
+
+#define MAGNET_MAX_LEN  ONE_MILLION
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
-#define MAGNET_KT_COUNT 5     //!< max number of search keywords
+#define MAGNET_KT_COUNT 2     //!< max number of search keywords NOT CONFIGURABLE
 #define MAGNET_KT_LEN   16    //!< longest possible search keyword
 #define MAGNET_DN_LEN   128   //!< must not exceed MAX_U8
 #define MAGNET_TR_LEN   1024  //!< must not exceed MAX_U16
@@ -54,12 +57,12 @@ typedef struct {
 	uint64_t xl; //!< exact length, size of file in bytes
 	char    *dn; //!< display name, filename
 	uint8_t *tr; //!< address tracker, tracker url
-	char    *kt[MAGNET_KT_COUNT]; //!< search keywords, upto MAGNET_KT_LEN each
+	std::string kt[MAGNET_KT_COUNT]; //!< search keywords, upto MAGNET_KT_LEN each
 } pack;
 
 typedef struct category{
-	std::vector<uint32_t> idx;
-	std::map<std::string, struct category> child;
+	std::vector<uint32_t> idx; //!< indexes
+	std::map<std::string, std::vector<uint32_t>> sub; //!< sub-category
 } category;
 
 /**

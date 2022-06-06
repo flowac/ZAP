@@ -30,6 +30,7 @@ uint32_t u8cmp(uint8_t *ptr, char *str);
  *	number of payloads
  */
 void printBlock(block *target);
+void printTorCat(torDB *target);
 
 /**
  * @brief Create a new pack (magnet link info)
@@ -42,7 +43,7 @@ bool newPack(torDB *td,
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
              uint8_t *tr,               //!< Tracker url
-			 char *kt[MAGNET_KT_COUNT]);//!< Search keywords
+			 std::string kt[MAGNET_KT_COUNT]);//!< Search keywords
 
 bool newTran(tran *tx,
 			 uint64_t id,

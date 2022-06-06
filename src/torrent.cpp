@@ -108,32 +108,57 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 	return retLen;
 }
 
+void printTorCat(torDB *target)
+{
+	std::map<std::string, category>::iterator itc;
+	std::map<std::string, std::vector<uint32_t>>::iterator itu;
+
+	printf("Categories %lu\n", target->cat.size());
+	for (itc = target->cat.begin(); itc != target->cat.end(); ++itc)
+	{
+		printf("%s: ", itc->first.c_str());
+		for (uint32_t u32 : itc->second.idx) printf("%u ", u32);
+		printf("\nSub categories %lu ", itc->second.sub.size());
+		for (itu = itc->second.sub.begin(); itu != itc->second.sub.end(); ++itu)
+		{
+			printf("%s, ", itu->first.c_str());
+			for (uint32_t u32 : itu->second) printf("%u ", u32);
+		}
+		printf("\n");
+	}
+}
+
 bool processPack(torDB *td, pack *px)
 {
-	uint64_t left, mid, right;
-	uint32_t i;
+	category tCat;
+	uint32_t idx;
+	std::map<std::string, category>::iterator itc;
+	std::map<std::string, std::vector<uint32_t>>::iterator itu;
+	std::string key1, key2;
 	if (!td || !px) return false;
 
-	return true;
-	for (i = 0; i < MAGNET_KT_COUNT; ++i)
-	{
-	}
+	idx = td->pak.size() - 1;
+	if (px->kt[0].empty()) return true;
+	key1 = px->kt[0];
+	if (px->kt[1].empty()) key2.clear();
+	else key2 = px->kt[1];
 
-	do
+	if ((itc = td->cat.find(key1)) == td->cat.end()) return false;
+	else if (key2.empty()) td->cat[key1].idx.push_back(idx);
+	else
 	{
-		left = 0;
-		right = td->pak.size();
-		mid = (left + right) >> 1;
+		tCat = td->cat[key1];
+		if ((itu = tCat.sub.find(key2)) == tCat.sub.end()) return false;
+		else td->cat[key1].sub[key2].push_back(idx);
 	}
-	while (left != right);
 
 	return true;
 }
 
-bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, char *kt[MAGNET_KT_COUNT])
+bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, std::string kt[MAGNET_KT_COUNT])
 {
-	uint32_t ndn = 0, ntr = 0, nkt = 0, i = 0;
-	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .kt = {0}};
+	uint32_t ndn = 0, ntr = 0, i = 0;
+	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL};
 	if (!td || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
@@ -147,19 +172,21 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (!(px.tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px.tr, tr, ntr);
 
-	for (i = 0; i < MAGNET_KT_COUNT; ++i) px.kt[i] = NULL;
+	for (i = 0; i < MAGNET_KT_COUNT; ++i) px.kt[i].clear();
 	for (i = 0; i < MAGNET_KT_COUNT; ++i)
 	{
-		if (!kt[i] || 0 == (nkt = strlen(kt[i]))) break;
-		if (nkt > MAGNET_KT_LEN) goto cleanup;
+		if (0 == kt[i].size()) break;
+		if (kt[i].size() > MAGNET_KT_LEN) goto cleanup;
 		px.kt[i] = kt[i];
 	}
 
 	if (!checkPack(&px, true)) goto cleanup;
 	td->pak.push_back(px);
-	return processPack(td, &px);
+	if (!processPack(td, &px)) printf("proc pack failed\n");
+
+	return true;
 cleanup:
-	printf("\nfailed new pack kt[i] %u[%u] %s< ndn %u ntr %u %p\n", nkt, i, dn, ndn, ntr, tr);
+	printf("\nfailed new pack kt[i] [%u] %s< ndn %u ntr %u %p\n", i, dn, ndn, ntr, tr);
 	if (px.dn) free(px.dn);
 	if (px.tr) free(px.tr);
 	return false;
@@ -177,7 +204,6 @@ inline void deletePack(pack *target)
 	if (!target) return;
 	if (target->dn) free(target->dn);
 	if (target->tr) free(target->tr);
-	for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i) if (target->kt[i]) free(target->kt[i]);
 }
 
 void deleteTorDB(torDB *target)

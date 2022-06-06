@@ -44,8 +44,8 @@ void torDBToText(torDB *td, const char *dest)
 				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr));
 		for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
 		{
-			if (!td->pak[i].kt[i] || !td->pak[i].kt[i][0]) break;
-			fprintf(fp, "%s ", td->pak[i].kt[i]);
+			if (td->pak[i].kt[i].empty()) break;
+			fprintf(fp, "%s ", td->pak[i].kt[i].c_str());
 		}
 		fprintf(fp, "\n}\n");
 	}
@@ -128,10 +128,10 @@ bool torDBToZip(torDB *td, const char *dest)
 		ktPos = j++;
 		for (k = 0; k < MAGNET_KT_COUNT; ++k)
 		{
-			if (!td->pak[i].kt[k] || !td->pak[i].kt[k][0]) break;
-			slen = strlen(td->pak[i].kt[k]);
+			if (td->pak[i].kt[k].empty()) break;
+			slen = td->pak[i].kt[k].size();
 			buf[j++] = (uint8_t) slen;
-			memcpy(buf + j, td->pak[i].kt[k], slen);
+			memcpy(buf + j, td->pak[i].kt[k].c_str(), slen);
 			j += slen;
 		}
 		buf[ktPos] = k;

@@ -8,7 +8,7 @@ bool torDBFromZip(torDB *td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
-	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
+	std::string kt[MAGNET_KT_COUNT];
 	FILE *fp = fopen(src, "rb");
 	uint8_t buf[BUF1K];
 	uint8_t xt[MAGNET_XT_LEN];
@@ -51,17 +51,14 @@ bool torDBFromZip(torDB *td, const char *src)
 			if (1 != fread(buf, 1, 1, fp)) goto cleanup;
 			len = buf[0];
 			if (!len || len > MAGNET_KT_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
-			if (!(kt[j] = (char *) calloc(len + 1, 1))) goto cleanup;
-			memcpy(kt[j], buf, len);
-			kt[j][len] = 0;
+			kt[j].assign((char *) buf, len);
 		}
+		for (j = nkt; j < MAGNET_KT_COUNT; ++j) kt[j].clear();
 
-		if ((ret = newPack(td, xt, xl, dn, tr, kt))) for (j = 0; j < nkt; ++j) kt[j] = NULL;
-		else goto cleanup;
+		if (!(ret = newPack(td, xt, xl, dn, tr, kt))) goto cleanup;
 	}
 cleanup:
 	if (fp) fclose(fp);
-	for (j = 0; j < MAGNET_KT_COUNT; ++j) if (kt[j]) free(kt[j]);
 	return ret;
 }
 
@@ -137,7 +134,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 	bool ret = false;
 	char dn[MAGNET_DN_LEN];
 	char *fio = NULL, *idx, *tok;
-	char *kt[MAGNET_KT_COUNT] = {NULL, NULL, NULL, NULL, NULL};
+	std::string kt[MAGNET_KT_COUNT];
 	FILE *fp = fopen(src, "r");
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
@@ -154,6 +151,8 @@ bool torDBFromTxt(torDB *td, const char *src)
 		xl = 0;
 		dn[0] = 0;
 		tr[0] = 0;
+		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i].clear();
+
 		if ((tok = strstr(idx, "size:")))
 		{
 			char buf64[BUF64];
@@ -170,8 +169,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
 			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
-			kt[0] = (char *) calloc(slen + 1, 1);
-			memcpy(kt[0], tok, slen);
+			kt[0].assign(tok, slen);
 		}
 
 		if ((tok = strstr(idx, "minor:")))
@@ -179,8 +177,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
 			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
-			kt[1] = (char *) calloc(slen + 1, 1);
-			memcpy(kt[1], tok, slen);
+			kt[1].assign(tok, slen);
 		}
 
 		if ((tok = strstr(idx, "name:")))
@@ -202,7 +199,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 			if ((slen = idx - tok) != MAGNET_XT_LEN * 2 || tok >= idx) break;
 
 			char buf3[3] = {0, 0, 0};
-			for (uint32_t i = 0; i < MAGNET_XT_LEN; ++i)
+			for (int i = 0; i < MAGNET_XT_LEN; ++i)
 			{
 				memcpy(buf3, tok + (i << 1), 2);
 				xt[i] = (uint8_t) strtol(buf3, NULL, 16);
@@ -218,12 +215,10 @@ bool torDBFromTxt(torDB *td, const char *src)
 		else break;
 
 		if (!newPack(td, xt, xl, dn, tr, kt)) break;
-		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i] = NULL;
 	}
 
 	ret = true;
 cleanup:
-	for (int i = 0; i < MAGNET_KT_COUNT; ++i) if (kt[i]) free(kt[i]);
 	if (fp) fclose(fp);
 	if (fio) free(fio);
 	return ret;

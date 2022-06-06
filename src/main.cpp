@@ -51,7 +51,7 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 	uint8_t tr[MAGNET_TR_LEN];
 	uint8_t src[ED448_LEN], dest[ED448_LEN], sig[ED448_SIG_LEN];
 	char dn[121];
-	char *kt[MAGNET_KT_COUNT];
+	std::string kt[MAGNET_KT_COUNT];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
 	memset(src,  0xC0, ED448_LEN);
 	memset(dest, 0xFF, ED448_LEN);
@@ -72,21 +72,12 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 				if (k < MAGNET_XT_LEN) xt[k] = rand() % MAX_U8;
 				dn[k] = charset[rand() % 62];
 			}
-			uint8_t nkt = rand() % MAGNET_KT_COUNT;
-			for (k = 0; k < MAGNET_KT_COUNT; kt[k++] = NULL);
-			for (k = 0; k < nkt; ++k)
-			{
-				uint8_t len = 1 + rand() % (MAGNET_KT_LEN - 1);
-				kt[k] = (char *) calloc(len + 1, 1);
-				for (uint8_t x = 0; x < len; ++x) kt[k][x] = charset[rand() % 62];
-			}
+
+			kt[0].assign("Other");
+			kt[1].assign("Other");
 
 			val = newPack(td, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
-			if (!val)
-			{
-				for (int x = 0; x < MAGNET_KT_COUNT; ++x) if (kt[x]) free(kt[x]);
-				//printf("    newPack failed?");
-			}
+			if (!val) printf("    newPack failed?");
 		}
 
 		for (j = 0; j < nTrans; j++)
@@ -146,6 +137,8 @@ void chain_test(int size)
 
 	pstat(auditChain(&cin1), "Chain audit");
 	pstat(auditTorDB(&tin1), "TorDB audit");
+
+	printTorCat(&td);
 
 	uint64_t ccomp = compareChain(&ch, &cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))
