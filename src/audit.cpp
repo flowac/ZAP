@@ -10,7 +10,7 @@
 bool checkPack(pack *px, bool modify)
 {
 	uint8_t *md_val = NULL;
-	uint32_t i, shaLen;
+	uint32_t shaLen;
 	EVP_MD_CTX *md_ctx = NULL;
 
 	if (!px || !px->dn || !px->tr) goto cleanup;
@@ -18,11 +18,7 @@ bool checkPack(pack *px, bool modify)
 	if (!(update_shake(&(px->xl), 8, md_ctx))) goto cleanup;
 	if (!(update_shake(px->dn, strlen(px->dn), md_ctx))) goto cleanup;
 	if (!(update_shake(px->tr,  u8len(px->tr), md_ctx))) goto cleanup;
-	for (i = 0; i < MAGNET_KT_COUNT; ++i)
-	{
-		if (px->kt[i].empty()) break;
-		if (!(update_shake(px->kt[i].c_str(), px->kt[i].size(), md_ctx))) goto cleanup;
-	}
+	if (!(update_shake(&(px->kt), 1, md_ctx))) goto cleanup;
 
 	if (!(md_val = finish_shake(&shaLen, &md_ctx))) goto cleanup;
 	if (modify) return shake_copy_free(px->crc, md_val, shaLen);

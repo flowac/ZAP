@@ -8,12 +8,12 @@ bool torDBFromZip(torDB *td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
-	std::string kt[MAGNET_KT_COUNT];
 	FILE *fp = fopen(src, "rb");
 	uint8_t buf[BUF1K];
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
-	uint32_t j, len, nkt;
+	uint8_t kt;
+	uint32_t len;
 	uint64_t i, nPacks, xl;
 	if (!fp) goto cleanup;
 
@@ -43,17 +43,8 @@ bool torDBFromZip(torDB *td, const char *src)
 		tr[len] = 0;
 
 		if (1 != fread(buf, 1, 1, fp)) goto cleanup;
-		nkt = buf[0];
-		if (nkt > MAGNET_KT_COUNT) goto cleanup;
-
-		for (j = 0; j < nkt; ++j)
-		{
-			if (1 != fread(buf, 1, 1, fp)) goto cleanup;
-			len = buf[0];
-			if (!len || len > MAGNET_KT_LEN || len != fread(buf, 1, len, fp)) goto cleanup;
-			kt[j].assign((char *) buf, len);
-		}
-		for (j = nkt; j < MAGNET_KT_COUNT; ++j) kt[j].clear();
+		kt = buf[0];
+		if (!isKeywordValid(kt)) goto cleanup;
 
 		if (!(ret = newPack(td, xt, xl, dn, tr, kt))) goto cleanup;
 	}
@@ -133,11 +124,12 @@ bool torDBFromTxt(torDB *td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN];
+	char kt1[BUF64], kt2[BUF64];
 	char *fio = NULL, *idx, *tok;
-	std::string kt[MAGNET_KT_COUNT];
 	FILE *fp = fopen(src, "r");
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
+	uint8_t kt;
 	uint32_t blen, slen;
 	uint64_t xl;
 
@@ -151,7 +143,6 @@ bool torDBFromTxt(torDB *td, const char *src)
 		xl = 0;
 		dn[0] = 0;
 		tr[0] = 0;
-		for (int i = 0; i < MAGNET_KT_COUNT; ++i) kt[i].clear();
 
 		if ((tok = strstr(idx, "size:")))
 		{
@@ -168,17 +159,19 @@ bool torDBFromTxt(torDB *td, const char *src)
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
-			kt[0].assign(tok, slen);
+			if ((slen = idx - tok) > BUF64 || tok >= idx) break;
+			memcpy(kt1, tok, slen);
+			kt1[slen] = 0;
 		}
-
 		if ((tok = strstr(idx, "minor:")))
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
 			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
-			kt[1].assign(tok, slen);
+			memcpy(kt2, tok, slen);
+			kt2[slen] = 0;
 		}
+		kt = lookupKeyword(kt1, kt2);
 
 		if ((tok = strstr(idx, "name:")))
 		{
@@ -214,7 +207,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 		}
 		else break;
 
-		if (!newPack(td, xt, xl, dn, tr, kt)) break;
+		if (!newPack(td, xt, xl, dn, tr, kt)) goto cleanup;
 	}
 
 	ret = true;

@@ -43,7 +43,7 @@ bool newPack(torDB *td,
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
              uint8_t *tr,               //!< Tracker url
-			 std::string kt[MAGNET_KT_COUNT]);//!< Search keywords
+			 uint8_t kt);                //!< Keywords
 
 bool newTran(tran *tx,
 			 uint64_t id,
@@ -66,10 +66,12 @@ bool insertBlock(chain *ch,
 				 uint8_t crc[SHA3_LEN] = NULL,
 				 uint8_t key[SHA3_LEN] = NULL);
 
-std::map<uint32_t, typename std::list<std::string>> searchTorDB(torDB *td, char *kt[MAGNET_KT_COUNT], const char *str);
+bool isKeywordValid(uint8_t kt, uint8_t *kt1 = NULL, uint8_t *kt2 = NULL);
+bool lookupKeyword(uint8_t kt, char **kt1, char **kt2);
+uint8_t lookupKeyword(const char *kt1, const char *kt2);
+std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1p, const char *kt2p, const char *str);
 
 void deleteChain(chain *target);
-void deleteTorDB(torDB *target);
 
 /**
  * @brief: Compress tracker links in place
@@ -82,6 +84,8 @@ uint32_t compressTracker(uint8_t *tr);
  * @return: Length of null terminated returned string
  */
 uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN]);
+
+std::vector<uint32_t> searchTorDB(torDB *td, char *kt1, char *kt2, const char *str);
 
 /**
  * @brief Generate or validate a checksum

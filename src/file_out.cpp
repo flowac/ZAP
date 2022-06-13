@@ -25,6 +25,7 @@ void torDBToText(torDB *td, const char *dest)
 {
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
+	char *kt1, *kt2;
 	FILE *fp = fopen(dest, "w");
 	uint64_t i;
 	if (!td || !fp) goto cleanup;
@@ -36,18 +37,15 @@ void torDBToText(torDB *td, const char *dest)
 
 		fprintf(fp, "{P\n\t");
 		printBytes(fp, td->pak[i].xt, 20);
+		if (!lookupKeyword(td->pak[i].kt, &kt1, &kt2)) kt1 = kt2 = NULL;
+
 		fprintf(fp, ","
 				"\n\tlen : %lu,"
 				"\n\tdn  : %s,"
 				"\n\ttr  : %s,"
-				"\n\tkt  : ",
-				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr));
-		for (uint32_t i = 0; i < MAGNET_KT_COUNT; ++i)
-		{
-			if (td->pak[i].kt[i].empty()) break;
-			fprintf(fp, "%s ", td->pak[i].kt[i].c_str());
-		}
-		fprintf(fp, "\n}\n");
+				"\n\tkt  : %s %s\n}\n",
+				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr),
+				kt1, kt2);
 	}
 cleanup:
 	if (fp) fclose(fp);
@@ -98,7 +96,7 @@ bool torDBToZip(torDB *td, const char *dest)
 	bool ret = false;
 	FILE *fp = fopen(dest, "wb");
 	uint8_t buf[BUF1K];
-	uint32_t j, k, slen, ktPos;
+	uint32_t j, slen;
 	uint64_t i;
 	if (!td || !fp) goto cleanup;
 
@@ -125,16 +123,7 @@ bool torDBToZip(torDB *td, const char *dest)
 		memcpy(buf + j, td->pak[i].tr, slen);
 		j += slen;
 
-		ktPos = j++;
-		for (k = 0; k < MAGNET_KT_COUNT; ++k)
-		{
-			if (td->pak[i].kt[k].empty()) break;
-			slen = td->pak[i].kt[k].size();
-			buf[j++] = (uint8_t) slen;
-			memcpy(buf + j, td->pak[i].kt[k].c_str(), slen);
-			j += slen;
-		}
-		buf[ktPos] = k;
+		buf[j++] = td->pak[i].kt;
 		fwrite(buf, 1, j, fp);
 	}
 	ret = true;

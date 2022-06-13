@@ -47,11 +47,9 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
 
 	bool val;
-	uint8_t xt[MAGNET_XT_LEN];
-	uint8_t tr[MAGNET_TR_LEN];
+	uint8_t kt, xt[MAGNET_XT_LEN], tr[MAGNET_TR_LEN];
 	uint8_t src[ED448_LEN], dest[ED448_LEN], sig[ED448_SIG_LEN];
 	char dn[121];
-	std::string kt[MAGNET_KT_COUNT];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
 	memset(src,  0xC0, ED448_LEN);
 	memset(dest, 0xFF, ED448_LEN);
@@ -73,9 +71,7 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 				dn[k] = charset[rand() % 62];
 			}
 
-			kt[0].assign("Other");
-			kt[1].assign("Other");
-
+			kt = 1;
 			val = newPack(td, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val) printf("    newPack failed?");
 		}
@@ -102,6 +98,8 @@ void chain_test(int size)
 	start_timer();
 
 	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
+	printTorCat(&td);
+
 	printf("\nGenerate\n");
 	start_timer();
 	chain_gen(&ch, &td, size);
@@ -138,15 +136,11 @@ void chain_test(int size)
 	pstat(auditChain(&cin1), "Chain audit");
 	pstat(auditTorDB(&tin1), "TorDB audit");
 
-	printTorCat(&td);
-
 	uint64_t ccomp = compareChain(&ch, &cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))
 		printf("[INFO] Difference at %lu\n", ccomp);
 	deleteChain(&ch);
 	deleteChain(&cin1);
-	deleteTorDB(&td);
-	deleteTorDB(&tin1);
 	checksum_test(za2File);
 	checksum_test(torFile);
 

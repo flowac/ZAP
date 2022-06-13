@@ -33,6 +33,60 @@ const char *tlist[TMAX] =
 	"open"
 };
 
+typedef struct
+{
+	bool operator()(const char *left, const char *right) const
+	{
+		return strcmp(left, right) < 0;
+	}
+} CStringComp;
+
+std::map<const char *, uint8_t, CStringComp> KEYWORDS[] = {
+	// Keyword 1
+	{
+		{"Other", 1},
+		{"Games", 2}
+	},
+	// Keyword 2
+	{
+		{"Other", 1}
+	},
+	{
+		{"Other", 1},
+		{"PC", 2}
+	}
+};
+
+constexpr uint8_t KEYWORDS_LIM[] = {
+	3,
+	2,
+	3
+};
+
+// Reverse keyword lookup
+const char *KEYWORDS_R0[] = {
+	NULL,
+	"Other",
+	"Games"
+};
+const char *KEYWORDS_R1[] = {
+	NULL,
+	"Other"
+};
+const char *KEYWORDS_R2[] = {
+	NULL,
+	"Other",
+	"PC"
+};
+
+const char **KEYWORDS_R[] = {
+	// Keyword 1
+	KEYWORDS_R0,
+	// Keyword 2
+	KEYWORDS_R1,
+	KEYWORDS_R2
+};
+
 uint32_t compressTracker(uint8_t *tr)
 {
 	char buf3[3] = {0, 0, 0};
@@ -110,19 +164,15 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 
 void printTorCat(torDB *target)
 {
-	std::map<std::string, category>::iterator itc;
-	std::map<std::string, std::vector<uint32_t>>::iterator itu;
-
-	printf("Categories %lu\n", target->cat.size());
-	for (itc = target->cat.begin(); itc != target->cat.end(); ++itc)
+	if (!target) return;
+	for (uint32_t i = 1; i < KEYWORDS_LIM[0]; ++i)
 	{
-		printf("%s: ", itc->first.c_str());
-		for (uint32_t u32 : itc->second.idx) printf("%u ", u32);
-		printf("\nSub categories %lu ", itc->second.sub.size());
-		for (itu = itc->second.sub.begin(); itu != itc->second.sub.end(); ++itu)
+		printf("%s: ", KEYWORDS_R[0][i]);
+		for (uint32_t u32 : target->cat[i].idx) printf("%u ", u32);
+		for (uint32_t j = 1; j < KEYWORDS_LIM[i]; ++j)
 		{
-			printf("%s, ", itu->first.c_str());
-			for (uint32_t u32 : itu->second) printf("%u ", u32);
+			printf("\n\t%s: ", KEYWORDS_R[i][j]);
+			for (uint32_t u32 : target->cat[i].sub[j]) printf("%u ", u32);
 		}
 		printf("\n");
 	}
@@ -130,35 +180,25 @@ void printTorCat(torDB *target)
 
 bool processPack(torDB *td, pack *px)
 {
-	category tCat;
+	uint8_t kt1, kt2;
 	uint32_t idx;
-	std::map<std::string, category>::iterator itc;
-	std::map<std::string, std::vector<uint32_t>>::iterator itu;
-	std::string key1, key2;
 	if (!td || !px) return false;
+	if (!isKeywordValid(px->kt)) return false;
 
 	idx = td->pak.size() - 1;
-	if (px->kt[0].empty()) return true;
-	key1 = px->kt[0];
-	if (px->kt[1].empty()) key2.clear();
-	else key2 = px->kt[1];
+	kt1 = px->kt & MAX_U4;
+	kt2 = px->kt >> 4;
 
-	if ((itc = td->cat.find(key1)) == td->cat.end()) return false;
-	else if (key2.empty()) td->cat[key1].idx.push_back(idx);
-	else
-	{
-		tCat = td->cat[key1];
-		if ((itu = tCat.sub.find(key2)) == tCat.sub.end()) return false;
-		else td->cat[key1].sub[key2].push_back(idx);
-	}
+	if (!kt2) td->cat[kt1].idx.push_back(idx);
+	else td->cat[kt1].sub[kt2].push_back(idx);
 
 	return true;
 }
 
-bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, std::string kt[MAGNET_KT_COUNT])
+bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt)
 {
-	uint32_t ndn = 0, ntr = 0, i = 0;
-	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL};
+	uint32_t ndn = 0, ntr = 0;
+	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .kt = 0};
 	if (!td || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
@@ -172,43 +212,90 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (!(px.tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px.tr, tr, ntr);
 
-	for (i = 0; i < MAGNET_KT_COUNT; ++i) px.kt[i].clear();
-	for (i = 0; i < MAGNET_KT_COUNT; ++i)
-	{
-		if (0 == kt[i].size()) break;
-		if (kt[i].size() > MAGNET_KT_LEN) goto cleanup;
-		px.kt[i] = kt[i];
-	}
+	if (isKeywordValid(kt)) px.kt = kt;
+	else goto cleanup;
 
 	if (!checkPack(&px, true)) goto cleanup;
 	td->pak.push_back(px);
-	if (!processPack(td, &px)) printf("proc pack failed\n");
+	if (!processPack(td, &px)) printf("proc pack failed %u %u\n", kt & MAX_U4, kt >> 4);
 
 	return true;
 cleanup:
-	printf("\nfailed new pack kt[i] [%u] %s< ndn %u ntr %u %p\n", i, dn, ndn, ntr, tr);
+	printf("\nfailed new pack kt[i] %s< ndn %u ntr %u %p kt: %u %u\n",
+		   dn, ndn, ntr, tr, kt & MAX_U4, kt >> 4);
 	if (px.dn) free(px.dn);
 	if (px.tr) free(px.tr);
 	return false;
 }
 
-std::map<uint32_t, typename std::list<std::string>> searchTorDB(torDB *td, char *kt[MAGNET_KT_COUNT], const char *str)
+bool isKeywordValid(uint8_t kt, uint8_t *kt1p, uint8_t *kt2p)
 {
-	std::map<uint32_t, typename std::list<std::string>> result;
+	uint8_t kt1 = kt & MAX_U4, kt2 = kt >> 4;
+	if (kt1p) *kt1p = kt1;
+	if (kt2p) *kt2p = kt2;
+	if (kt1 == 0 || kt1 > KEYWORDS_LIM[0]) return false;
+	if (kt2 > KEYWORDS_LIM[kt1]) return false;
+	return true;
+}
 
+bool lookupKeyword(uint8_t kt, char **kt1, char **kt2)
+{
+	uint8_t kt1u, kt2u;
+	if (!kt1 || !kt2 || !isKeywordValid(kt, &kt1u, &kt2u)) return false;
+	*kt1 = (char *) KEYWORDS_R[0][kt1u];
+	if (kt2u > 0) *kt2 = (char *) KEYWORDS_R[kt1u][kt2u];
+	else *kt2 = NULL;
+	return true;
+}
+
+uint8_t lookupKeyword(const char *kt1, const char *kt2)
+{
+	uint8_t ret = 0;
+	std::map<const char *, uint8_t>::iterator it;
+
+	if (!kt1) return ret;
+	if ((it = KEYWORDS[0].find(kt1)) == KEYWORDS[0].end()) return ret;
+	ret = it->second & MAX_U4;
+
+	if (!kt2) return ret;
+	if ((it = KEYWORDS[ret].find(kt2)) == KEYWORDS[ret].end()) return ret;
+	ret |= (it->second & MAX_U4) << 4;
+
+	return ret;
+}
+
+std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, const char *str)
+{
+	uint8_t kt1u, kt2u;
+	std::vector<uint32_t> result;
+
+	kt1u = lookupKeyword(kt1, kt2);
+	kt2u = kt1u >> 4;
+	kt1u &= MAX_U4;
+
+	if (kt1u)
+	{
+		result.insert(result.begin(), td->cat[kt1u].idx.begin(), td->cat[kt1u].idx.end());
+		if (kt2u)
+			result.insert(result.begin(), td->cat[kt1u].sub[kt2u].begin(), td->cat[kt1u].sub[kt2u].end());
+	}
 	return result;
 }
 
-inline void deletePack(pack *target)
+static inline void deletePack(pack *target)
 {
 	if (!target) return;
 	if (target->dn) free(target->dn);
 	if (target->tr) free(target->tr);
 }
 
-void deleteTorDB(torDB *target)
+torDB::torDB()
 {
-	target->cat.clear();
-	for (uint64_t i = 0; i < target->pak.size(); ++i) deletePack(&(target->pak[i]));
-	target->pak.clear();
+	cat.resize(KEYWORDS_LIM[0]);
+	for (uint8_t i = 1; i < KEYWORDS_LIM[0]; ++i) cat[i].sub.resize(KEYWORDS_LIM[i]);
+}
+
+torDB::~torDB()
+{
+	for (uint64_t i = 0; i < pak.size(); ++i) deletePack(&(pak[i]));
 }
