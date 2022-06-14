@@ -52,15 +52,22 @@ std::map<const char *, uint8_t, CStringComp> KEYWORDS[] = {
 		{"Other", 1}
 	},
 	{
-		{"Other", 1},
-		{"PC", 2}
+		{"Other",    1},
+		{"PC",       2},
+		{"Mac",      3},
+		{"PSx",      4},
+		{"XBOX",     5},
+		{"Wii",      6},
+		{"Handheld", 7},
+		{"IOS",      8},
+		{"Android",  9}
 	}
 };
 
 constexpr uint8_t KEYWORDS_LIM[] = {
 	3,
 	2,
-	3
+	10
 };
 
 // Reverse keyword lookup
@@ -76,7 +83,14 @@ const char *KEYWORDS_R1[] = {
 const char *KEYWORDS_R2[] = {
 	NULL,
 	"Other",
-	"PC"
+	"PC",
+	"Mac",
+	"PSx",
+	"XBOX",
+	"Wii",
+	"Handheld",
+	"IOS",
+	"Android",
 };
 
 const char **KEYWORDS_R[] = {
@@ -266,6 +280,7 @@ uint8_t lookupKeyword(const char *kt1, const char *kt2)
 
 std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, const char *str)
 {
+	category cat;
 	uint8_t kt1u, kt2u;
 	std::vector<uint32_t> result;
 
@@ -273,11 +288,20 @@ std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, c
 	kt2u = kt1u >> 4;
 	kt1u &= MAX_U4;
 
+	printf("%u %u\n", kt1u, kt2u);
 	if (kt1u)
 	{
-		result.insert(result.begin(), td->cat[kt1u].idx.begin(), td->cat[kt1u].idx.end());
+		cat = td->cat[kt1u];
+		result.insert(result.begin(), cat.idx.begin(), cat.idx.end());
 		if (kt2u)
-			result.insert(result.begin(), td->cat[kt1u].sub[kt2u].begin(), td->cat[kt1u].sub[kt2u].end());
+		{
+			result.insert(result.begin(), cat.sub[kt2u].begin(), cat.sub[kt2u].end());
+		}
+		else
+		{
+			for (std::vector<uint32_t> vu32 : cat.sub)
+				result.insert(result.end(), vu32.begin(), vu32.end());
+		}
 	}
 	return result;
 }

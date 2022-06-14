@@ -85,6 +85,14 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 	}
 }
 
+void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
+{
+	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
+	printf("[%s %s] %s:\n\t", kt1, kt2, str);
+	for (uint32_t idx : result) printf("%u ", idx);
+	printf("\n");
+}
+
 void chain_test(int size)
 {
 	const char *zaaFile = "temp.zaa"; // chainToZip file
@@ -104,6 +112,9 @@ void chain_test(int size)
 	start_timer();
 	chain_gen(&ch, &td, size);
 	print_elapsed_time();
+	search_test(&td, "Games", "PC", NULL);
+	search_test(&td, "Games", "Mac", NULL);
+	search_test(&td, "Games", NULL, NULL);
 
 	printf("\nWrite to file\n");
 	start_timer();

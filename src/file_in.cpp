@@ -159,7 +159,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) > BUF64 || tok >= idx) break;
+			if ((slen = idx - tok) >= BUF64 || tok >= idx) break;
 			memcpy(kt1, tok, slen);
 			kt1[slen] = 0;
 		}
@@ -167,7 +167,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 		{
 		    tok += 6;
 			if (!(idx = strchr(tok, '\n'))) break;
-			if ((slen = idx - tok) >= MAGNET_KT_LEN || tok >= idx) break;
+			if ((slen = idx - tok) >= BUF64 || tok >= idx) break;
 			memcpy(kt2, tok, slen);
 			kt2[slen] = 0;
 		}
