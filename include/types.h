@@ -6,8 +6,8 @@
  * they also define the coin's structure.
  */
 
-#ifndef _ATYPE_H
-#define _ATYPE_H
+#ifndef _TYPES_H
+#define _TYPES_H
 
 #include <cstdint>
 
@@ -94,17 +94,12 @@ typedef struct {
 	std::vector<block>   blk;
 } chain;
 
-typedef struct category{
-	std::vector<uint32_t> idx; //!< indexes
-	std::vector<std::vector<uint32_t>> sub; //!< sub-category
-} category;
-
 class torDB {
 public:
-	std::vector<category> cat; //!< categorized
+	std::vector<std::vector<std::vector<uint32_t>>> cat; //!< categorized
 	std::vector<pack> pak; //!< raw unsorted data
 	torDB();
 	~torDB();
 };
 
-#endif //_ATYPE_H
+#endif //_TYPES_H

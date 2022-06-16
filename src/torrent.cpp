@@ -4,102 +4,7 @@
 #include <cstring>
 
 #include "main_lib.h"
-
-typedef enum
-{
-	TZERO  = 1 << 7,
-	TSTART = 0,
-	TUDP   = 1,
-	THTTP  = 2,
-	TANN   = 3,
-	TTOR   = 4,
-	TTRA   = 5,
-	TCOM   = 6,
-	TORG   = 7,
-	TOPEN  = 8,
-	TMAX   = 9
-} TR_ENUM;
-
-const char *tlist[TMAX] =
-{
-	"&tr=",
-	"udp",
-	"http",
-	"announce",
-	"torrent",
-	"tracker",
-	".com",
-	".org",
-	"open"
-};
-
-typedef struct
-{
-	bool operator()(const char *left, const char *right) const
-	{
-		return strcmp(left, right) < 0;
-	}
-} CStringComp;
-
-std::map<const char *, uint8_t, CStringComp> KEYWORDS[] = {
-	// Keyword 1
-	{
-		{"Other", 1},
-		{"Games", 2}
-	},
-	// Keyword 2
-	{
-		{"Other", 1}
-	},
-	{
-		{"Other",    1},
-		{"PC",       2},
-		{"Mac",      3},
-		{"PSx",      4},
-		{"XBOX",     5},
-		{"Wii",      6},
-		{"Handheld", 7},
-		{"IOS",      8},
-		{"Android",  9}
-	}
-};
-
-constexpr uint8_t KEYWORDS_LIM[] = {
-	3,
-	2,
-	10
-};
-
-// Reverse keyword lookup
-const char *KEYWORDS_R0[] = {
-	NULL,
-	"Other",
-	"Games"
-};
-const char *KEYWORDS_R1[] = {
-	NULL,
-	"Other"
-};
-const char *KEYWORDS_R2[] = {
-	NULL,
-	"Other",
-	"PC",
-	"Mac",
-	"PSx",
-	"XBOX",
-	"Wii",
-	"Handheld",
-	"IOS",
-	"Android",
-};
-
-const char **KEYWORDS_R[] = {
-	// Keyword 1
-	KEYWORDS_R0,
-	// Keyword 2
-	KEYWORDS_R1,
-	KEYWORDS_R2
-};
+#include "torrent_types.h"
 
 uint32_t compressTracker(uint8_t *tr)
 {
@@ -182,11 +87,11 @@ void printTorCat(torDB *target)
 	for (uint32_t i = 1; i < KEYWORDS_LIM[0]; ++i)
 	{
 		printf("%s: ", KEYWORDS_R[0][i]);
-		for (uint32_t u32 : target->cat[i].idx) printf("%u ", u32);
 		for (uint32_t j = 1; j < KEYWORDS_LIM[i]; ++j)
 		{
 			printf("\n\t%s: ", KEYWORDS_R[i][j]);
-			for (uint32_t u32 : target->cat[i].sub[j]) printf("%u ", u32);
+			for (uint64_t k = 0; k < std::min((uint64_t) 10, (uint64_t) target->cat[i][j].size()); ++k)
+				printf("%u ", target->cat[i][j][k]);
 		}
 		printf("\n");
 	}
@@ -203,8 +108,8 @@ bool processPack(torDB *td, pack *px)
 	kt1 = px->kt & MAX_U4;
 	kt2 = px->kt >> 4;
 
-	if (!kt2) td->cat[kt1].idx.push_back(idx);
-	else td->cat[kt1].sub[kt2].push_back(idx);
+	if (!kt2) td->cat[kt1][1].push_back(idx);
+	else      td->cat[kt1][kt2].push_back(idx);
 
 	return true;
 }
@@ -280,7 +185,6 @@ uint8_t lookupKeyword(const char *kt1, const char *kt2)
 
 std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, const char *str)
 {
-	category cat;
 	uint8_t kt1u, kt2u;
 	std::vector<uint32_t> result;
 
@@ -288,20 +192,10 @@ std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, c
 	kt2u = kt1u >> 4;
 	kt1u &= MAX_U4;
 
-	printf("%u %u\n", kt1u, kt2u);
 	if (kt1u)
 	{
-		cat = td->cat[kt1u];
-		result.insert(result.begin(), cat.idx.begin(), cat.idx.end());
-		if (kt2u)
-		{
-			result.insert(result.begin(), cat.sub[kt2u].begin(), cat.sub[kt2u].end());
-		}
-		else
-		{
-			for (std::vector<uint32_t> vu32 : cat.sub)
-				result.insert(result.end(), vu32.begin(), vu32.end());
-		}
+		if (kt2u) result.insert(result.begin(), td->cat[kt1u][kt2u].begin(), td->cat[kt1u][kt2u].end());
+		else for (std::vector<uint32_t> vu32 : td->cat[kt1u]) result.insert(result.end(), vu32.begin(), vu32.end());
 	}
 	return result;
 }
@@ -316,7 +210,7 @@ static inline void deletePack(pack *target)
 torDB::torDB()
 {
 	cat.resize(KEYWORDS_LIM[0]);
-	for (uint8_t i = 1; i < KEYWORDS_LIM[0]; ++i) cat[i].sub.resize(KEYWORDS_LIM[i]);
+	for (uint8_t i = 1; i < KEYWORDS_LIM[0]; ++i) cat[i].resize(KEYWORDS_LIM[i]);
 }
 
 torDB::~torDB()

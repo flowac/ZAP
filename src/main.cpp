@@ -106,12 +106,12 @@ void chain_test(int size)
 	start_timer();
 
 	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
-	printTorCat(&td);
 
 	printf("\nGenerate\n");
 	start_timer();
 	chain_gen(&ch, &td, size);
 	print_elapsed_time();
+	printTorCat(&td);
 	search_test(&td, "Games", "PC", NULL);
 	search_test(&td, "Games", "Mac", NULL);
 	search_test(&td, "Games", NULL, NULL);
