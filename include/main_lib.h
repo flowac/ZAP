@@ -11,6 +11,9 @@
 
 #include "types.h"
 
+void filter_word(char *b, int *k); //!< Remove non-alphanum then toLower
+void stem_word(char *b, int *k);   //!< PortStemmer
+
 /**
  * @brief Packs uint??_t into uint8_t buffer little endian style
  */
@@ -43,7 +46,7 @@ bool newPack(torDB *td,
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
              uint8_t *tr,               //!< Tracker url
-			 uint8_t kt);                //!< Keywords
+			 uint8_t kt);               //!< Keywords
 
 bool newTran(tran *tx,
 			 uint64_t id,

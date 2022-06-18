@@ -85,6 +85,26 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 	}
 }
 
+void word_proc_test(const char *str)
+{
+	char buf[BUF64];
+	int len = strlen(str);
+	if (len >= (int) BUF64)
+	{
+		printf("ERROR: input string exceeded buffer size %u\n", BUF64);
+		return;
+	}
+
+	printf("\tOriginal [%02u]: %s\n", len, str);
+	strcpy(buf, str);
+	filter_word(buf, &len);
+	buf[len] = 0;
+	printf("\tFiltered [%02u]: %s\n", len, buf);
+	stem_word(buf, &len);
+	buf[len] = 0;
+	printf("\tStemmed  [%02u]: %s\n\n", len, buf);
+}
+
 void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
 {
 	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
@@ -104,6 +124,12 @@ void chain_test(int size)
 	torDB td, tin1;
 
 	start_timer();
+
+	printf("[INFO] Word processing test\n");
+	word_proc_test("Wasn'T");
+	word_proc_test("AlieNs");
+	word_proc_test("Hopping");
+	word_proc_test("Hoping");
 
 	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
 
