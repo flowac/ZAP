@@ -11,8 +11,8 @@
 #include "7zTypes.h"
 #include "LzmaEnc.h"
 
-/** @brief Default buffer size for i/o (1MB) */
-#define buffer_cread_size (1<<20)
+/** @brief Default buffer size for i/o (64KB) */
+#define buffer_cread_size (1<<16)
 
 /** @brief Size of prop and the following data that contains the filesize */
 #define LZMA_PROPS_SIZE_FILESIZE LZMA_PROPS_SIZE + 8

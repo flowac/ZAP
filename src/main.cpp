@@ -126,10 +126,11 @@ void chain_test(int size)
 	start_timer();
 
 	printf("[INFO] Word processing test\n");
-	word_proc_test("Wasn'T");
-	word_proc_test("AlieNs");
+	word_proc_test("ALieNs");
 	word_proc_test("Hopping");
 	word_proc_test("Hoping");
+	word_proc_test("transfer");
+	word_proc_test("PEr-forM'Er");
 
 	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
 
