@@ -97,11 +97,7 @@ void word_proc_test(const char *str)
 
 	printf("\tOriginal [%02u]: %s\n", len, str);
 	strcpy(buf, str);
-	filter_word(buf, &len);
-	buf[len] = 0;
-	printf("\tFiltered [%02u]: %s\n", len, buf);
 	stem_word(buf, &len);
-	buf[len] = 0;
 	printf("\tStemmed  [%02u]: %s\n\n", len, buf);
 }
 
@@ -131,8 +127,9 @@ void chain_test(int size)
 	word_proc_test("Hoping");
 	word_proc_test("transfer");
 	word_proc_test("PEr-forM'Er");
+	word_proc_test("sterilizations");
 
-	pstat(torDBFromTxt(&td, "extern/scrap/pirate.txt"), "TorDB import from text");
+	pstat(torDBFromTxt(&td, "extern/scrap/pirate.src"), "TorDB import from text");
 
 	printf("\nGenerate\n");
 	start_timer();
