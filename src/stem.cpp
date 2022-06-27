@@ -1,8 +1,9 @@
-/*stemmer by:
-    tartarus.org/martin/PortStemmer/
-    ANSI C thread safe
-    Word list by:
-    gwicks.net/justwords.html
+/* Word processing functions
+   stemmer by:
+   tartarus.org/martin/PortStemmer/
+   ANSI C thread safe
+   Word list by:
+   gwicks.net/justwords.html
  */
 #include <ctype.h>   /* for isalnum, tolower */
 #include <stdlib.h>  /* for malloc, free */
@@ -20,9 +21,13 @@ typedef struct {
 static int cons(stem *z, int i)
 {
     switch (z->b[i])
-    {  case 'a': case 'e': case 'i': case 'o': case 'u': return FALSE;
-        case 'y': return (i == 0) ? TRUE : !cons(z, i - 1);
-        default: return TRUE;
+    {
+    case 'a': case 'e': case 'i': case 'o': case 'u':
+        return FALSE;
+    case 'y':
+        return (i == 0) ? TRUE : !cons(z, i - 1);
+    default:
+        return TRUE;
     }
 }
 
@@ -297,9 +302,10 @@ void stem_word(char *b, int *k)
     if (z.k <= 1) return;
 
     step1ab(&z);
-    if (z.k > 0) {
+    if (z.k > 0)
+    {
         step1c(&z); step2(&z); step3(&z); step4(&z); step5(&z);
     }
     *k = ++z.k;
-	b[z.k] = 0;
+    b[z.k] = 0;
 }

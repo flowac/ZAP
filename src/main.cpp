@@ -85,20 +85,25 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 	}
 }
 
-void word_proc_test(const char *str)
+bool word_proc_test(const char *str, const char *expected)
 {
 	char buf[BUF64];
 	int len = strlen(str);
 	if (len >= (int) BUF64)
 	{
 		printf("ERROR: input string exceeded buffer size %u\n", BUF64);
-		return;
+		return false;
 	}
 
-	printf("\tOriginal [%02u]: %s\n", len, str);
 	strcpy(buf, str);
 	stem_word(buf, &len);
-	printf("\tStemmed  [%02u]: %s\n\n", len, buf);
+	if (strcmp(buf, expected) != 0)
+	{
+		printf("\tOriginal [%02u]: %s\n", len, str);
+		printf("\tStemmed  [%02u]: %s\n", len, buf);
+		return false;
+	}
+	return true;
 }
 
 void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
@@ -121,24 +126,18 @@ void chain_test(int size)
 
 	start_timer();
 
-	printf("[INFO] Word processing test\n");
-	word_proc_test("ALieNs");
-	word_proc_test("Hopping");
-	word_proc_test("Hoping");
-	word_proc_test("transfer");
-	word_proc_test("PEr-forM'Er");
-	word_proc_test("sterilizations");
-
 	pstat(torDBFromTxt(&td, "extern/scrap/pirate.src"), "TorDB import from text");
 
 	printf("\nGenerate\n");
 	start_timer();
 	chain_gen(&ch, &td, size);
 	print_elapsed_time();
+#if 0
 	printTorCat(&td);
 	search_test(&td, "Games", "PC", NULL);
 	search_test(&td, "Games", "Mac", NULL);
 	search_test(&td, "Games", NULL, NULL);
+#endif
 
 	printf("\nWrite to file\n");
 	start_timer();
@@ -219,9 +218,9 @@ void tracker_test()
 	}
 	memcpy(tr2, test_tracker, len + 1);
 
-	pstat((clen = compressTracker(tr2)) > 0, "Compress tracker");
-	pstat((dlen = decompressTracker(tr2, tr3)) > 0, "Decompress tracker");
-	if (!pstat(len == dlen && memcmp(test_tracker, tr3, len + 1) == 0, "Compare trackers"))
+	clen = compressTracker(tr2);
+	dlen = decompressTracker(tr2, tr3);
+	if (!pstat(len == dlen && memcmp(test_tracker, tr3, len + 1) == 0, "Tracker operations"))
 		printf("[INFO] Original: %s\n[INFO] Decomped: %s\n", test_tracker, tr3);
 	printf("[INFO] Tracker size: %u,  compressed: %u,  decompressed: %u\n", len, clen, dlen);
 }
@@ -259,6 +258,15 @@ int main()
 		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
+
+	pstat(word_proc_test("ALieNs", "alien") &&
+		  word_proc_test("Hopping", "hop") &&
+		  word_proc_test("Hoping", "hope") &&
+		  word_proc_test("transfer", "transfer") &&
+		  word_proc_test("PEr-forM'Er", "perform") &&
+		  word_proc_test("sterilizations", "steril"),
+		  "Word processing test");
+
 	log_test();
 	tracker_test();
 	chain_test(100);
