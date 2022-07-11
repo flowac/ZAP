@@ -37,7 +37,7 @@ void torDBToText(torDB *td, const char *dest)
 
 		fprintf(fp, "{P\n\t");
 		printBytes(fp, td->pak[i].xt, 20);
-		if (!lookupKeyword(td->pak[i].kt, &kt1, &kt2)) kt1 = kt2 = NULL;
+		if (!lookupKeyword(td->pak[i].kt[0], &kt1, &kt2)) kt1 = kt2 = NULL;
 
 		fprintf(fp, ","
 				"\n\tlen : %lu,"
@@ -45,7 +45,7 @@ void torDBToText(torDB *td, const char *dest)
 				"\n\ttr  : %s,"
 				"\n\tkt  : %s %s\n}\n",
 				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr),
-				kt1, kt2);
+				kt1 ? kt1 : "nil", kt2 ? kt2 : "nil");
 	}
 cleanup:
 	if (fp) fclose(fp);
@@ -123,7 +123,7 @@ bool torDBToZip(torDB *td, const char *dest)
 		memcpy(buf + j, td->pak[i].tr, slen);
 		j += slen;
 
-		buf[j++] = td->pak[i].kt;
+		buf[j++] = td->pak[i].kt[0];
 		fwrite(buf, 1, j, fp);
 	}
 	ret = true;

@@ -1,5 +1,5 @@
 /**
- * @file atype.h
+ * @file types.h
  * @brief File containing some struct definitions for the coin
  *
  * The structs in this file mainly relate to the alib functions,
@@ -15,17 +15,17 @@
 #include <string>
 #include <vector>
 
-
-#define LOG 0                 //!< not sure
+#define LOG 0 //!< not sure
 
 #define MAX_U2   0x03U
 #define MAX_U4   0x0FU
 #define MAX_U6   0x3FU
 #define MAX_U8   0xFFUL
 #define MAX_U16  0xFFFFUL
+#define MAX_U21  0x1FFFFFUL
 #define MAX_U30  0x3FFFFFFFUL
 #define MAX_U32  0xFFFFFFFFUL
-#define MAX_U34  0x3FFFFFFFFUL
+#define MAX_U34  0x3FFFFFFFFULL
 #define MAX_U64  0xFFFFFFFFFFFFFFFFULL
 
 #define ONE_MILLION 1000000
@@ -50,13 +50,16 @@
 /**
  * @brief Holds information about the parameters of the magnet link
  */
-typedef struct {
-	uint8_t  crc[SHAKE_LEN];    //!< checksum of all members below
-	uint8_t  xt[MAGNET_XT_LEN]; //!< exact topic, 160 bit file hash
-	uint64_t xl; //!< exact length, size of file in bytes
-	char    *dn; //!< display name, filename
-	uint8_t *tr; //!< address tracker, tracker url
-	uint8_t kt;  //!< categories: second - upper 4, first - lower 4
+typedef struct pack {
+	uint8_t   crc[SHAKE_LEN];    //!< checksum of all members below
+	uint8_t   xt[MAGNET_XT_LEN]; //!< exact topic, 160 bit file hash
+	uint64_t  xl; //!< exact length, size of file in bytes
+	char     *dn; //!< display name, filename
+	uint8_t  *tr; //!< address tracker, tracker url
+//TODO: compress or turn search terms into 16 bits
+	uint64_t *st; //!< 21 bit dictionary search terms
+	char     *ut; //!< Search terms not found in dictionary (MAX_U6)
+	uint8_t   kt[8]; //!< [0] categories: second - upper 4, first - lower 4, [1-7] 8 bit number search terms
 } pack;
 
 /**
@@ -93,6 +96,17 @@ typedef struct {
 	std::vector<balance> bal;
 	std::vector<block>   blk;
 } chain;
+
+class wordDB {
+public:
+	wordDB(const char *src);
+	~wordDB();
+	inline char *at(uint32_t idx); //!< starts counting from 1
+	inline uint32_t size(void);
+private:
+	uint32_t len = 0;
+	char **dict = NULL;
+};
 
 class torDB {
 public:

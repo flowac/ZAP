@@ -9,6 +9,8 @@
 #include <stdlib.h>  /* for malloc, free */
 #include <string.h>  /* for memcmp, memmove */
 
+#include "types.h"
+
 typedef struct {
     char *b;           /*buffer for word to be stemmed */
     int k;             /* offset to the end of the string */
@@ -278,34 +280,186 @@ static void step5(stem *z)
     if (b[z->k] == 'l' && doublec(z, z->k) && m(z) > 1) z->k--;
 }
 
-void filter_word(char *b, int *k)
+wordDB::wordDB(const char *src)
 {
+	int blen;
+	char buf[BUF64];
+	FILE *fp = fopen(src, "r");
+	if (!fp) return;
+
+	while (fgets(buf, BUF64, fp))
+	{
+		blen = strlen(buf);
+		while (blen && !isalpha(buf[blen - 1])) --blen;
+		if (!blen) continue;
+
+		if ((len % 10) == 0) dict = (char **) realloc(dict, sizeof(char *) * (len + 10));
+		dict[len] = (char *) calloc(blen + 1, 1);
+		memcpy(dict[len++], buf, blen);
+	}
+	printf("[INFO] Dictionary %s initialized %u\n", src, len);
+	fclose(fp);
+}
+
+wordDB::~wordDB()
+{
+	while (len) free(dict[--len]);
+	free(dict);
+}
+
+inline char * wordDB::at(uint32_t idx)
+{
+	if (idx == 0 || idx > len) return NULL;
+	return dict[--idx];
+}
+
+inline uint32_t wordDB::size(void)
+{
+	return len;
+}
+
+void filter_line(char *b, int *k)
+{
+	char prev = 0;
     for (int i = 0; i < *k;)
     {
         if (!isalnum(b[i]))
         {
-            memmove(b + i, b + i + 1, *k - i);
-            --(*k);
+			if (prev != ' ')
+			{
+				if (b[i] == '-' || b[i] == '.')
+				{
+					prev = b[i] = ' ';
+					++i;
+				}
+				else if (b[i] == ' ')
+				{
+					prev = ' ';
+					++i;
+				}
+				else
+				{
+					goto LINE_MOVE;
+				}
+			}
+			else
+			{
+LINE_MOVE:
+				memmove(b + i, b + i + 1, *k - i);
+				--(*k);
+			}
         }
         else
         {
-            b[i] = tolower(b[i]);
+            prev = b[i] = tolower(b[i]);
             ++i;
         }
     }
 }
 
-void stem_word(char *b, int *k)
+void stem_word(char *buf, int *len)
 {
-    filter_word(b, k);
-    stem z = {.b = b, .k = *k - 1, .j = 0};
-    if (z.k <= 1) return;
+    stem z = {.b = buf, .k = *len - 1, .j = 0};
+    if (z.k <= 1 || !buf) return;
 
     step1ab(&z);
     if (z.k > 0)
     {
         step1c(&z); step2(&z); step3(&z); step4(&z); step5(&z);
     }
-    *k = ++z.k;
-    b[z.k] = 0;
+    *len = ++z.k;
+    buf[z.k] = 0;
+}
+
+// This function assumes dictionary index lookups will not go out of bounds
+uint32_t find_word(char *buf)
+{
+	static wordDB words("extern/scrap/english.src");
+	int cmp;
+	uint32_t i, left = 1, right = words.size();
+	if (right == 0) return 0UL;
+
+	while (left != right)
+	{
+		i = (left + right) >> 1;
+		cmp = strcasecmp(buf, words.at(i));
+		if (cmp < 0)      right = i - 1;
+		else if (cmp > 0) left  = i + 1;
+		else return i;
+	}
+
+	if (0 == strcasecmp(buf, words.at(left))) return left;
+	return 0UL;
+}
+
+bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
+{
+	char *p, *s;
+	int ilen, j;
+	uint32_t ret = 0, ret_3 = 0;
+	uint32_t blen, ulen = 0;
+	uint64_t idx;
+
+	if (!buf || !st || !ut || !kt) return false;
+	*st = NULL;
+	*ut = NULL;
+	memset(kt + 1, MAX_U8, 7);
+
+	ilen = strlen(buf);
+	filter_line(buf, &ilen);
+	for (p = buf; (s = p);)
+	{
+		if ((p = strchr(s, ' ')))
+		{
+			*p = 0;
+			ilen = p - s;
+		}
+		else ilen = strlen(s);
+
+		stem_word(s, &ilen);
+		idx = (uint64_t) find_word(s);
+		if (idx > 0ULL)
+		{
+			ret_3 = ret / 3;
+			switch (ret % 3)
+			{
+			case 0:
+				*st = (uint64_t *) realloc(*st, 8 * (ret_3 + 1));
+				(*st)[ret_3] = idx;
+				break;
+			case 1:
+				(*st)[ret_3] |= idx << 21;
+				break;
+			case 2:
+				(*st)[ret_3] |= idx << 42;
+				break;
+			}
+			++ret;
+		}
+		else
+		{
+			j = 1;
+			for (char *tmp = s; *tmp && j < 8; ++tmp)
+			{
+				if (!isdigit(*tmp)) continue;
+				idx = *tmp - '0';
+				if (isdigit(*(tmp + 1))) idx = idx * 10 + *(++tmp) - '0';
+				kt[j++] = idx;
+			}
+
+			blen = ilen + ulen + 1;
+			if (blen > MAX_U6) continue;
+			*ut = (char *) realloc(*ut, blen);
+			memcpy(*ut + ulen, s, ilen);
+			ulen = blen;
+			(*ut)[--blen] = ' ';
+		}
+
+		if (p && *(p + 1) > 0) ++p;
+		else p = NULL;
+	}
+
+	if (*st) (*st)[ret_3] |= 1ULL << 63;
+	if (*ut) (*ut)[--ulen] = 0;
+	return true;
 }

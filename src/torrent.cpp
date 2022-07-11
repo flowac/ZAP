@@ -102,22 +102,21 @@ bool processPack(torDB *td, pack *px)
 	uint8_t kt1, kt2;
 	uint32_t idx;
 	if (!td || !px) return false;
-	if (!isKeywordValid(px->kt)) return false;
+	if (!isKeywordValid(px->kt[0], &kt1, &kt2)) return false;
 
 	idx = td->pak.size() - 1;
-	kt1 = px->kt & MAX_U4;
-	kt2 = px->kt >> 4;
-
 	if (!kt2) td->cat[kt1][1].push_back(idx);
 	else      td->cat[kt1][kt2].push_back(idx);
 
+	// TODO: add search term processing
+	// TODO: check the checksums in audit
 	return true;
 }
 
 bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt)
 {
 	uint32_t ndn = 0, ntr = 0;
-	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .kt = 0};
+	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .st = NULL, .ut = NULL, .kt = {0}};
 	if (!td || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
@@ -131,7 +130,7 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (!(px.tr = (uint8_t *) calloc(ntr + 1, 1))) goto cleanup;
 	memcpy(px.tr, tr, ntr);
 
-	if (isKeywordValid(kt)) px.kt = kt;
+	if (isKeywordValid(kt)) px.kt[0] = kt;
 	else goto cleanup;
 
 	if (!checkPack(&px, true)) goto cleanup;
@@ -150,10 +149,10 @@ cleanup:
 bool isKeywordValid(uint8_t kt, uint8_t *kt1p, uint8_t *kt2p)
 {
 	uint8_t kt1 = kt & MAX_U4, kt2 = kt >> 4;
-	if (kt1p) *kt1p = kt1;
-	if (kt2p) *kt2p = kt2;
 	if (kt1 == 0 || kt1 > KEYWORDS_LIM[0]) return false;
 	if (kt2 > KEYWORDS_LIM[kt1]) return false;
+	if (kt1p) *kt1p = kt1;
+	if (kt2p) *kt2p = kt2;
 	return true;
 }
 

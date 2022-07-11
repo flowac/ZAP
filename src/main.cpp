@@ -99,10 +99,46 @@ bool word_proc_test(const char *str, const char *expected)
 	stem_word(buf, &len);
 	if (strcmp(buf, expected) != 0)
 	{
-		printf("\tOriginal [%02u]: %s\n", len, str);
+		printf("\tOriginal [%02lu]: %s\n", strlen(str), str);
 		printf("\tStemmed  [%02u]: %s\n", len, buf);
 		return false;
 	}
+	return true;
+}
+
+bool line_proc_test(const char *str)
+{
+	char buf[BUF64];
+	char *ut = NULL;
+	int i, len = strlen(str);
+	uint8_t kt[8];
+	uint64_t *st = NULL;
+
+	if (len >= (int) BUF64)
+	{
+		printf("ERROR: input string exceeded buffer size %u\n", BUF64);
+		return false;
+	}
+
+	strcpy(buf, str);
+	filter_line(buf, &len);
+	printf("\tOriginal [%02lu]: %s\n", strlen(str), str);
+	printf("\tFiltered [%02u]: %s\n", len, buf);
+
+	strcpy(buf, str);
+	encode_msg(buf, &st, &ut, kt);
+	printf("\tUT: %s<\n\tST: ", ut ? ut : "nil");
+	for (i = 0; st; ++i)
+	{
+		printf("%6lu %6lu %6lu ", st[i] & MAX_U21, (st[i] >> 21) & MAX_U21, (st[i] >> 42) & MAX_U21);
+		if (st[i] >> 63) break;
+	}
+	printf("\n\tKT: ");
+	for (i = 1; i < 8; ++i) printf("%2u ", kt[i]);
+	printf("\n");
+
+	if (ut) free(ut);
+	if (st) free(st);
 	return true;
 }
 
@@ -259,13 +295,19 @@ int main()
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
 
-	pstat(word_proc_test("ALieNs", "alien") &&
-		  word_proc_test("Hopping", "hop") &&
-		  word_proc_test("Hoping", "hope") &&
+	pstat(word_proc_test("aliens", "alien") &&
+		  word_proc_test("hoping", "hope") &&
+		  word_proc_test("hopping", "hop") &&
 		  word_proc_test("transfer", "transfer") &&
-		  word_proc_test("PEr-forM'Er", "perform") &&
+		  word_proc_test("performer", "perform") &&
+		  word_proc_test("refreshments", "refresh") &&
 		  word_proc_test("sterilizations", "steril"),
 		  "Word processing test");
+
+	// TODO: define line proc failure conditions or expected output
+	pstat(line_proc_test("I have a dream-1984") &&
+		  line_proc_test("Beavis & Butthead S1e2"),
+		  "Line processing test");
 
 	log_test();
 	tracker_test();
