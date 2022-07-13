@@ -109,6 +109,7 @@ private:
 	char **dict = NULL;
 };
 extern wordDB WORDS_EN;
+extern wordDB STOPWORDS_EN;
 
 class torDB {
 public:

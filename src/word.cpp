@@ -358,8 +358,8 @@ bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
 		else ilen = strlen(s);
 
 		stem_word(s, &ilen);
-		idx = (uint64_t) WORDS_EN.find(s);
-		if (idx > 0ULL)
+		if (STOPWORDS_EN.find(s)) goto LOOP_CONTINUE;
+		if ((idx = (uint64_t) WORDS_EN.find(s)))
 		{
 			ret_3 = ret / 3;
 			switch (ret % 3)
@@ -396,6 +396,7 @@ bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
 			(*ut)[--blen] = ' ';
 		}
 
+LOOP_CONTINUE:
 		if (p && *(p + 1) > 0) ++p;
 		else p = NULL;
 	}

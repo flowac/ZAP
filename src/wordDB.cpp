@@ -5,6 +5,7 @@
 #include "types.h"
 
 wordDB WORDS_EN("extern/scrap/english.src");
+wordDB STOPWORDS_EN("extern/scrap/stopwords_en.src");
 
 wordDB::wordDB(const char *src)
 {
@@ -41,11 +42,15 @@ uint32_t wordDB::find(const char *str)
 
 	do
 	{
-		if (cmp < 0)      right = i - 1;
-		else if (cmp > 0) left  = i + 1;
-		else return ++i;
+		if (cmp < 0)
+		{
+			if (i > 0) right = i - 1;
+			else break;
+		}
+		else left = i + 1;
 		i = (left + right) >> 1;
 		cmp = strcasecmp(str, dict[i]);
+		if (cmp == 0) return ++i;
 	}
 	while (left < right);
 
@@ -61,11 +66,15 @@ std::vector<std::string> wordDB::findN(const char *str, uint8_t n)
 
 	do
 	{
-		if (cmp < 0)      right = i - 1;
-		else if (cmp > 0) left  = i + 1;
-		else break;
+		if (cmp < 0)
+		{
+			if (i > 0) right = i - 1;
+			else break;
+		}
+		else left = i + 1;
 		i = (left + right) >> 1;
 		cmp = strcasecmp(str, dict[i]);
+		if (cmp == 0) break;
 	}
 	while (left < right);
 	for (; i < len && strncasecmp(str, dict[i], slen) > 0; ++i);

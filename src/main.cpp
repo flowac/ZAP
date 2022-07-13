@@ -297,7 +297,7 @@ void dictionary_search(void)
 		if (buf[0] == '0') break;
 		for (uint8_t i = 0; i < BUF64; ++i) if (!isalpha(buf[i])) buf[i] = 0;
 
-		std::vector<std::string> list = WORDS_EN.findN(buf, 7);
+		std::vector<std::string> list = WORDS_EN.findN(buf, 9);
 		for (std::string item : list) printf("%s ", item.c_str());
 		printf("\n");
 	}
