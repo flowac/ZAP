@@ -108,6 +108,7 @@ private:
 	uint32_t len = 0;
 	char **dict = NULL;
 };
+extern wordDB WORDS_EN;
 
 class torDB {
 public:

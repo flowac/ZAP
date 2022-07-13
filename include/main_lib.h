@@ -7,13 +7,11 @@
 #define _ALIB_H
 
 #include <cstddef>
-#include <list>
 
 #include "types.h"
 
 void filter_line(char *b, int *k);
 void stem_word(char *buf, int *len); //!< PortStemmer
-uint32_t find_word(char *buf); //!< Find word index from the dictionary
 bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8]); //!< Encode a message with dictionary
 
 /**

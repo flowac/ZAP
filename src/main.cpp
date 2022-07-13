@@ -288,7 +288,6 @@ void wallet_test()
 void dictionary_search(void)
 {
 	char buf[BUF64];
-	wordDB words("extern/scrap/english.src");
 
 	memset(buf, 0, BUF64);
 	printf("Dictionary search test (enter any word, or 0 to exit):\n");
@@ -298,7 +297,7 @@ void dictionary_search(void)
 		if (buf[0] == '0') break;
 		for (uint8_t i = 0; i < BUF64; ++i) if (!isalpha(buf[i])) buf[i] = 0;
 
-		std::vector<std::string> list = words.findN(buf, 7);
+		std::vector<std::string> list = WORDS_EN.findN(buf, 7);
 		for (std::string item : list) printf("%s ", item.c_str());
 		printf("\n");
 	}
