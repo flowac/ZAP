@@ -285,10 +285,38 @@ void wallet_test()
 	pstat(verifyMessage(pub, sig, msg, msgLen), "Verify");
 }
 
-int main()
+void dictionary_search(void)
+{
+	char buf[BUF64];
+	wordDB words("extern/scrap/english.src");
+
+	memset(buf, 0, BUF64);
+	printf("Dictionary search test (enter any word, or 0 to exit):\n");
+
+	while (fgets(buf, BUF64, stdin))
+	{
+		if (buf[0] == '0') break;
+		for (uint8_t i = 0; i < BUF64; ++i) if (!isalpha(buf[i])) buf[i] = 0;
+
+		std::vector<std::string> list = words.findN(buf, 7);
+		for (std::string item : list) printf("%s ", item.c_str());
+		printf("\n");
+	}
+}
+
+int main(int argc, char **argv)
 {
 	time_t tm;
 	srand((unsigned) time(&tm));
+
+	for (int i = 1; i < argc; ++i)
+	{
+		switch (tolower(argv[i][0]))
+		{
+		case 'd': dictionary_search(); return 0; break;
+		default: printf("WARNING: unknown switch %s ignored.\n", argv[i]); break;
+		}
+	}
 
 	printf("[INFO] OpenSSL version %lX.%lX.%lX (required was 3.0.0+)\n",
 		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,

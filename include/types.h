@@ -101,8 +101,9 @@ class wordDB {
 public:
 	wordDB(const char *src);
 	~wordDB();
-	inline char *at(uint32_t idx); //!< starts counting from 1
-	inline uint32_t size(void);
+	uint32_t find(const char *str);
+	std::vector<std::string> findN(const char *str, uint8_t n);
+	std::string get(uint32_t idx);
 private:
 	uint32_t len = 0;
 	char **dict = NULL;

@@ -307,15 +307,56 @@ wordDB::~wordDB()
 	free(dict);
 }
 
-inline char * wordDB::at(uint32_t idx)
+uint32_t wordDB::find(const char *str)
 {
-	if (idx == 0 || idx > len) return NULL;
-	return dict[--idx];
+	int cmp;
+	uint32_t i, left = 0, right = len - 1;
+	if (len == 0) return 0UL;
+
+	do
+	{
+		if (cmp < 0)      right = i - 1;
+		else if (cmp > 0) left  = i + 1;
+		else return ++i;
+		i = (left + right) >> 1;
+		cmp = strcasecmp(str, dict[i]);
+	}
+	while (left < right);
+
+	return 0UL;
 }
 
-inline uint32_t wordDB::size(void)
+std::vector<std::string> wordDB::findN(const char *str, uint8_t n)
 {
-	return len;
+	int cmp = -1, slen = strlen(str);
+	uint32_t i = len, left = 0, right;
+	std::vector<std::string> ret;
+	if (len == 0) return ret;
+
+	do
+	{
+		if (cmp < 0)      right = i - 1;
+		else if (cmp > 0) left  = i + 1;
+		else break;
+		i = (left + right) >> 1;
+		cmp = strcasecmp(str, dict[i]);
+	}
+	while (left < right);
+	for (; i < len && strncasecmp(str, dict[i], slen) > 0; ++i);
+
+    for (uint8_t j = 0; j < n && i < len; ++i, ++j)
+	{
+		if (strncasecmp(str, dict[i], slen) != 0) break;
+		ret.push_back(std::string(dict[i]));
+	}
+
+	return ret;
+}
+
+std::string wordDB::get(uint32_t idx)
+{
+	if (idx < 1 || idx >= len) return std::string();
+	return std::string(dict[--idx]);
 }
 
 void filter_line(char *b, int *k)
@@ -371,25 +412,10 @@ void stem_word(char *buf, int *len)
     buf[z.k] = 0;
 }
 
-// This function assumes dictionary index lookups will not go out of bounds
 uint32_t find_word(char *buf)
 {
 	static wordDB words("extern/scrap/english.src");
-	int cmp;
-	uint32_t i, left = 1, right = words.size();
-	if (right == 0) return 0UL;
-
-	while (left != right)
-	{
-		i = (left + right) >> 1;
-		cmp = strcasecmp(buf, words.at(i));
-		if (cmp < 0)      right = i - 1;
-		else if (cmp > 0) left  = i + 1;
-		else return i;
-	}
-
-	if (0 == strcasecmp(buf, words.at(left))) return left;
-	return 0UL;
+	return words.find(buf);
 }
 
 bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
