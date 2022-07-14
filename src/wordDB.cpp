@@ -9,22 +9,25 @@ wordDB STOPWORDS_EN("extern/scrap/stopwords_en.src");
 
 wordDB::wordDB(const char *src)
 {
-	int blen;
 	char buf[BUF64];
 	FILE *fp = fopen(src, "r");
-	if (!fp) return;
+	uint32_t blen, tlen;
 
-	while (fgets(buf, BUF64, fp))
+	if (!fp) return;
+	if (!fgets(buf, BUF64, fp)) return;
+	if ((tlen = strtoul(buf, NULL, 0)) > MAX_U21) return;
+	if (!(dict = (char **) calloc(tlen, sizeof(char *)))) return;
+
+	while (fgets(buf, BUF64, fp) && len < tlen)
 	{
 		blen = strlen(buf);
 		while (blen && !isalpha(buf[blen - 1])) --blen;
 		if (!blen) continue;
 
-		if ((len % 10) == 0) dict = (char **) realloc(dict, sizeof(char *) * (len + 10));
 		dict[len] = (char *) calloc(blen + 1, 1);
 		memcpy(dict[len++], buf, blen);
 	}
-	printf("[INFO] Dictionary %s initialized %u\n", src, len);
+	printf("[INFO] Dictionary %s initialized %u of out %u expected\n", src, len, tlen);
 	fclose(fp);
 }
 
