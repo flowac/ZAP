@@ -10,9 +10,9 @@
 
 #include "types.h"
 
-void filter_line(char *b, int *k);
-void stem_word(char *buf, int *len); //!< PortStemmer
-bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8]); //!< Encode a message with dictionary
+void filterLine(char *b, int *k);
+void stemWord(char *buf, int *len); //!< PortStemmer
+bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8]); //!< Encode a message with dictionary
 
 /**
  * @brief Packs uint??_t into uint8_t buffer little endian style

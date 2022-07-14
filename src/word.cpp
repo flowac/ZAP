@@ -9,7 +9,7 @@
 #include <stdlib.h>  /* for malloc, free */
 #include <string.h>  /* for memcmp, memmove */
 
-#include "types.h"
+#include "main_lib.h"
 
 typedef struct {
     char *b;           /*buffer for word to be stemmed */
@@ -280,7 +280,7 @@ static void step5(stem *z)
     if (b[z->k] == 'l' && doublec(z, z->k) && m(z) > 1) z->k--;
 }
 
-void filter_line(char *b, int *k)
+void filterLine(char *b, int *k)
 {
 	char prev = 0;
     for (int i = 0; i < *k;)
@@ -319,7 +319,7 @@ LINE_MOVE:
     }
 }
 
-void stem_word(char *buf, int *len)
+void stemWord(char *buf, int *len)
 {
     stem z = {.b = buf, .k = *len - 1, .j = 0};
     if (z.k <= 1 || !buf) return;
@@ -333,21 +333,24 @@ void stem_word(char *buf, int *len)
     buf[z.k] = 0;
 }
 
-bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
+bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8])
 {
+	char buf[BUF1K];
 	char *p, *s;
 	int ilen, j;
 	uint32_t ret = 0, ret_3 = 0;
 	uint32_t blen, ulen = 0;
 	uint64_t idx;
 
-	if (!buf || !st || !ut || !kt) return false;
+	if (!msg || !st || !ut || !kt) return false;
 	*st = NULL;
 	*ut = NULL;
 	memset(kt + 1, MAX_U8, 7);
 
-	ilen = strlen(buf);
-	filter_line(buf, &ilen);
+	if ((ilen = strlen(msg)) >= (int) BUF1K) return false;
+	memcpy(buf, msg, ilen + 1);
+	filterLine(buf, &ilen);
+
 	for (p = buf; (s = p); (p && *(p + 1) > 0) ? ++p : p = NULL)
 	{
 		if ((p = strchr(s, ' ')))
@@ -357,7 +360,7 @@ bool encode_msg(char *buf, uint64_t **st, char **ut, uint8_t kt[8])
 		}
 		else ilen = strlen(s);
 
-		stem_word(s, &ilen);
+		stemWord(s, &ilen);
 		if (STOPWORDS_EN.find(s)) continue;
 		if ((idx = (uint64_t) WORDS_EN.find(s)))
 		{

@@ -96,7 +96,7 @@ bool word_proc_test(const char *str, const char *expected)
 	}
 
 	strcpy(buf, str);
-	stem_word(buf, &len);
+	stemWord(buf, &len);
 	if (strcmp(buf, expected) != 0)
 	{
 		printf("\tOriginal [%02lu]: %s\n", strlen(str), str);
@@ -121,12 +121,12 @@ bool line_proc_test(const char *str)
 	}
 
 	strcpy(buf, str);
-	filter_line(buf, &len);
+	filterLine(buf, &len);
 	printf("\tOriginal [%02lu]: %s\n", strlen(str), str);
 	printf("\tFiltered [%02u]: %s\n", len, buf);
 
 	strcpy(buf, str);
-	encode_msg(buf, &st, &ut, kt);
+	encodeMsg(buf, &st, &ut, kt);
 	printf("\tUT: %s<\n\tST: ", ut ? ut : "nil");
 	for (i = 0; st; ++i)
 	{

@@ -56,7 +56,6 @@ typedef struct pack {
 	uint64_t  xl; //!< exact length, size of file in bytes
 	char     *dn; //!< display name, filename
 	uint8_t  *tr; //!< address tracker, tracker url
-//TODO: compress or turn search terms into 16 bits
 	uint64_t *st; //!< 21 bit dictionary search terms
 	char     *ut; //!< Search terms not found in dictionary (MAX_U6)
 	uint8_t   kt[8]; //!< [0] categories: second - upper 4, first - lower 4, [1-7] 8 bit number search terms

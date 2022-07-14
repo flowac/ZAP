@@ -107,10 +107,7 @@ bool processPack(torDB *td, pack *px)
 	idx = td->pak.size() - 1;
 	if (!kt2) td->cat[kt1][1].push_back(idx);
 	else      td->cat[kt1][kt2].push_back(idx);
-
-	// TODO: add search term processing
-	// TODO: check the checksums in audit
-	return true;
+	return encodeMsg(px->dn, &(px->st), &(px->ut), px->kt);
 }
 
 bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt)
@@ -133,9 +130,13 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (isKeywordValid(kt)) px.kt[0] = kt;
 	else goto cleanup;
 
+	if (!processPack(td, &px))
+	{
+		printf("proc pack failed %u %u\n", kt & MAX_U4, kt >> 4);
+		goto cleanup;
+	}
 	if (!checkPack(&px, true)) goto cleanup;
 	td->pak.push_back(px);
-	if (!processPack(td, &px)) printf("proc pack failed %u %u\n", kt & MAX_U4, kt >> 4);
 
 	return true;
 cleanup:
@@ -204,6 +205,8 @@ static inline void deletePack(pack *target)
 	if (!target) return;
 	if (target->dn) free(target->dn);
 	if (target->tr) free(target->tr);
+	if (target->st) free(target->st);
+	if (target->ut) free(target->ut);
 }
 
 torDB::torDB()
