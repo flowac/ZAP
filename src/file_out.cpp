@@ -21,32 +21,35 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
-void torDBToText(torDB *td, const char *dest)
+void packToText(pack *px, FILE *fp)
 {
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
 	char *kt1, *kt2;
+
+	if (!px || !fp) return;
+	decompOK = decompressTracker(px->tr, decompTR) > 0;
+	if (!decompOK) printf("[WARN] failed to decompressTracker\n");
+
+	fprintf(fp, "{P\n\t");
+	printBytes(fp, px->xt, 20);
+	if (!lookupKeyword(px->kt[0], &kt1, &kt2)) kt1 = kt2 = NULL;
+
+	fprintf(fp, ","
+			"\n\tlen : %lu,"
+			"\n\tdn  : %s,"
+			"\n\ttr  : %s,"
+			"\n\tkt  : %s %s\n}\n",
+			px->xl, px->dn, decompOK ? decompTR : (char *) (px->tr),
+			kt1 ? kt1 : "nil", kt2 ? kt2 : "nil");
+}
+
+void torDBToText(torDB *td, const char *dest)
+{
 	FILE *fp = fopen(dest, "w");
-	uint64_t i;
 	if (!td || !fp) goto cleanup;
 
-	for (i = 0; i < td->pak.size(); ++i)
-	{
-		decompOK = decompressTracker(td->pak[i].tr, decompTR) > 0;
-		if (!decompOK) printf("[WARN] failed to decompressTracker\n");
-
-		fprintf(fp, "{P\n\t");
-		printBytes(fp, td->pak[i].xt, 20);
-		if (!lookupKeyword(td->pak[i].kt[0], &kt1, &kt2)) kt1 = kt2 = NULL;
-
-		fprintf(fp, ","
-				"\n\tlen : %lu,"
-				"\n\tdn  : %s,"
-				"\n\ttr  : %s,"
-				"\n\tkt  : %s %s\n}\n",
-				td->pak[i].xl, td->pak[i].dn, decompOK ? decompTR : (char *) (td->pak[i].tr),
-				kt1 ? kt1 : "nil", kt2 ? kt2 : "nil");
-	}
+	for (uint64_t i = 0; i < td->pak.size(); ++i) packToText(&(td->pak[i]), fp);
 cleanup:
 	if (fp) fclose(fp);
 }
@@ -64,29 +67,30 @@ void tranToText(tran *tx, FILE *fp)
 	printBytes(fp, tx->sig, ED448_SIG_LEN, ",\n\t\t},\n");
 }
 
+void blockToText(block *bx, FILE *fp)
+{
+	if (!bx || !fp) return;
+	fprintf(fp, "{B\n");
+	printBytes(fp, bx->crc, SHA3_LEN, "\n");
+	printBytes(fp, bx->key, SHA3_LEN);
+
+	fprintf(fp,
+			"\n\tn   : %lu,"
+			"\n\tgmt : %lu,"
+			"\n\ttran: %u,\n",
+			bx->n, bx->time, bx->n_trans);
+
+	for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
+	fprintf(fp, "},\n");
+}
+
 void chainToText(chain *ch, const char *dest)
 {
 	FILE *fp = fopen(dest, "w");
-	uint32_t j;
-	uint64_t i;
 	if (!ch || !fp) goto cleanup;
 
 	fprintf(fp, "C %lu\n", ch->blk.size());
-	for (i = 0; i < ch->blk.size(); ++i)
-	{
-		fprintf(fp, "{B\n");
-		printBytes(fp, ch->blk[i].crc, SHA3_LEN, "\n");
-		printBytes(fp, ch->blk[i].key, SHA3_LEN);
-
-		fprintf(fp,
-				"\n\tn   : %lu,"
-				"\n\tgmt : %lu,"
-				"\n\ttran: %u,\n",
-				ch->blk[i].n, ch->blk[i].time, ch->blk[i].n_trans);
-
-		for (j = 0; j < ch->blk[i].n_trans; ++j) tranToText(&(ch->blk[i].trans[j]), fp);
-		fprintf(fp, "},\n");
-	}
+	for (uint64_t i = 0; i < ch->blk.size(); ++i) blockToText(&(ch->blk[i]), fp);
 cleanup:
 	if (fp) fclose(fp);
 }

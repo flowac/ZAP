@@ -74,17 +74,6 @@ bool dequeueTran(tran *target)
 	return true;
 }
 
-uint32_t tranQueueLen(void)
-{
-	return tran_queue.size();
-}
-
-void printBlock(block *target)
-{
-	//printTime((time_t) target->time);
-	printf("B%04lu %lu T%u\n", target->n, target->time, target->n_trans);
-}
-
 bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 			 uint8_t src[ED448_LEN], uint8_t dest[ED448_LEN], uint8_t sig[ED448_SIG_LEN])
 {

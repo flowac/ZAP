@@ -11,9 +11,11 @@
 uint32_t getFilesize(FILE *fp);
 void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix = NULL);
 
+void blockToText (block *bx, FILE *fp);
 void chainToText (chain *ch, const char *dest);
 bool chainToZip  (chain *ch, const char *dest);
 bool chainFromZip(chain *ch, const char *src);
+void packToText  (pack  *px, FILE *fp);
 void torDBToText (torDB *td, const char *dest);
 bool torDBToZip  (torDB *td, const char *dest);
 bool torDBFromZip(torDB *td, const char *src);

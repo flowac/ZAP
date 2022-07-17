@@ -32,7 +32,6 @@ uint32_t u8cmp(uint8_t *ptr, char *str);
  *	key (Unique identifier)
  *	number of payloads
  */
-void printBlock(block *target);
 void printTorCat(torDB *target);
 
 /**

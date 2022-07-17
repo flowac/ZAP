@@ -150,7 +150,62 @@ void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
 	printf("\n");
 }
 
-void chain_test(int size)
+void interact_test(chain *ch, torDB *td)
+{
+	bool tmpb;
+	char buf[BUF64];
+	uint64_t tmpul;
+
+	if (!ch || !td) return;
+	memset(buf, 0, BUF64);
+PRINT_HELP:
+	printf("Interactive test\n"
+		   "lc         Get chain length\n"
+		   "ai         Audit block at i\n"
+		   "bi         Print block at i\n"
+		   "lt         Get magnet length\n"
+		   "ti         Print magnet at i\n"
+		   "s[i[i]] n  Search for magnet by name n and category index i\n"
+		   "e          Exit\n");
+
+	while (fgets(buf, BUF64, stdin))
+	{
+		if (strlen(buf) < 1) goto PRINT_HELP;
+		tmpul = strtoul(buf + 1, NULL, 0);
+		switch (buf[0])
+		{
+		case 'l':
+			if (buf[1] == 'c') printf("Chain length is %lu\n", ch->blk.size());
+			else if (buf[1] == 't') printf("Magnet length is %lu\n", td->pak.size());
+			else goto PRINT_HELP;
+			break;
+		case 'a':
+			if (tmpul >= ch->blk.size()) goto PRINT_HELP;
+			tmpb = checkBlock(&(ch->blk[tmpul]), false, tmpul ? ch->blk[tmpul - 1].crc : NULL);
+			printf("Audit for block %ld %s\n", tmpul, tmpb ? "passed" : "failed");
+			break;
+		case 'b':
+			if (tmpul >= ch->blk.size()) goto PRINT_HELP;
+			blockToText(&(ch->blk[tmpul]), stdout);
+			break;
+		case 't':
+			if (tmpul >= td->pak.size()) goto PRINT_HELP;
+			packToText(&(td->pak[tmpul]), stdout);
+			break;
+		case 's':
+			printf("Work in progress\n");
+			break;
+		case 'e':
+			return;
+			break;
+		default:
+			goto PRINT_HELP;
+			break;
+		}
+	}
+}
+
+void chain_test(int size, bool interact)
 {
 	const char *zaaFile = "temp.zaa"; // chainToZip file
 	const char *za2File = "temp.za2"; // imported, then chainToZip'd file
@@ -174,6 +229,8 @@ void chain_test(int size)
 	search_test(&td, "Games", "Mac", NULL);
 	search_test(&td, "Games", NULL, NULL);
 #endif
+
+	if (interact) interact_test(&ch, &td);
 
 	printf("\nWrite to file\n");
 	start_timer();
@@ -305,6 +362,7 @@ void dictionary_search(void)
 
 int main(int argc, char **argv)
 {
+	bool interact = false; // Enter interactive mode once the test chain is loaded
 	time_t tm;
 	srand((unsigned) time(&tm));
 
@@ -313,6 +371,7 @@ int main(int argc, char **argv)
 		switch (tolower(argv[i][0]))
 		{
 		case 'd': dictionary_search(); return 0; break;
+		case 'i': interact = true; break;
 		default: printf("WARNING: unknown switch %s ignored.\n", argv[i]); break;
 		}
 	}
@@ -338,7 +397,7 @@ int main(int argc, char **argv)
 
 	log_test();
 	tracker_test();
-	chain_test(100);
+	chain_test(100, interact);
 	wallet_test();
 
 	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
