@@ -10,6 +10,7 @@ bool torDBFromZip(torDB *td, const char *src)
 	char dn[MAGNET_DN_LEN + 1];
 	FILE *fp = fopen(src, "rb");
 	uint8_t buf[BUF1K];
+	uint8_t crc[SHAKE_LEN];
 	uint8_t xt[MAGNET_XT_LEN];
 	uint8_t tr[MAGNET_TR_LEN];
 	uint8_t kt;
@@ -23,11 +24,12 @@ bool torDBFromZip(torDB *td, const char *src)
 
 	for (i = 0; i < nPacks; ++i)
 	{
-		len = 9 + MAGNET_XT_LEN;
+		len = 9 + SHAKE_LEN + MAGNET_XT_LEN;
 		if (len != fread(buf, 1, len, fp)) goto cleanup;
 		if (buf[0] != 'P') goto cleanup;
-		memcpy(xt, buf + 1, MAGNET_XT_LEN);
-		u64Unpack(buf + 1 + MAGNET_XT_LEN, &xl);
+		memcpy(crc, buf + 1, SHAKE_LEN);
+		memcpy(xt, buf + 1 + SHAKE_LEN, MAGNET_XT_LEN);
+		u64Unpack(buf + 1 + SHAKE_LEN + MAGNET_XT_LEN, &xl);
 
 		if (1 != fread(buf, 1, 1, fp)) goto cleanup;
 		len = buf[0];
@@ -46,7 +48,7 @@ bool torDBFromZip(torDB *td, const char *src)
 		kt = buf[0];
 		if (!isKeywordValid(kt)) goto cleanup;
 
-		if (!(ret = newPack(td, xt, xl, dn, tr, kt))) goto cleanup;
+		if (!(ret = newPack(td, xt, xl, dn, tr, kt, crc))) goto cleanup;
 	}
 cleanup:
 	if (fp) fclose(fp);

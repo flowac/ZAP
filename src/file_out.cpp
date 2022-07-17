@@ -21,27 +21,42 @@ void printBytes(FILE *fp, uint8_t *data, uint32_t len, const char *suffix)
 	if (suffix) fprintf(fp, suffix);
 }
 
-void packToText(pack *px, FILE *fp)
+void packToText(pack *px, FILE *fp, bool verbose)
 {
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
 	char *kt1, *kt2;
+	int i;
 
 	if (!px || !fp) return;
 	decompOK = decompressTracker(px->tr, decompTR) > 0;
 	if (!decompOK) printf("[WARN] failed to decompressTracker\n");
 
-	fprintf(fp, "{P\n\t");
-	printBytes(fp, px->xt, 20);
+	fprintf(fp, "{P\n\tcrc :");
+	printBytes(fp, px->crc, SHAKE_LEN, "\n\txt  :");
+	printBytes(fp, px->xt, MAGNET_XT_LEN);
 	if (!lookupKeyword(px->kt[0], &kt1, &kt2)) kt1 = kt2 = NULL;
-
-	fprintf(fp, ","
-			"\n\tlen : %lu,"
+	fprintf(fp,
+			",\n\tlen : %lu,"
 			"\n\tdn  : %s,"
 			"\n\ttr  : %s,"
-			"\n\tkt  : %s %s\n}\n",
+			"\n\tkt  : %s %s\n",
 			px->xl, px->dn, decompOK ? decompTR : (char *) (px->tr),
 			kt1 ? kt1 : "nil", kt2 ? kt2 : "nil");
+
+	if (verbose)
+	{
+		printf("\tUT: %s.\n\tST: ", px->ut ? px->ut : "nil");
+		if (px->st) for (i = 0;; ++i)
+		{
+			printf("%6lu %6lu %6lu ", px->st[i] & MAX_U21, (px->st[i] >> 21) & MAX_U21, (px->st[i] >> 42) & MAX_U21);
+			if (px->st[i] >> 63) break;
+		}
+		printf("\n\tKT: %u %u, ", px->kt[0] & MAX_U4, px->kt[0] >> 4);
+		for (i = 1; i < 8; ++i) printf("%2u ", px->kt[i]);
+		printf("\n");
+	}
+	fprintf(fp, "}\n");
 }
 
 void torDBToText(torDB *td, const char *dest)
@@ -67,20 +82,20 @@ void tranToText(tran *tx, FILE *fp)
 	printBytes(fp, tx->sig, ED448_SIG_LEN, ",\n\t\t},\n");
 }
 
-void blockToText(block *bx, FILE *fp)
+void blockToText(block *bx, FILE *fp, bool verbose)
 {
 	if (!bx || !fp) return;
-	fprintf(fp, "{B\n");
-	printBytes(fp, bx->crc, SHA3_LEN, "\n");
+	fprintf(fp, "{B\ncrc:");
+	printBytes(fp, bx->crc, SHA3_LEN, "\nkey:");
 	printBytes(fp, bx->key, SHA3_LEN);
 
 	fprintf(fp,
 			"\n\tn   : %lu,"
-			"\n\tgmt : %lu,"
+			"\n\ttime: %lu,"
 			"\n\ttran: %u,\n",
 			bx->n, bx->time, bx->n_trans);
 
-	for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
+	if (verbose) for (uint32_t i = 0; i < bx->n_trans; ++i) tranToText(&(bx->trans[i]), fp);
 	fprintf(fp, "},\n");
 }
 
@@ -112,6 +127,8 @@ bool torDBToZip(torDB *td, const char *dest)
 	{
 		j = 0;
 		buf[j++] = 'P';
+		memcpy(buf + j, td->pak[i].crc, SHAKE_LEN);
+		j += SHAKE_LEN;
 		memcpy(buf + j, td->pak[i].xt, MAGNET_XT_LEN);
 		j += MAGNET_XT_LEN;
 		j += u64Packer(buf + j, td->pak[i].xl);

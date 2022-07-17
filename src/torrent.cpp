@@ -110,7 +110,7 @@ bool processPack(torDB *td, pack *px)
 	return encodeMsg(px->dn, &(px->st), &(px->ut), px->kt);
 }
 
-bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt)
+bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt, uint8_t crc[SHAKE_LEN])
 {
 	uint32_t ndn = 0, ntr = 0;
 	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .st = NULL, .ut = NULL, .kt = {0}};
@@ -120,6 +120,7 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
 	if (!(ntr = compressTracker(tr))) goto cleanup;
 
+	if (crc) memcpy(px.crc, crc, SHAKE_LEN);
 	memcpy(px.xt, xt, MAGNET_XT_LEN);
 	px.xl = xl;
 	if (!(px.dn = (char *) calloc(ndn + 1, 1))) goto cleanup;
@@ -135,7 +136,7 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 		printf("proc pack failed %u %u\n", kt & MAX_U4, kt >> 4);
 		goto cleanup;
 	}
-	if (!checkPack(&px, true)) goto cleanup;
+	if (!checkPack(&px, !crc)) goto cleanup;
 	td->pak.push_back(px);
 
 	return true;

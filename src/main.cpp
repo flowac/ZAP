@@ -128,7 +128,7 @@ bool line_proc_test(const char *str)
 	strcpy(buf, str);
 	encodeMsg(buf, &st, &ut, kt);
 	printf("\tUT: %s<\n\tST: ", ut ? ut : "nil");
-	for (i = 0; st; ++i)
+	if (st) for (i = 0;; ++i)
 	{
 		printf("%6lu %6lu %6lu ", st[i] & MAX_U21, (st[i] >> 21) & MAX_U21, (st[i] >> 42) & MAX_U21);
 		if (st[i] >> 63) break;
@@ -154,43 +154,58 @@ void interact_test(chain *ch, torDB *td)
 {
 	bool tmpb;
 	char buf[BUF64];
-	uint64_t tmpul;
+	uint32_t blen, tmpu;
 
 	if (!ch || !td) return;
 	memset(buf, 0, BUF64);
 PRINT_HELP:
-	printf("Interactive test\n"
-		   "lc         Get chain length\n"
-		   "ai         Audit block at i\n"
-		   "bi         Print block at i\n"
-		   "lt         Get magnet length\n"
-		   "ti         Print magnet at i\n"
-		   "s[i[i]] n  Search for magnet by name n and category index i\n"
-		   "e          Exit\n");
+	printf("Interactive test: {required} [optional]\n"
+		   "lb           Get block length\n"
+		   "a{i}b        Audit block at i\n"
+		   "b{i}[v]      Print block at i, v for verbose output\n"
+		   "lm           Get magnet length\n"
+		   "a{i}m        Audit magnet at i\n"
+		   "m{i}[v]      Print magnet at i, v for verbose output\n"
+		   "s[i[i]] {n}  Search for magnet by name n and category index i\n"
+		   "e            Exit\n");
 
 	while (fgets(buf, BUF64, stdin))
 	{
-		if (strlen(buf) < 1) goto PRINT_HELP;
-		tmpul = strtoul(buf + 1, NULL, 0);
-		switch (buf[0])
+		for (blen = 0; buf[blen] && (buf[blen] == ' ' || isalnum(buf[blen])); ++blen);
+		buf[blen] = 0;
+		if (blen-- < 1) goto PRINT_HELP;
+		tmpu = strtoul(buf + 1, NULL, 0);
+		buf[blen] = tolower(buf[blen]);
+
+		switch (tolower(buf[0]))
 		{
 		case 'l':
-			if (buf[1] == 'c') printf("Chain length is %lu\n", ch->blk.size());
-			else if (buf[1] == 't') printf("Magnet length is %lu\n", td->pak.size());
+			if (buf[1] == 'b') printf("Block length is %lu\n", ch->blk.size());
+			else if (buf[1] == 'm') printf("Magnet length is %lu\n", td->pak.size());
 			else goto PRINT_HELP;
 			break;
 		case 'a':
-			if (tmpul >= ch->blk.size()) goto PRINT_HELP;
-			tmpb = checkBlock(&(ch->blk[tmpul]), false, tmpul ? ch->blk[tmpul - 1].crc : NULL);
-			printf("Audit for block %ld %s\n", tmpul, tmpb ? "passed" : "failed");
+			if (buf[blen] == 'b')
+			{
+				if (tmpu >= ch->blk.size()) goto PRINT_HELP;
+				tmpb = checkBlock(&(ch->blk[tmpu]), false, tmpu ? ch->blk[tmpu - 1].crc : NULL);
+				printf("Audit for block %u %s\n", tmpu, tmpb ? "passed" : "failed");
+			}
+			else if (buf[blen] == 'm')
+			{
+				if (tmpu >= td->pak.size()) goto PRINT_HELP;
+				tmpb = checkPack(&(td->pak[tmpu]), false);
+				printf("Audit for pack %u %s\n", tmpu, tmpb ? "passed" : "failed");
+			}
+			else goto PRINT_HELP;
 			break;
 		case 'b':
-			if (tmpul >= ch->blk.size()) goto PRINT_HELP;
-			blockToText(&(ch->blk[tmpul]), stdout);
+			if (tmpu >= ch->blk.size()) goto PRINT_HELP;
+			blockToText(&(ch->blk[tmpu]), stdout, buf[blen] == 'v');
 			break;
-		case 't':
-			if (tmpul >= td->pak.size()) goto PRINT_HELP;
-			packToText(&(td->pak[tmpul]), stdout);
+		case 'm':
+			if (tmpu >= td->pak.size()) goto PRINT_HELP;
+			packToText(&(td->pak[tmpu]), stdout, buf[blen] == 'v');
 			break;
 		case 's':
 			printf("Work in progress\n");
@@ -392,7 +407,8 @@ int main(int argc, char **argv)
 
 	// TODO: define line proc failure conditions or expected output
 	pstat(line_proc_test("I have a dream-1984") &&
-		  line_proc_test("Beavis & Butthead S1e2"),
+		  line_proc_test("Beavis & Butthead S1e2") &&
+		  line_proc_test("Inferno Beyond The 7th Circle v1 0 16-Razor1911"),
 		  "Line processing test");
 
 	log_test();

@@ -337,7 +337,7 @@ bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8])
 {
 	char buf[BUF1K];
 	char *p, *s;
-	int ilen, j;
+	int ilen, klen = 1;
 	uint32_t ret = 0, ret_3 = 0;
 	uint32_t blen, ulen = 0;
 	uint64_t idx;
@@ -382,13 +382,12 @@ bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8])
 		}
 		else
 		{
-			j = 1;
-			for (char *tmp = s; *tmp && j < 8; ++tmp)
+			for (char *tmp = s; *tmp && klen < 8; ++tmp)
 			{
 				if (!isdigit(*tmp)) continue;
 				idx = *tmp - '0';
 				if (isdigit(*(tmp + 1))) idx = idx * 10 + *(++tmp) - '0';
-				kt[j++] = idx;
+				kt[klen++] = idx;
 			}
 
 			blen = ilen + ulen + 1;

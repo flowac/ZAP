@@ -45,7 +45,8 @@ bool newPack(torDB *td,
              uint64_t xl,               //!< Exact length (size in bytes)
              char *dn,                  //!< Display name
              uint8_t *tr,               //!< Tracker url
-			 uint8_t kt);               //!< Keywords
+			 uint8_t kt,                //!< Keywords
+			 uint8_t crc[SHAKE_LEN] = NULL);
 
 bool newTran(tran *tx,
 			 uint64_t id,
