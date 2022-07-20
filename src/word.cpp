@@ -391,7 +391,7 @@ bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8])
 			}
 
 			blen = ilen + ulen + 1;
-			if (blen > MAX_U6) continue;
+			if (blen > MAGNET_UT_LEN) continue;
 			*ut = (char *) realloc(*ut, blen);
 			memcpy(*ut + ulen, s, ilen);
 			ulen = blen;

@@ -106,7 +106,7 @@ bool word_proc_test(const char *str, const char *expected)
 	return true;
 }
 
-bool line_proc_test(const char *str)
+void line_proc_test(const char *str)
 {
 	char buf[BUF64];
 	char *ut = NULL;
@@ -117,7 +117,7 @@ bool line_proc_test(const char *str)
 	if (len >= (int) BUF64)
 	{
 		printf("ERROR: input string exceeded buffer size %u\n", BUF64);
-		return false;
+		return;
 	}
 
 	strcpy(buf, str);
@@ -139,13 +139,25 @@ bool line_proc_test(const char *str)
 
 	if (ut) free(ut);
 	if (st) free(st);
-	return true;
 }
 
-void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
+void print_search_terms(uint8_t kt1, uint8_t kt2, const char *str)
+{
+	if (isKeywordValid(kt1, kt2)) printf("[%s:%s]", getKeyword1(kt1), getKeyword2(kt1, kt2));
+	else printf("Category invalid [%d:%d]", kt1, kt2);
+	printf(" %s\n", str ? str : "nil");
+}
+
+void print_search_terms(const char *kt1, const char *kt2, const char *str)
+{
+	printf("[%s:%s] %s\n", kt1 ? kt1 : "nil", kt2 ? kt2 : "nil", str ? str : "nil");
+}
+
+template <class T_kt>
+void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str)
 {
 	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
-	printf("[%s %s] %s:\n\t", kt1, kt2, str);
+	print_search_terms(kt1, kt2, str);
 	for (uint32_t idx : result) printf("%u ", idx);
 	printf("\n");
 }
@@ -153,7 +165,8 @@ void search_test(torDB *td, const char *kt1, const char *kt2, const char *str)
 void interact_test(chain *ch, torDB *td)
 {
 	bool tmpb;
-	char buf[BUF64];
+	char buf[BUF64], *tmpc;
+	uint8_t kt1, kt2;
 	uint32_t blen, tmpu;
 
 	if (!ch || !td) return;
@@ -166,7 +179,7 @@ PRINT_HELP:
 		   "lm           Get magnet length\n"
 		   "a{i}m        Audit magnet at i\n"
 		   "m{i}[v]      Print magnet at i, v for verbose output\n"
-		   "s[i[i]] {n}  Search for magnet by name n and category index i\n"
+		   "s[i[i]] [n]  Search for magnet by category index i and name n\n"
 		   "e            Exit\n");
 
 	while (fgets(buf, BUF64, stdin))
@@ -209,6 +222,10 @@ PRINT_HELP:
 			break;
 		case 's':
 			printf("Work in progress\n");
+			tmpc = NULL;
+			kt1 = isdigit(buf[1]) ? buf[1] - '0' : 0;
+			kt2 = buf[2] ? strtoul(buf + 2, &tmpc, 0) : 0;
+			search_test(td, kt1, kt2, tmpc);
 			break;
 		case 'e':
 			return;
@@ -242,7 +259,7 @@ void chain_test(int size, bool interact)
 	printTorCat(&td);
 	search_test(&td, "Games", "PC", NULL);
 	search_test(&td, "Games", "Mac", NULL);
-	search_test(&td, "Games", NULL, NULL);
+	search_test(&td, "Games", "", NULL);
 #endif
 
 	if (interact) interact_test(&ch, &td);
@@ -405,11 +422,8 @@ int main(int argc, char **argv)
 		  word_proc_test("sterilizations", "steril"),
 		  "Word processing test");
 
-	// TODO: define line proc failure conditions or expected output
-	pstat(line_proc_test("I have a dream-1984") &&
-		  line_proc_test("Beavis & Butthead S1e2") &&
-		  line_proc_test("Inferno Beyond The 7th Circle v1 0 16-Razor1911"),
-		  "Line processing test");
+	printf("[INFO] Line processing test\n");
+	line_proc_test("Inferno Beyond The 7th Circle v1 0 16-Razor1911");
 
 	log_test();
 	tracker_test();

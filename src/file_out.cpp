@@ -25,17 +25,21 @@ void packToText(pack *px, FILE *fp, bool verbose)
 {
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
-	char *kt1, *kt2;
+	const char *kt1, *kt2;
 	int i;
+	uint8_t kt1u, kt2u;
 
 	if (!px || !fp) return;
 	decompOK = decompressTracker(px->tr, decompTR) > 0;
 	if (!decompOK) printf("[WARN] failed to decompressTracker\n");
 
+	convertKeyword(px->kt[0], &kt1u, &kt2u);
+	kt1 = getKeyword1(kt1u);
+	kt2 = getKeyword2(kt1u, kt2u);
+
 	fprintf(fp, "{P\n\tcrc :");
 	printBytes(fp, px->crc, SHAKE_LEN, "\n\txt  :");
 	printBytes(fp, px->xt, MAGNET_XT_LEN);
-	if (!lookupKeyword(px->kt[0], &kt1, &kt2)) kt1 = kt2 = NULL;
 	fprintf(fp,
 			",\n\tlen : %lu,"
 			"\n\tdn  : %s,"
