@@ -15,7 +15,7 @@ wordDB::wordDB(const char *src)
 
 	if (!fp) return;
 	if (!fgets(buf, BUF64, fp)) return;
-	if ((tlen = strtoul(buf, NULL, 0)) > MAX_U21) return;
+	if ((tlen = strtoul(buf, NULL, 0)) >= MAX_U32) return;
 	if (!(dict = (char **) calloc(tlen, sizeof(char *)))) return;
 
 	while (fgets(buf, BUF64, fp) && len < tlen)

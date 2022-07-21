@@ -11,6 +11,7 @@
 
 #include <cstdint>
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
@@ -22,7 +23,6 @@
 #define MAX_U6   0x3FU
 #define MAX_U8   0xFFUL
 #define MAX_U16  0xFFFFUL
-#define MAX_U21  0x1FFFFFUL
 #define MAX_U30  0x3FFFFFFFUL
 #define MAX_U32  0xFFFFFFFFUL
 #define MAX_U34  0x3FFFFFFFFULL
@@ -43,6 +43,7 @@
 #define SHAKE_LEN       16    //!< number of bytes for a SHAKE-128
 
 #define MAGNET_MAX_LEN  ONE_MILLION
+#define MAGNET_KT_LEN   (1+7) //!< 7 numeric search terms
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_UT_LEN   32    //!< max storage of non-dictionary words
 #define MAGNET_DN_LEN   128   //!< must not exceed MAX_U8
@@ -57,9 +58,9 @@ typedef struct pack {
 	uint64_t  xl; //!< exact length, size of file in bytes
 	char     *dn; //!< display name, filename
 	uint8_t  *tr; //!< address tracker, tracker url
-	uint64_t *st; //!< 21 bit dictionary search terms
+	uint32_t *st; //!< dictionary search terms
 	char     *ut; //!< Search terms not found in dictionary (MAX_U6)
-	uint8_t   kt[8]; //!< [0] categories: second - upper 4, first - lower 4, [1-7] 8 bit number search terms
+	uint8_t   kt[MAGNET_KT_LEN]; //!< [0] categories: second - upper 4, first - lower 4, [1-7] 8 bit number search terms
 } pack;
 
 /**
@@ -113,8 +114,9 @@ extern wordDB STOPWORDS_EN;
 
 class torDB {
 public:
-	std::vector<std::vector<std::vector<uint32_t>>> cat; //!< categorized
 	std::vector<pack> pak; //!< raw unsorted data
+	std::vector<std::vector<std::vector<uint32_t>>> cat; //!< categories
+	std::map<uint32_t, std::vector<uint32_t>> wrd; //!< dictionary words
 	torDB();
 	~torDB();
 };

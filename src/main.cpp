@@ -111,8 +111,8 @@ void line_proc_test(const char *str)
 	char buf[BUF64];
 	char *ut = NULL;
 	int i, len = strlen(str);
-	uint8_t kt[8];
-	uint64_t *st = NULL;
+	uint8_t kt[MAGNET_KT_LEN];
+	uint32_t *st = NULL;
 
 	if (len >= (int) BUF64)
 	{
@@ -128,17 +128,16 @@ void line_proc_test(const char *str)
 	strcpy(buf, str);
 	encodeMsg(buf, &st, &ut, kt);
 	printf("\tUT: %s<\n\tST: ", ut ? ut : "nil");
-	if (st) for (i = 0;; ++i)
+	if (st) for (i = 0; st[i]; ++i)
 	{
-		printf("%6lu %6lu %6lu ", st[i] & MAX_U21, (st[i] >> 21) & MAX_U21, (st[i] >> 42) & MAX_U21);
-		if (st[i] >> 63) break;
+		printf("%6u ", st[i]);
 	}
 	printf("\n\tKT: ");
 	for (i = 1; i < 8; ++i) printf("%2u ", kt[i]);
 	printf("\n");
 
-	if (ut) free(ut);
 	if (st) free(st);
+	if (ut) free(ut);
 }
 
 void print_search_terms(uint8_t kt1, uint8_t kt2, const char *str)
@@ -154,9 +153,9 @@ void print_search_terms(const char *kt1, const char *kt2, const char *str)
 }
 
 template <class T_kt>
-void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str)
+void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str = NULL, uint8_t verbose = 0)
 {
-	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
+	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str, verbose)};
 	print_search_terms(kt1, kt2, str);
 	for (uint32_t idx : result) printf("%u ", idx);
 	printf("\n");
@@ -166,25 +165,26 @@ void interact_test(chain *ch, torDB *td)
 {
 	bool tmpb;
 	char buf[BUF64], *tmpc;
-	uint8_t kt1, kt2;
+	uint8_t kt1, kt2, verbose;
 	uint32_t blen, tmpu;
 
 	if (!ch || !td) return;
 	memset(buf, 0, BUF64);
 PRINT_HELP:
-	printf("Interactive test: {required} [optional]\n"
+	printf("Interactive test: {required} [optional] [v[v]]\n"
 		   "lb           Get block length\n"
 		   "a{i}b        Audit block at i\n"
-		   "b{i}[v]      Print block at i, v for verbose output\n"
+		   "b{i}         Print block at i (v)\n"
 		   "lm           Get magnet length\n"
 		   "a{i}m        Audit magnet at i\n"
-		   "m{i}[v]      Print magnet at i, v for verbose output\n"
-		   "s[i[i]] [n]  Search for magnet by category index i and name n\n"
+		   "m{i}         Print magnet at i (v)\n"
+		   "s[i[i]] [n]  Search for magnet by category index i and name n (vv)\n"
 		   "e            Exit\n");
 
 	while (fgets(buf, BUF64, stdin))
 	{
 		for (blen = 0; buf[blen] && (buf[blen] == ' ' || isalnum(buf[blen])); ++blen);
+		for (verbose = 0; blen && tolower(buf[blen - 1]) == 'v'; ++verbose, --blen);
 		buf[blen] = 0;
 		if (blen-- < 1) goto PRINT_HELP;
 		tmpu = strtoul(buf + 1, NULL, 0);
@@ -214,18 +214,20 @@ PRINT_HELP:
 			break;
 		case 'b':
 			if (tmpu >= ch->blk.size()) goto PRINT_HELP;
-			blockToText(&(ch->blk[tmpu]), stdout, buf[blen] == 'v');
+			blockToText(&(ch->blk[tmpu]), stdout, verbose);
 			break;
 		case 'm':
 			if (tmpu >= td->pak.size()) goto PRINT_HELP;
-			packToText(&(td->pak[tmpu]), stdout, buf[blen] == 'v');
+			packToText(&(td->pak[tmpu]), stdout, verbose);
 			break;
 		case 's':
-			printf("Work in progress\n");
 			tmpc = NULL;
 			kt1 = isdigit(buf[1]) ? buf[1] - '0' : 0;
 			kt2 = buf[2] ? strtoul(buf + 2, &tmpc, 0) : 0;
-			search_test(td, kt1, kt2, tmpc);
+			search_test(td, kt1, kt2, tmpc, verbose);
+			printf("Work in progress\n");
+			// TODO default st + kt, v = ut search, vv = dn search
+			// TODO change random generated dn to use dictionary words
 			break;
 		case 'e':
 			return;
@@ -255,11 +257,13 @@ void chain_test(int size, bool interact)
 	start_timer();
 	chain_gen(&ch, &td, size);
 	print_elapsed_time();
+
 #if 0
 	printTorCat(&td);
-	search_test(&td, "Games", "PC", NULL);
-	search_test(&td, "Games", "Mac", NULL);
-	search_test(&td, "Games", "", NULL);
+	printTorWordMap(&td);
+	search_test(&td, "Games", "PC");
+	search_test(&td, "Games", "Mac");
+	search_test(&td, "Games", "");
 #endif
 
 	if (interact) interact_test(&ch, &td);

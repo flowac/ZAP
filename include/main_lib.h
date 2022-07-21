@@ -12,7 +12,7 @@
 
 void filterLine(char *b, int *k);
 void stemWord(char *buf, int *len); //!< PortStemmer
-bool encodeMsg(char *msg, uint64_t **st, char **ut, uint8_t kt[8]); //!< Encode a message with dictionary
+bool encodeMsg(const char *msg, uint32_t **st, char **ut, uint8_t kt[MAGNET_KT_LEN]); //!< Encode a message with dictionary
 
 /**
  * @brief Packs uint??_t into uint8_t buffer little endian style
@@ -24,15 +24,8 @@ uint32_t u64Unpack(uint8_t *buf, uint64_t *data);
 uint32_t u8len(uint8_t *ptr);
 uint32_t u8cmp(uint8_t *ptr, char *str);
 
-/**
- * @brief This function will print the relative information of a block
- * 
- * it will print the:
- *	time (when the block was created)
- *	key (Unique identifier)
- *	number of payloads
- */
 void printTorCat(torDB *target);
+void printTorWordMap(torDB *target);
 
 /**
  * @brief Create a new pack (magnet link info)
@@ -74,8 +67,8 @@ const char *getKeyword1(uint8_t kt1);
 const char *getKeyword2(uint8_t kt1, uint8_t kt2);
 bool isKeywordValid(uint8_t kt1, uint8_t kt2);
 uint8_t lookupKeyword(const char *kt1, const char *kt2);
-std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const char *str);
-std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1p, const char *kt2p, const char *str);
+std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const char *str, uint8_t verbose = 0);
+std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1p, const char *kt2p, const char *str, uint8_t verbose = 0);
 
 void deleteChain(chain *target);
 

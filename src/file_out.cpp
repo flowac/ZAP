@@ -51,11 +51,7 @@ void packToText(pack *px, FILE *fp, bool verbose)
 	if (verbose)
 	{
 		printf("\tUT: %s.\n\tST: ", px->ut ? px->ut : "nil");
-		if (px->st) for (i = 0;; ++i)
-		{
-			printf("%6lu %6lu %6lu ", px->st[i] & MAX_U21, (px->st[i] >> 21) & MAX_U21, (px->st[i] >> 42) & MAX_U21);
-			if (px->st[i] >> 63) break;
-		}
+		if (px->st) for (i = 0; px->st[i]; ++i) printf("%6u ", px->st[i]);
 		printf("\n\tKT: %u %u, ", px->kt[0] & MAX_U4, px->kt[0] >> 4);
 		for (i = 1; i < 8; ++i) printf("%2u ", px->kt[i]);
 		printf("\n");
