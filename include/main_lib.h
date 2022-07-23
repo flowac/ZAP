@@ -12,7 +12,7 @@
 
 void filterLine(char *b, int *k);
 void stemWord(char *buf, int *len); //!< PortStemmer
-bool encodeMsg(const char *msg, uint32_t **st, char **ut, uint8_t kt[MAGNET_KT_LEN]); //!< Encode a message with dictionary
+bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t kt[MAGNET_KT_LEN]); //!< Encode a message with dictionary
 
 /**
  * @brief Packs uint??_t into uint8_t buffer little endian style

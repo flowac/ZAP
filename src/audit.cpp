@@ -18,7 +18,7 @@ bool checkPack(pack *px, bool modify)
 	if (!(update_shake(&(px->xl), 8, md_ctx))) goto cleanup;
 	if (!(update_shake(px->dn, strlen(px->dn), md_ctx))) goto cleanup;
 	if (!(update_shake(px->tr,  u8len(px->tr), md_ctx))) goto cleanup;
-	if (!(update_shake(px->kt, 1, md_ctx))) goto cleanup;
+	if (!(update_shake(&(px->kt), 1, md_ctx))) goto cleanup;
 
 	if (!(md_val = finish_shake(&shaLen, &md_ctx))) goto cleanup;
 	if (modify) return shake_copy_free(px->crc, md_val, shaLen);

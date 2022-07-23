@@ -96,3 +96,8 @@ std::string wordDB::get(uint32_t idx)
 	if (idx < 1 || idx >= len) return std::string();
 	return std::string(dict[--idx]);
 }
+
+uint32_t wordDB::size(void)
+{
+	return len;
+}

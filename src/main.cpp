@@ -40,16 +40,14 @@ void checksum_test(const char *src)
 
 void chain_gen(chain *ch, torDB *td, uint64_t size)
 {
+	constexpr uint8_t TEST_KEYWORDS_LIM[] = {7, 7, 8, 6, 10, 7, 10};
 	int32_t j, k;
-	int32_t nPacks;
-	int32_t nTrans;
+	int32_t nPacks, nTrans, ndn;
 	uint64_t i;
-	const char charset[] = "qazwsxedcrfvtgbyhnujmikolpQAZWSXEDCRFVTGBYHNUJMIKOLP0123456789";//62
-
 	bool val;
 	uint8_t kt, xt[MAGNET_XT_LEN], tr[MAGNET_TR_LEN];
 	uint8_t src[ED448_LEN], dest[ED448_LEN], sig[ED448_SIG_LEN];
-	char dn[121];
+	char dn[MAGNET_DN_LEN];
 	memcpy(tr, test_tracker, strlen(test_tracker) + 1);
 	memset(src,  0xC0, ED448_LEN);
 	memset(dest, 0xFF, ED448_LEN);
@@ -63,15 +61,24 @@ void chain_gen(chain *ch, torDB *td, uint64_t size)
 		for (j = 0; j < nPacks; j++)
 		{
 			memset(xt, 0, MAGNET_XT_LEN);
-			memset(dn, 0, 121);
+			memset(dn, 0, MAGNET_DN_LEN);
 			k = rand() % 70 + 40;
-			for (; k >= 0; --k)
+			for (k = 0; k < MAGNET_XT_LEN; ++k) xt[k] = rand() % MAX_U8;
+			for (ndn = 0, k = rand() % 11 + 1; k > 0; --k)
 			{
-				if (k < MAGNET_XT_LEN) xt[k] = rand() % MAX_U8;
-				dn[k] = charset[rand() % 62];
+				if (rand() % 3 == 0) dn[ndn++] = '0' + (rand() % 10);
+				else
+				{
+					strncpy(dn + ndn, WORDS_EN.get(rand() % (WORDS_EN.size() + 1)).c_str(), MAGNET_DN_LEN - ndn - 1);
+					ndn = strlen(dn);
+				}
+				if (ndn >= (MAGNET_DN_LEN - 1)) break;
+				dn[ndn] = ' ';
+				dn[++ndn] = 0;
 			}
 
-			kt = 1;
+			kt = (rand() % (TEST_KEYWORDS_LIM[0] - 1)) + 1;
+			kt |= (rand() % TEST_KEYWORDS_LIM[kt]) << 4;
 			val = newPack(td, xt, (rand() % 50 + 1) * 1024 * 1024, dn, tr, kt);
 			if (!val) printf("    newPack failed?");
 		}
@@ -112,7 +119,7 @@ void line_proc_test(const char *str)
 	char *ut = NULL;
 	int i, len = strlen(str);
 	uint8_t kt[MAGNET_KT_LEN];
-	uint32_t *st = NULL;
+	uint32_t st[MAGNET_ST_LEN];
 
 	if (len >= (int) BUF64)
 	{
@@ -126,17 +133,13 @@ void line_proc_test(const char *str)
 	printf("\tFiltered [%02u]: %s\n", len, buf);
 
 	strcpy(buf, str);
-	encodeMsg(buf, &st, &ut, kt);
+	encodeMsg(buf, st, ut, kt);
 	printf("\tUT: %s<\n\tST: ", ut ? ut : "nil");
-	if (st) for (i = 0; st[i]; ++i)
-	{
-		printf("%6u ", st[i]);
-	}
+	for (i = 0; i < MAGNET_ST_LEN && st[i]; ++i) printf("%6u ", st[i]);
 	printf("\n\tKT: ");
-	for (i = 1; i < 8; ++i) printf("%2u ", kt[i]);
+	for (i = 0; i < MAGNET_KT_LEN; ++i) printf("%2u ", kt[i]);
 	printf("\n");
 
-	if (st) free(st);
 	if (ut) free(ut);
 }
 
@@ -221,13 +224,10 @@ PRINT_HELP:
 			packToText(&(td->pak[tmpu]), stdout, verbose);
 			break;
 		case 's':
-			tmpc = NULL;
+			tmpc = buf + 2;
 			kt1 = isdigit(buf[1]) ? buf[1] - '0' : 0;
-			kt2 = buf[2] ? strtoul(buf + 2, &tmpc, 0) : 0;
+			kt2 = (kt1 && buf[2]) ? strtoul(buf + 2, &tmpc, 0) : 0;
 			search_test(td, kt1, kt2, tmpc, verbose);
-			printf("Work in progress\n");
-			// TODO default st + kt, v = ut search, vv = dn search
-			// TODO change random generated dn to use dictionary words
 			break;
 		case 'e':
 			return;

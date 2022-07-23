@@ -26,14 +26,13 @@ void packToText(pack *px, FILE *fp, bool verbose)
 	bool decompOK;
 	char decompTR[MAGNET_TR_LEN];
 	const char *kt1, *kt2;
-	int i;
 	uint8_t kt1u, kt2u;
 
 	if (!px || !fp) return;
 	decompOK = decompressTracker(px->tr, decompTR) > 0;
 	if (!decompOK) printf("[WARN] failed to decompressTracker\n");
 
-	convertKeyword(px->kt[0], &kt1u, &kt2u);
+	convertKeyword(px->kt, &kt1u, &kt2u);
 	kt1 = getKeyword1(kt1u);
 	kt2 = getKeyword2(kt1u, kt2u);
 
@@ -50,11 +49,8 @@ void packToText(pack *px, FILE *fp, bool verbose)
 
 	if (verbose)
 	{
-		printf("\tUT: %s.\n\tST: ", px->ut ? px->ut : "nil");
-		if (px->st) for (i = 0; px->st[i]; ++i) printf("%6u ", px->st[i]);
-		printf("\n\tKT: %u %u, ", px->kt[0] & MAX_U4, px->kt[0] >> 4);
-		for (i = 1; i < 8; ++i) printf("%2u ", px->kt[i]);
-		printf("\n");
+		printf("\tUT: %s.", px->ut ? px->ut : "nil");
+		printf("\n\tKT: %u %u\n", px->kt & MAX_U4, px->kt >> 4);
 	}
 	fprintf(fp, "}\n");
 }
@@ -144,7 +140,7 @@ bool torDBToZip(torDB *td, const char *dest)
 		memcpy(buf + j, td->pak[i].tr, slen);
 		j += slen;
 
-		buf[j++] = td->pak[i].kt[0];
+		buf[j++] = td->pak[i].kt;
 		fwrite(buf, 1, j, fp);
 	}
 	ret = true;

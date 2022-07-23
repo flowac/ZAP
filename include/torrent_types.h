@@ -1,6 +1,4 @@
-#ifndef _TORRENT_TYPES_H
-#define _TORRENT_TYPES_H
-
+// WARNING: This header is private to torrent.cpp
 #include "types.h"
 
 typedef enum
@@ -198,5 +196,3 @@ const char **KEYWORDS_R[] = {
 	KEYWORDS_R5,
 	KEYWORDS_R6,
 };
-
-#endif //_TORRENT_TYPES_H

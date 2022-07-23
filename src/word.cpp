@@ -333,19 +333,19 @@ void stemWord(char *buf, int *len)
     buf[z.k] = 0;
 }
 
-bool encodeMsg(const char *msg, uint32_t **st, char **ut, uint8_t kt[MAGNET_KT_LEN])
+bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t kt[MAGNET_KT_LEN])
 {
 	char buf[BUF1K];
 	char *p, *s;
-	int ilen, klen = 1;
+	int ilen, klen = 0;
 	uint32_t ret = 0;
 	uint32_t blen, ulen = 0;
 	uint64_t idx;
 
-	if (!msg || !st || !ut || !kt) return false;
-	*st = NULL;
-	*ut = NULL;
-	memset(kt + 1, MAX_U8, MAGNET_KT_LEN - 1);
+	if (!msg || !st || !kt) return false;
+	ut = NULL;
+	memset(st, 0, sizeof(uint32_t) * MAGNET_ST_LEN);
+	memset(kt, MAX_U8, MAGNET_KT_LEN);
 
 	if ((ilen = strlen(msg)) >= (int) BUF1K) return false;
 	memcpy(buf, msg, ilen + 1);
@@ -364,9 +364,7 @@ bool encodeMsg(const char *msg, uint32_t **st, char **ut, uint8_t kt[MAGNET_KT_L
 		if (STOPWORDS_EN.find(s)) continue;
 		if ((idx = (uint64_t) WORDS_EN.find(s)))
 		{
-			if (ret % 5 == 0) *st = (uint32_t *) realloc(*st, sizeof(uint32_t) * (ret + 6));
-			(*st)[ret] = idx;
-			++ret;
+			if (ret < MAGNET_ST_LEN) st[ret++] = idx;
 		}
 		else
 		{
@@ -380,17 +378,13 @@ bool encodeMsg(const char *msg, uint32_t **st, char **ut, uint8_t kt[MAGNET_KT_L
 
 			blen = ilen + ulen + 1;
 			if (blen > MAGNET_UT_LEN) continue;
-			*ut = (char *) realloc(*ut, blen);
-			memcpy(*ut + ulen, s, ilen);
+			ut = (char *) realloc(ut, blen);
+			memcpy(ut + ulen, s, ilen);
 			ulen = blen;
-			(*ut)[--blen] = ' ';
+			ut[--blen] = ' ';
 		}
 	}
 
-	if (*st){
-		(*st)[ret] = 0;
-		*st = (uint32_t *) realloc(*st, sizeof(uint32_t) * ++ret);
-	}
-	if (*ut) (*ut)[--ulen] = 0;
+	if (ut) (ut)[--ulen] = 0;
 	return true;
 }

@@ -10,6 +10,7 @@
 #define _TYPES_H
 
 #include <cstdint>
+#include <cstring>
 
 #include <algorithm>
 #include <map>
@@ -43,9 +44,11 @@
 #define SHAKE_LEN       16    //!< number of bytes for a SHAKE-128
 
 #define MAGNET_MAX_LEN  ONE_MILLION
-#define MAGNET_KT_LEN   (1+7) //!< 7 numeric search terms
+#define MAGNET_NUM_LEN  100   //!< max of 2 digit decimal numbers
+#define MAGNET_KT_LEN   12    //!< max numeric search terms
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
-#define MAGNET_UT_LEN   32    //!< max storage of non-dictionary words
+#define MAGNET_ST_LEN   24    //!< max dictionary word search terms
+#define MAGNET_UT_LEN   32    //!< max bytes of non-dictionary words
 #define MAGNET_DN_LEN   128   //!< must not exceed MAX_U8
 #define MAGNET_TR_LEN   1024  //!< must not exceed MAX_U16
 
@@ -58,9 +61,8 @@ typedef struct pack {
 	uint64_t  xl; //!< exact length, size of file in bytes
 	char     *dn; //!< display name, filename
 	uint8_t  *tr; //!< address tracker, tracker url
-	uint32_t *st; //!< dictionary search terms
-	char     *ut; //!< Search terms not found in dictionary (MAX_U6)
-	uint8_t   kt[MAGNET_KT_LEN]; //!< [0] categories: second - upper 4, first - lower 4, [1-7] 8 bit number search terms
+	char     *ut; //!< search terms not found in dictionary (MAX_U6)
+	uint8_t   kt; //!< categories: second - upper 4, first - lower 4
 } pack;
 
 /**
@@ -105,6 +107,7 @@ public:
 	uint32_t find(const char *str);
 	std::vector<std::string> findN(const char *str, uint8_t n);
 	std::string get(uint32_t idx);
+	uint32_t size(void);
 private:
 	uint32_t len = 0;
 	char **dict = NULL;
@@ -116,6 +119,7 @@ class torDB {
 public:
 	std::vector<pack> pak; //!< raw unsorted data
 	std::vector<std::vector<std::vector<uint32_t>>> cat; //!< categories
+	std::vector<uint32_t> num[MAGNET_NUM_LEN]; //!< numbers in the title
 	std::map<uint32_t, std::vector<uint32_t>> wrd; //!< dictionary words
 	torDB();
 	~torDB();

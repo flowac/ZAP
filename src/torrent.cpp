@@ -111,25 +111,28 @@ void printTorWordMap(torDB *target)
 
 bool processPack(torDB *td, pack *px)
 {
-	uint8_t kt1, kt2;
-	uint32_t i, j;
+	uint8_t kt1, kt2, kt[MAGNET_KT_LEN];
+	uint32_t idx, i, j, st[MAGNET_ST_LEN];
 	if (!td || !px) return false;
-	convertKeyword(px->kt[0], &kt1, &kt2);
+	convertKeyword(px->kt, &kt1, &kt2);
 	if (!isKeywordValid(kt1, kt2)) return false;
+	idx = td->pak.size();
 
-	td->cat[kt1][kt2 ? kt2 : 1].push_back(td->pak.size());
-	if (!encodeMsg(px->dn, &(px->st), &(px->ut), px->kt)) return false;
+	td->cat[kt1][kt2 ? kt2 : 1].push_back(idx);
+	if (!encodeMsg(px->dn, st, px->ut, kt)) return false;
 
-	if (px->st) for (i = 0; (j = px->st[i]); ++i)
+	for (i = 0; i < MAGNET_ST_LEN && (j = st[i]); ++i)
 	{
-		if (td->wrd.contains(j)) td->wrd[j].push_back(td->pak.size());
+		if (td->wrd.contains(j)) td->wrd[j].push_back(idx);
 		else
 		{
 			std::vector<uint32_t> tmp;
-			tmp.push_back(td->pak.size());
+			tmp.push_back(idx);
 			td->wrd[j] = tmp;
 		}
 	}
+
+	for (i = 0; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i) td->num[j].push_back(idx);
 	return true;
 }
 
@@ -137,7 +140,7 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 {
 	uint8_t kt1, kt2;
 	uint32_t ndn = 0, ntr = 0;
-	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .st = NULL, .ut = NULL, .kt = {0}};
+	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .ut = NULL, .kt = 0};
 	if (!td || !xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
@@ -154,7 +157,7 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 
 	convertKeyword(kt, &kt1, &kt2);
 	if (!isKeywordValid(kt1, kt2)) goto cleanup;
-	px.kt[0] = kt;
+	px.kt = kt;
 
 	if (!processPack(td, &px))
 	{
@@ -224,40 +227,50 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 	bool checkKT = isKeywordValid(kt1, kt2);
 	char *ut = NULL;
 	uint8_t kt[MAGNET_KT_LEN];
-	uint32_t i, j, *st = NULL;
+	uint32_t i, j, st[MAGNET_ST_LEN];
 	std::vector<uint32_t> result;
 	std::vector<std::pair<uint32_t, uint8_t>> freqVec;
 	std::map<uint32_t, uint8_t> freqMap; // result frequency map
 	if (!td) return result;
 
-	if (!encodeMsg(str, &st, &ut, kt))
+	if (checkKT)
 	{
-		if (checkKT)
+		if (kt2) for (uint32_t k : td->cat[kt1][kt2]) freqMap[k] = 0;
+		else for (std::vector<uint32_t> x : td->cat[kt1]) for (uint32_t k : x) freqMap[k] = 0;
+	}
+	encodeMsg(str, st, ut, kt);
+
+	for (i = 1; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i)
+	{
+		for (uint32_t k : td->num[j])
 		{
-			if (kt2) result.insert(result.begin(), td->cat[kt1][kt2].begin(), td->cat[kt1][kt2].end());
-			else for (std::vector<uint32_t> vu32 : td->cat[kt1]) result.insert(result.end(), vu32.begin(), vu32.end());
+			if (freqMap.contains(k)) freqMap[k] += 1;
+			else if (!checkKT) freqMap[k] = 1;
 		}
-		return result;
 	}
 
-	if (st) for (i = 0; (j = st[i]); ++i)
+	for (i = 0; (j = st[i]); ++i)
 	{
 		if (!td->wrd.contains(j)) continue;
 		for (uint32_t k : td->wrd[j])
 		{
-			if (freqMap.contains(k)) freqMap[k]++;
-			else freqMap[k] = 1;
+			if (freqMap.contains(k)) freqMap[k] += 3;
+			else if (!checkKT) freqMap[k] = 3;
 		}
 	}
 
-	for (std::pair<uint32_t, uint8_t> k : freqMap) freqVec.push_back(k);
+	if (verbose > 0)
+	{
+		// ut
+	}
+
+	for (std::pair<uint32_t, uint8_t> x : freqMap) freqVec.push_back(x);
 	std::sort(freqVec.begin(), freqVec.end(), freqVecCmp);
-	for (std::pair<uint32_t, uint8_t> k : freqVec) result.push_back(k.first);
+	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second) result.insert(result.begin(), x.first);
 
 	printf("freqMap\n");
-	for (std::pair<uint32_t, uint8_t> k : freqVec) printf("%u %u\n", k.first, k.second);
+	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second) printf("%u %u\n", x.first, x.second);
 
-	if (st) free(st);
 	if (ut) free(ut);
 	return result;
 }
@@ -277,7 +290,6 @@ static inline void deletePack(pack *target)
 	if (!target) return;
 	if (target->dn) free(target->dn);
 	if (target->tr) free(target->tr);
-	if (target->st) free(target->st);
 	if (target->ut) free(target->ut);
 }
 
