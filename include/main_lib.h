@@ -67,8 +67,8 @@ const char *getKeyword1(uint8_t kt1);
 const char *getKeyword2(uint8_t kt1, uint8_t kt2);
 bool isKeywordValid(uint8_t kt1, uint8_t kt2);
 uint8_t lookupKeyword(const char *kt1, const char *kt2);
-std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const char *str, uint8_t verbose = 0);
-std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1p, const char *kt2p, const char *str, uint8_t verbose = 0);
+std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const char *str);
+std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1p, const char *kt2p, const char *str);
 
 void deleteChain(chain *target);
 

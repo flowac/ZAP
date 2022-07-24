@@ -50,7 +50,9 @@
 #define MAGNET_KT_LEN   12    //!< max numeric search terms
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_ST_LEN   24    //!< max dictionary word search terms
-#define MAGNET_UT_LEN   32    //!< max bytes of non-dictionary words
+#define MAGNET_UT_CNT   12    //!< max number of non-dictionary words
+#define MAGNET_UT_LEN   24    //!< max bytes of a single non-dictionary word
+#define MAGNET_UT_MAX   50    //!< max total bytes of non-dictionary words
 #define MAGNET_DN_LEN   128   //!< must not exceed MAX_U8
 #define MAGNET_TR_LEN   1024  //!< must not exceed MAX_U16
 

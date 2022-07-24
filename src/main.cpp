@@ -156,9 +156,9 @@ void print_search_terms(const char *kt1, const char *kt2, const char *str)
 }
 
 template <class T_kt>
-void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str = NULL, uint8_t verbose = 0)
+void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str = NULL)
 {
-	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str, verbose)};
+	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
 	print_search_terms(kt1, kt2, str);
 	for (uint32_t idx : result) printf("%u ", idx);
 	printf("\n");
@@ -227,7 +227,7 @@ PRINT_HELP:
 			tmpc = buf + 2;
 			kt1 = isdigit(buf[1]) ? buf[1] - '0' : 0;
 			kt2 = (kt1 && buf[2]) ? strtoul(buf + 2, &tmpc, 0) : 0;
-			search_test(td, kt1, kt2, tmpc, verbose);
+			search_test(td, kt1, kt2, tmpc);
 			break;
 		case 'e':
 			return;

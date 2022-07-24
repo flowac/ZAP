@@ -339,7 +339,7 @@ bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t k
 	char *p, *s;
 	int ilen, klen = 0;
 	uint32_t ret = 0;
-	uint32_t blen, ulen = 0;
+	uint32_t blen, ulen = 0, ucnt = 0;
 	uint64_t idx;
 
 	if (!msg || !st || !kt) return false;
@@ -368,6 +368,7 @@ bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t k
 		}
 		else
 		{
+			if (ucnt > MAGNET_UT_CNT || ilen > MAGNET_UT_LEN) continue;
 			for (char *tmp = s; *tmp && klen < MAGNET_KT_LEN; ++tmp)
 			{
 				if (!isdigit(*tmp)) continue;
@@ -377,10 +378,11 @@ bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t k
 			}
 
 			blen = ilen + ulen + 1;
-			if (blen > MAGNET_UT_LEN) continue;
+			if (blen > MAGNET_UT_MAX) continue;
 			ut = (char *) realloc(ut, blen);
 			memcpy(ut + ulen, s, ilen);
 			ulen = blen;
+			ucnt++;
 			ut[--blen] = ' ';
 		}
 	}
