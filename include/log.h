@@ -7,10 +7,35 @@
 #define _LOG_H
 
 #include <fstream>
+
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+
+// TODO: Remove this autistic custom uint64_t definition
 #include "7zTypes.h"
 
-#include <string.h>
-#include <errno.h>
+#define LOG_PATH "log"
+
+class logDescriptor {
+public:
+	static FILE *getFD()
+	{
+		static logDescriptor L;
+		return L.fd;
+	}
+private:
+	FILE *fd = NULL;
+	 logDescriptor () {fd = fopen(LOG_PATH, "a");}
+	~logDescriptor () {if (fd) fclose(fd);}
+};
+
+/**
+ * @brief This function will append to the log file
+ *
+ * @return true - success
+ */
+bool log_msg(char const *msg, ...);
 
 /**
  * @brief Log the the strerror of the errno
@@ -32,20 +57,6 @@
  * @brief Print pass or fail of test cases to stdout
  */
 bool pstat(bool status, const char *msg);
-
-/**
- * @brief De-initialize logger
- */
-void log_deinit(void);
-
-/**
- * @brief This function will append to the log file
- *
- * @return 0 - failure\n
- * 1 - success
- */
-int log_msg(char const *msg,//!< Format specified string
-            ...);           //!< Args if any
 
 /**
  * @brief Get the size of a file

@@ -17,9 +17,9 @@ static const char *test_tracker = "udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2F
 /* Test if log.c log_msg is working correctly
  *
  */
-void log_test()
+bool log_test()
 {
-	log_msg("fewf %s\n", "wfean");
+	return log_msg("Message %s", "one") && log_msg("two") && log_msg("LAST?");
 }
 
 void checksum_test(const char *src)
@@ -429,13 +429,11 @@ int main(int argc, char **argv)
 
 	printf("[INFO] Line processing test\n");
 	line_proc_test("Inferno Beyond The 7th Circle v1 0 16-Razor1911");
+	pstat(log_test(), "Singleton logger");
 
-	log_test();
 	tracker_test();
 	chain_test(100, interact);
 	wallet_test();
 
-	//std::cout.imbue(std::locale()); // might be useful to remove valgrind false positives
-	log_deinit();
 	return 0;
 }

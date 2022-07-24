@@ -1,21 +1,12 @@
-/* TODO: slap a license
- */
-#include <time.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <string.h>
 #include <ostream>
 #include <iostream>
 #include <fstream>
 
+#include <ctime>
+#include <cstdarg>
+
 #include "log.h"
 #include "time_fn.h"
-/* extern */
-#include "7zTypes.h"
-
-#define LOG_PATH "log"
-static FILE *LOG_FD = NULL;
 
 bool pstat(bool status, const char *msg)
 {
@@ -23,43 +14,29 @@ bool pstat(bool status, const char *msg)
 	return status;
 }
 
-void log_deinit(void)
+bool log_msg(char const *msg, ...)
 {
-	if (!LOG_FD) return;
-
-	fclose(LOG_FD);
-	LOG_FD = NULL;
-}
-
-int log_msg(char const *msg, ...)
-{
-	//TODO: do we want to open the fd every time this fn is called?
+	FILE *fd = logDescriptor::getFD();
 	struct tm *local_time_t = get_loc_time();
-	if (local_time_t == NULL) {
-		printf("LOG: Failed to get local time\n");
-		return 0;
-	}
 	char buffer_msg[512];
-	/* perhaps switch to boost so we dont need this buff */
 	char buffer_time[64];
 	va_list msg_formatted;
-
-	if (!LOG_FD && !(LOG_FD = fopen(LOG_PATH, "a"))) {
-		printf("LOG: Failed to open logfile: %s\n", strerror(errno));
-		return 0;
+	if (!fd || !local_time_t)
+	{
+		printf("LOG INIT FAILED: log file descriptor = %p, local time = %p\n", fd, local_time_t);
+		return false;
 	}
 
 	va_start(msg_formatted, msg);	// convert args to string
 	strftime(buffer_time, sizeof(buffer_time), "%a %b %T", local_time_t);
 	vsnprintf(buffer_msg, sizeof(buffer_msg), msg, msg_formatted);
 
-	fprintf(LOG_FD, "%s %s", buffer_time, buffer_msg);
-
+	fprintf(fd, "%s %s\n", buffer_time, buffer_msg);
 	va_end(msg_formatted);
-	return 1;
+	return true;
 }
 
-long get_file_size_c(FILE * fd)
+long get_file_size_c(FILE *fd)
 {
 	fseek(fd, 0, SEEK_END);
 	long size = ftell(fd);

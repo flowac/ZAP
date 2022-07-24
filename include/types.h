@@ -19,8 +19,6 @@
 #include <thread>
 #include <vector>
 
-#define LOG 0 //!< not sure
-
 #define MAX_U2   0x03U
 #define MAX_U4   0x0FU
 #define MAX_U6   0x3FU
@@ -47,7 +45,7 @@
 
 #define MAGNET_MAX_LEN  ONE_MILLION
 #define MAGNET_NUM_LEN  100   //!< max of 2 digit decimal numbers
-#define MAGNET_KT_LEN   12    //!< max numeric search terms
+#define MAGNET_KT_LEN   8     //!< max numeric search terms
 #define MAGNET_XT_LEN   20    //!< 160 bit file checksum
 #define MAGNET_ST_LEN   24    //!< max dictionary word search terms
 #define MAGNET_UT_CNT   12    //!< max number of non-dictionary words

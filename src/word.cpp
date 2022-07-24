@@ -335,6 +335,7 @@ void stemWord(char *buf, int *len)
 
 bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t kt[MAGNET_KT_LEN])
 {
+	bool onlyDigits;
 	char buf[BUF1K];
 	char *p, *s;
 	int ilen, klen = 0;
@@ -368,15 +369,20 @@ bool encodeMsg(const char *msg, uint32_t st[MAGNET_ST_LEN], char *&ut, uint8_t k
 		}
 		else
 		{
-			if (ucnt > MAGNET_UT_CNT || ilen > MAGNET_UT_LEN) continue;
+			onlyDigits = true;
 			for (char *tmp = s; *tmp && klen < MAGNET_KT_LEN; ++tmp)
 			{
-				if (!isdigit(*tmp)) continue;
+				if (!isdigit(*tmp))
+				{
+					onlyDigits = false;
+					continue;
+				}
 				idx = *tmp - '0';
 				if (isdigit(*(tmp + 1))) idx = idx * 10 + *(++tmp) - '0';
 				kt[klen++] = idx;
 			}
 
+			if (onlyDigits || ucnt > MAGNET_UT_CNT || ilen > MAGNET_UT_LEN) continue;
 			blen = ilen + ulen + 1;
 			if (blen > MAGNET_UT_MAX) continue;
 			ut = (char *) realloc(ut, blen);
