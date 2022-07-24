@@ -13,8 +13,10 @@
 #include <cstring>
 
 #include <algorithm>
+#include <atomic>
 #include <map>
 #include <string>
+#include <thread>
 #include <vector>
 
 #define LOG 0 //!< not sure

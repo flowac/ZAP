@@ -416,6 +416,7 @@ int main(int argc, char **argv)
 		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
 		   (OPENSSL_VERSION_NUMBER >>  4) & MAX_U8);
+	printf("[INFO] %u thread available\n", std::thread::hardware_concurrency());
 
 	pstat(word_proc_test("aliens", "alien") &&
 		  word_proc_test("hoping", "hope") &&

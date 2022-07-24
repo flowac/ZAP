@@ -230,6 +230,7 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 	uint32_t i, j, st[MAGNET_ST_LEN];
 	std::vector<uint32_t> result;
 	std::vector<std::pair<uint32_t, uint8_t>> freqVec;
+	// TODO: make the map atomic and do multi thread st kt search
 	std::map<uint32_t, uint8_t> freqMap; // result frequency map
 	if (!td) return result;
 
@@ -259,17 +260,40 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 		}
 	}
 
-	if (verbose > 0)
+	if (verbose > 0 && ut)
 	{
-		// ut
+		char buf1[BUF64], buf2[BUF64], *c1, *c2, *c3, *c4;
+		for (uint32_t k = 0; k < td->pak.size(); ++k)
+		{
+			pack &px = td->pak[k];
+			for (c1 = px.ut; c1 && (c2 = strchr(c1, ' ')); c1 = c2)
+			{
+				if ((i = (c2 - c1)) >= BUF64) continue;
+				memcpy(buf1, c1, i);
+				buf1[i] = 0;
+
+				for (c3 = ut; c3 && (c4 = strchr(c3, ' ')); c3 = c4)
+				{
+					if ((j = (c4 - c3)) >= BUF64) continue;
+					memcpy(buf2, c3, j);
+					buf2[j] = 0;
+
+					if (strcasecmp(buf1, buf2) == 0)
+					{
+						if (freqMap.contains(k)) freqMap[k] += 3;
+						else if (!checkKT) freqMap[k] = 3;
+					}
+				}
+			}
+		}
 	}
 
 	for (std::pair<uint32_t, uint8_t> x : freqMap) freqVec.push_back(x);
 	std::sort(freqVec.begin(), freqVec.end(), freqVecCmp);
-	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second) result.insert(result.begin(), x.first);
+	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second > 2) result.insert(result.begin(), x.first);
 
 	printf("freqMap\n");
-	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second) printf("%u %u\n", x.first, x.second);
+	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second > 2) printf("%u %u\n", x.first, x.second);
 
 	if (ut) free(ut);
 	return result;
