@@ -26,32 +26,25 @@ public:
 	}
 private:
 	FILE *fd = NULL;
-	 logDescriptor () {fd = fopen(LOG_PATH, "a");}
+	logDescriptor () {if (!(fd = fopen(LOG_PATH, "a"))) fd = stderr;}
 	~logDescriptor () {if (fd) fclose(fd);}
 };
 
 /**
  * @brief This function will append to the log file
- *
- * @return true - success
+ *        Please use the macros below instead of this
  */
-bool log_msg(char const *msg, ...);
+void log_msg(char const *format, ...);
 
 /**
  * @brief Log the the strerror of the errno
  */
-#define log_msg_default log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
+#define logE log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
 
 /**
  * @brief Log the string passed to the macro
  */
-#define log_msg_custom(msg) log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, msg)
-
-/**
- * @brief Log the string passed to the macro and the strerror
- * of the errno
- */
-#define log_msg_custom_errno(msg, x) log_msg("%s %s:%d: %s:%d\n", __FILE__, __FUNCTION__, __LINE__, msg, x)
+#define log(...) log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief Print pass or fail of test cases to stdout

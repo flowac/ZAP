@@ -14,26 +14,22 @@ bool pstat(bool status, const char *msg)
 	return status;
 }
 
-bool log_msg(char const *msg, ...)
+void log_msg(char const *format, ...)
 {
-	FILE *fd = logDescriptor::getFD();
+	char buf64[64];
+	static FILE *fd = logDescriptor::getFD();
 	struct tm *local_time_t = get_loc_time();
-	char buffer_msg[512];
-	char buffer_time[64];
-	va_list msg_formatted;
-	if (!fd || !local_time_t)
+	va_list arg;
+
+	if (local_time_t)
 	{
-		printf("LOG INIT FAILED: log file descriptor = %p, local time = %p\n", fd, local_time_t);
-		return false;
+		strftime(buf64, sizeof(buf64), "%F %T ", local_time_t);
+		fprintf(fd, buf64);
 	}
 
-	va_start(msg_formatted, msg);	// convert args to string
-	strftime(buffer_time, sizeof(buffer_time), "%a %b %T", local_time_t);
-	vsnprintf(buffer_msg, sizeof(buffer_msg), msg, msg_formatted);
-
-	fprintf(fd, "%s %s\n", buffer_time, buffer_msg);
-	va_end(msg_formatted);
-	return true;
+	va_start(arg, format);
+	vfprintf(fd, format, arg);
+	va_end(arg);
 }
 
 long get_file_size_c(FILE *fd)

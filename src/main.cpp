@@ -17,9 +17,11 @@ static const char *test_tracker = "udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2F
 /* Test if log.c log_msg is working correctly
  *
  */
-bool log_test()
+void log_test()
 {
-	return log_msg("Message %s", "one") && log_msg("two") && log_msg("LAST?");
+	log("Message %s", "one");
+	logE;
+	log("LAST!");
 }
 
 void checksum_test(const char *src)
@@ -412,6 +414,7 @@ int main(int argc, char **argv)
 		}
 	}
 
+	log_test();
 	printf("[INFO] OpenSSL version %lX.%lX.%lX (required was 3.0.0+)\n",
 		   (OPENSSL_VERSION_NUMBER >> 28) & MAX_U4,
 		   (OPENSSL_VERSION_NUMBER >> 20) & MAX_U8,
@@ -429,7 +432,6 @@ int main(int argc, char **argv)
 
 	printf("[INFO] Line processing test\n");
 	line_proc_test("Inferno Beyond The 7th Circle v1 0 16-Razor1911");
-	pstat(log_test(), "Singleton logger");
 
 	tracker_test();
 	chain_test(100, interact);

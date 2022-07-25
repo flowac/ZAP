@@ -187,7 +187,7 @@ static void set_decomp_out_file_name(const char *in_path, //!< Input path
 bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProps *args)
 {
 	if (in_path == NULL) {
-		log_msg("Invalid args to compress_file");
+		log("Invalid args to compress_file");
 		return false;
 	}
 	FILE *input, *output; /* i/o file descriptors */
@@ -196,7 +196,7 @@ bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProp
 	printf("  compressing %s -> %s\n", in_path, out_path_local);
 
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	if (!compress_data_incr(input, output, args)) log_msg("Failed to compress\n");
+	if (!compress_data_incr(input, output, args)) log("Failed to compress");
 
 	fclose(input);
 	fclose(output);
@@ -206,7 +206,7 @@ bool compress_file(const char *in_path, const char *out_path, const CLzmaEncProp
 bool decompress_file(const char *in_path, const char *out_path)
 {
 	if (in_path == NULL) {
-		log_msg("Invalid args to decompress_file");
+		log("Invalid args to decompress_file");
 		return false;
 	}
 	FILE *input, *output; /* i/o file descriptors */
@@ -215,7 +215,7 @@ bool decompress_file(const char *in_path, const char *out_path)
 	printf("  decompressing %s -> %s\n", in_path, out_path_local);
 
 	if (!open_io_files(in_path, out_path_local, &input, &output)) return false;
-	if (!decompress_data_incr(input, output)) log_msg("Failed to decompress\n");
+	if (!decompress_data_incr(input, output)) log("Failed to decompress");
 
 	fclose(input);
 	fclose(output);
@@ -231,7 +231,7 @@ int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 	/* CLzmaEncHandle is just a pointer (void *) */
 	CLzmaEncHandle enc_hand = LzmaEnc_Create(&g_Alloc);
 	if (enc_hand == NULL) {
-		log_msg_custom("Error allocating mem when" "reading in stream");
+		log("Error allocating mem when reading in stream");
 		return SZ_ERROR_MEM;
 	}
 	/* 5 bytes for lzma prop + 8 bytes for filesize */
@@ -261,8 +261,7 @@ int compress_data_incr(FILE *input, FILE *output, const CLzmaEncProps *args)
 	return 1;
 
 cleanup:
-	log_msg_custom_errno("Error occurred compressing data: LZMA errno",
-						 rt);
+	log("Error occurred compressing data: LZMA errno %d", rt);
 	LzmaEnc_Destroy(enc_hand, &g_Alloc, &g_Alloc);
 	return rt;
 }
@@ -276,13 +275,13 @@ int decompress_data_incr(FILE *input, FILE *output)
 
 	file_size = get_header(input, props_header, LZMA_PROPS_SIZE_FILESIZE);
 	if (file_size == 0) {
-		log_msg("Failed to get file size");
+		log("Failed to get file size");
 		return 0;// failed
 	}
 	LzmaDec_Construct(&state);
 	rt = LzmaDec_Allocate(&state, props_header, LZMA_PROPS_SIZE, &g_Alloc);
 	if (rt != SZ_OK) {
-		log_msg_custom_errno("Failed call to LzmaDec_Allocate", rt);
+		log("Failed call to LzmaDec_Allocate %d", rt);
 		return 0;
 	}
 	unsigned char in_buff[buffer_cread_size];
@@ -315,7 +314,7 @@ int decompress_data_incr(FILE *input, FILE *output)
 
 			if ((rt != SZ_OK) || (file_size == 0)) break;
 			if ((in_processed == 0) && (out_processed == 0)) {
-				log_msg_custom("ERROR OCCURRED DECOMPRESS\n");
+				log("ERROR OCCURRED DECOMPRESS");
 				break;
 			}
 		}
