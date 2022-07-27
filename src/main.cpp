@@ -14,13 +14,11 @@
 
 static const char *test_tracker = "udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2780%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2730%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=http%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.tiny-vps.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce";
 
-/* Test if log.c log_msg is working correctly
- *
- */
 void log_test()
 {
-	log("Message %s", "one");
-	logE;
+	char *a = NULL, b = 'a';
+	log("Message %s %d %lu", "one", 11, 111ULL);
+	log("second %s %f %p %p %p %c", "two", 2.0, a, &a, &b, b);
 	log("LAST!");
 }
 

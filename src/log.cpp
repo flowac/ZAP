@@ -14,21 +14,18 @@ bool pstat(bool status, const char *msg)
 	return status;
 }
 
-void log_msg(char const *format, ...)
+void log_msg(const char *file, const char *function, const int line, const char *format, ...)
 {
-	char buf64[64];
+	char buf32[32];
+	char buf256[256];
 	static FILE *fd = logDescriptor::getFD();
-	struct tm *local_time_t = get_loc_time();
 	va_list arg;
 
-	if (local_time_t)
-	{
-		strftime(buf64, sizeof(buf64), "%F %T ", local_time_t);
-		fprintf(fd, buf64);
-	}
+	strftime(buf32, sizeof(buf32), "%F %T", get_loc_time());
+	snprintf(buf256, sizeof(buf256), "%s %s %s:%d %s \n", buf32, file, function, line, format);
 
 	va_start(arg, format);
-	vfprintf(fd, format, arg);
+	vfprintf(fd, buf256, arg);
 	va_end(arg);
 }
 

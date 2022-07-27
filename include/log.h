@@ -27,24 +27,15 @@ public:
 private:
 	FILE *fd = NULL;
 	logDescriptor () {if (!(fd = fopen(LOG_PATH, "a"))) fd = stderr;}
-	~logDescriptor () {if (fd) fclose(fd);}
+	~logDescriptor () {if (fd != stderr) fclose(fd);}
 };
 
 /**
  * @brief This function will append to the log file
- *        Please use the macros below instead of this
+ *        Please use the macro log() below instead of this
  */
-void log_msg(char const *format, ...);
-
-/**
- * @brief Log the the strerror of the errno
- */
-#define logE log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, strerror(errno))
-
-/**
- * @brief Log the string passed to the macro
- */
-#define log(...) log_msg("%s %s:%d: %s\n", __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+void log_msg(const char *file, const char *function, const int line, const char *format, ...);
+#define log(...) log_msg(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief Print pass or fail of test cases to stdout
