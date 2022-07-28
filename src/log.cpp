@@ -14,18 +14,32 @@ bool pstat(bool status, const char *msg)
 	return status;
 }
 
-void log_msg(const char *file, const char *function, const int line, const char *format, ...)
+void log_message(const char *file, const char *function, const int line, const char *format, ...)
 {
 	char buf32[32];
 	char buf256[256];
 	static FILE *fd = logDescriptor::getFD();
+	time_t raw;
 	va_list arg;
 
-	strftime(buf32, sizeof(buf32), "%F %T", get_loc_time());
-	snprintf(buf256, sizeof(buf256), "%s %s %s:%d %s \n", buf32, file, function, line, format);
+	time(&raw);
+	strftime(buf32, sizeof(buf32), "%F %T", localtime(&raw));
+	snprintf(buf256, sizeof(buf256), "%s %s %s:%d %s\n", buf32, file, function, line, format);
 
 	va_start(arg, format);
 	vfprintf(fd, buf256, arg);
+	va_end(arg);
+}
+
+void note_message(const char *file, const char *function, const int line, const char *format, ...)
+{
+	char buf256[256];
+	va_list arg;
+
+	snprintf(buf256, sizeof(buf256), "%s %s:%d %s\n", file, function, line, format);
+
+	va_start(arg, format);
+	vprintf(buf256, arg);
 	va_end(arg);
 }
 

@@ -31,11 +31,18 @@ private:
 };
 
 /**
- * @brief This function will append to the log file
+ * @brief This function will append to the log file with time stamps
  *        Please use the macro log() below instead of this
  */
-void log_msg(const char *file, const char *function, const int line, const char *format, ...);
-#define log(...) log_msg(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+void log_message(const char *file, const char *function, const int line, const char *format, ...);
+#define log(...) log_message(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+/**
+ * @brief This function will print to stdout without time stamps
+ *        Please use the macro note() below instead of this
+ */
+void note_message(const char *file, const char *function, const int line, const char *format, ...);
+#define note(...) note_message(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 /**
  * @brief Print pass or fail of test cases to stdout

@@ -310,24 +310,24 @@ void chain_test(int size, bool interact)
 #if 0
 	printf("\n7zip benchmark\n");
 	start_timer();
-	compress_file(zaaFile, "temp.zaa.7z");
+	compress_file(torFile, "temp.tor.7z");
 	print_elapsed_time();
 
 	start_timer();
-	decompress_file("temp.zaa.7z", "temp.zaa.unz");
+	decompress_file("temp.tor.7z", "temp.tor.unz");
 	print_elapsed_time();
 
 	start_timer();
-	compress_file(zaaFile, "temp.zaa.slow.7z", &slow_props);
+	compress_file(torFile, "temp.tor.slow.7z", &slow_props);
 	print_elapsed_time();
 
 	start_timer();
-	decompress_file("temp.zaa.slow.7z", "temp.zaa.slow.unz");
+	decompress_file("temp.tor.slow.7z", "temp.tor.slow.unz");
 	print_elapsed_time();
 
 	start_timer();
-	checksum_test(zaaFile);
-	checksum_test("temp.zaa.unz");
+	checksum_test(torFile);
+	checksum_test("temp.tor.unz");
 	print_elapsed_time();
 #endif
 

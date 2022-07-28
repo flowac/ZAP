@@ -27,7 +27,7 @@
  * Then pass your struct as the third arg to compressfile
  */
 const CLzmaEncProps default_props = {
-	2,            //!< level
+	1,            //!< level
 	1 << 16,      //!< dictSize
 	3,            //!< lc
 	0,            //!< lp
@@ -36,7 +36,7 @@ const CLzmaEncProps default_props = {
 	32,           //!< fb
 	0,            //!< btMode
 	4,            //!< numHashbytes
-	16UL,         //!< mc
+	32UL,         //!< mc
 	0,            //!< writeEndmark
 	2,            //!< numThreads
 	0x7FFFFFFFULL,//!< reduceSize
@@ -44,16 +44,16 @@ const CLzmaEncProps default_props = {
 };
 
 const CLzmaEncProps slow_props = {
-	9,            //!< level
+	1,            //!< level
 	1 << 24,      //!< dictSize
 	3,            //!< lc
 	0,            //!< lp
 	2,            //!< pb
 	1,            //!< algo
-	64,           //!< fb
+	32,           //!< fb
 	0,            //!< btMode
 	4,            //!< numHashbytes
-	16UL,         //!< mc
+	32UL,         //!< mc
 	0,            //!< writeEndmark
 	2,            //!< numThreads
 	0x7FFFFFFFULL,//!< reduceSize

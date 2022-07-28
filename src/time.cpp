@@ -7,19 +7,6 @@
 
 static std::stack<struct timespec> t_stack;
 
-struct tm *get_loc_time(void)
-{
-	time_t raw;
-	time(&raw);
-	return localtime(&raw);
-}
-
-void printTime(time_t time)
-{
-	char buf[MAX_U8];
-	strftime(buf, MAX_U8, "%g %B %d  %H:%M:%S", localtime(&time));
-}
-
 uint64_t nsNow(void)
 {
 	uint64_t ret;

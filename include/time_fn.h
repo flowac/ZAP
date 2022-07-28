@@ -3,9 +3,6 @@
 
 #include <time.h>
 
-struct tm *get_loc_time(void);
-void printTime(time_t time);
-
 /**
  * @brief Return current time
  *        Nano seconds stored in lower 30 bits
