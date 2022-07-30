@@ -19,29 +19,23 @@ uint32_t u16Packer(uint8_t *buf, uint16_t data)
 	return 2U;
 }
 
-uint32_t u16Unpack(uint8_t *buf, uint16_t *data)
+uint32_t u16Unpack(uint8_t *buf, uint16_t &data)
 {
-	*data = (uint16_t) buf[0];
-	*data |= (uint16_t) buf[1] << 8;
+	data = (uint16_t) buf[0];
+	data |= (uint16_t) buf[1] << 8;
 	return 2U;
 }
 
 uint32_t u64Packer(uint8_t *buf, uint64_t data)
 {
-	for (uint8_t i = 0; i < 8; i++)
-	{
-		buf[i] = (data >> (i * 8)) & MAX_U8;
-	}
+	for (uint8_t i = 0; i < 8; i++) buf[i] = (data >> (i * 8)) & MAX_U8;
 	return 8U;
 }
 
-uint32_t u64Unpack(uint8_t *buf, uint64_t *data)
+uint32_t u64Unpack(uint8_t *buf, uint64_t &data)
 {
-	*data = 0;
-	for (uint8_t i = 0; i < 8; i++)
-	{
-		*data |= (uint64_t) buf[i] << (i * 8);
-	}
+	data = 0;
+	for (uint8_t i = 0; i < 8; i++) data |= (uint64_t) buf[i] << (i * 8);
 	return 8U;
 }
 
@@ -59,17 +53,16 @@ uint32_t u8cmp(uint8_t *ptr, char *str)
 	return len;
 }
 
-bool enqueueTran(tran *target)
+bool enqueueTran(tran &target)
 {
-	if (!target) return false;
-	tran_queue.push(*target);
+	tran_queue.push(target);
 	return true;
 }
 
-bool dequeueTran(tran *target)
+bool dequeueTran(tran &target)
 {
 	if (tran_queue.empty()) return false;
-	*target = tran_queue.front();
+	target = tran_queue.front();
 	tran_queue.pop();
 	return true;
 }
@@ -91,25 +84,25 @@ bool newTran(tran *tx, uint64_t id, uint64_t deci, uint16_t frac,
 	memcpy(ptx->sig,  sig,  ED448_SIG_LEN);
 
 	if (tx) return true;
-	return enqueueTran(ptx);
+	return enqueueTran(ltx);
 }
 
-bool trimBlock(chain *ch)
+bool trimBlock(chain &ch)
 {
-	if (ch->blk.size() < B_MAX) return true;
+	if (ch.blk.size() < B_MAX) return true;
 
-	printf("Max number of blocks %d reached. Currently %lu.\n", B_MAX, ch->blk.size());
+	printf("Max number of blocks %d reached. Currently %lu.\n", B_MAX, ch.blk.size());
 	return true;
 }
 
-bool newBlock(chain *ch)
+bool newBlock(chain &ch)
 {
-	if (!ch || (false && tran_queue.empty())) return false;
+	if (false && tran_queue.empty()) return false;
 	uint8_t *md_val;
 	uint32_t i, shaLen;
 	block bx;
 
-	bx.n = ch->blk.empty() ? 1 : ch->blk.back().n + 1;
+	bx.n = ch.blk.empty() ? 1 : ch.blk.back().n + 1;
 	bx.time = nsNow();
 	bx.n_trans = std::min(tran_queue.size(), MAX_U8);
 	bx.trans = NULL;
@@ -119,7 +112,7 @@ bool newBlock(chain *ch)
 		if (!(bx.trans = (tran *) calloc(bx.n_trans, sizeof(tran)))) goto cleanup;
 		for (i = 0; i < bx.n_trans; ++i)
 		{
-			if (!dequeueTran(&(bx.trans[i])))
+			if (!dequeueTran(bx.trans[i]))
 			{
 				bx.n_trans = i;
 				bx.trans = (tran *) realloc(bx.trans, sizeof(tran) * bx.n_trans);
@@ -129,8 +122,8 @@ bool newBlock(chain *ch)
 	}
 	md_val = finish_sha3(&(bx.n), 8, &shaLen);
 	if (!sha3_copy_free(bx.key, md_val, shaLen)) goto cleanup;
-	if (!checkBlock(&bx, true, ch->blk.empty() ? NULL : ch->blk.back().crc)) goto cleanup;
-	ch->blk.push_back(bx);
+	if (!checkBlock(bx, true, ch.blk.empty() ? NULL : ch.blk.back().crc)) goto cleanup;
+	ch.blk.push_back(bx);
 
 	return trimBlock(ch);
 cleanup:
@@ -138,14 +131,14 @@ cleanup:
 	return false;
 }
 
-bool insertBlock(chain *ch,
+bool insertBlock(chain &ch,
 				 uint64_t n, uint64_t time,
 				 uint32_t n_trans, tran *trans,
 				 uint8_t crc[SHA3_LEN],
 				 uint8_t key[SHA3_LEN])
 {
-	if (!ch || n_trans > MAX_U8) return false;
-	if (ch->blk.size() != 0 && n != (ch->blk.back().n + 1)) return false;
+	if (n_trans > MAX_U8) return false;
+	if (ch.blk.size() != 0 && n != (ch.blk.back().n + 1)) return false;
 	uint8_t *md_val;
 	uint32_t shaLen;
 	block bx;
@@ -161,26 +154,25 @@ bool insertBlock(chain *ch,
 	if (!sha3_copy_free(bx.key, md_val, shaLen)) return false;
 	if (crc && !sha3_copy(bx.crc, crc, SHA3_LEN)) return false;
 
-	if (!checkBlock(&bx, crc == NULL, ch->blk.empty() ? NULL : ch->blk.back().crc)) return false;
-	ch->blk.push_back(bx);
+	if (!checkBlock(bx, crc == NULL, ch.blk.empty() ? NULL : ch.blk.back().crc)) return false;
+	ch.blk.push_back(bx);
 	return trimBlock(ch);
 }
 
-inline void deleteTran(tran *target)
+inline void deleteTran(tran &target)
 {
 }
 
-inline void deleteBlock(block *target)
+inline void deleteBlock(block &target)
 {
-	if (!target) return;
-	for (uint32_t i = 0; i < target->n_trans; ++i) deleteTran(&(target->trans[i]));
-	if (target->trans) free(target->trans);
+	for (uint32_t i = 0; i < target.n_trans; ++i) deleteTran(target.trans[i]);
+	if (target.trans) free(target.trans);
 }
 
-void deleteChain(chain *target)
+void deleteChain(chain &target)
 {
 	uint64_t i;
-	target->bal.clear();
-	for (i = 0; i < target->blk.size(); ++i) deleteBlock(&(target->blk[i]));
-	target->blk.clear();
+	target.bal.clear();
+	for (i = 0; i < target.blk.size(); ++i) deleteBlock(target.blk[i]);
+	target.blk.clear();
 }

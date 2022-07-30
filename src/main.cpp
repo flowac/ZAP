@@ -38,7 +38,7 @@ void checksum_test(const char *src)
 	if (sum) free(sum);
 }
 
-void chain_gen(chain *ch, torDB *td, uint64_t size)
+void chain_gen(chain &ch, torDB &td, uint64_t size)
 {
 	constexpr uint8_t TEST_KEYWORDS_LIM[] = {7, 7, 8, 6, 10, 7, 10};
 	int32_t j, k;
@@ -156,7 +156,7 @@ void print_search_terms(const char *kt1, const char *kt2, const char *str)
 }
 
 template <class T_kt>
-void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str = NULL)
+void search_test(torDB &td, T_kt kt1, T_kt kt2, const char *str = NULL)
 {
 	std::vector<uint32_t> result{searchTorDB(td, kt1, kt2, str)};
 	print_search_terms(kt1, kt2, str);
@@ -164,14 +164,13 @@ void search_test(torDB *td, T_kt kt1, T_kt kt2, const char *str = NULL)
 	printf("\n");
 }
 
-void interact_test(chain *ch, torDB *td)
+void interact_test(chain &ch, torDB &td)
 {
 	bool tmpb;
 	char buf[BUF64], *tmpc;
 	uint8_t kt1, kt2, verbose;
 	uint32_t blen, tmpu;
 
-	if (!ch || !td) return;
 	memset(buf, 0, BUF64);
 PRINT_HELP:
 	printf("Interactive test: {required} [optional] [v[v]]\n"
@@ -196,38 +195,40 @@ PRINT_HELP:
 		switch (tolower(buf[0]))
 		{
 		case 'l':
-			if (buf[1] == 'b') printf("Block length is %lu\n", ch->blk.size());
-			else if (buf[1] == 'm') printf("Magnet length is %lu\n", td->pak.size());
+			if (buf[1] == 'b') printf("Block length is %lu\n", ch.blk.size());
+			else if (buf[1] == 'm') printf("Magnet length is %lu\n", td.pak.size());
 			else goto PRINT_HELP;
 			break;
 		case 'a':
 			if (buf[blen] == 'b')
 			{
-				if (tmpu >= ch->blk.size()) goto PRINT_HELP;
-				tmpb = checkBlock(&(ch->blk[tmpu]), false, tmpu ? ch->blk[tmpu - 1].crc : NULL);
+				if (tmpu >= ch.blk.size()) goto PRINT_HELP;
+				tmpb = checkBlock(ch.blk[tmpu], false, tmpu ? ch.blk[tmpu - 1].crc : NULL);
 				printf("Audit for block %u %s\n", tmpu, tmpb ? "passed" : "failed");
 			}
 			else if (buf[blen] == 'm')
 			{
-				if (tmpu >= td->pak.size()) goto PRINT_HELP;
-				tmpb = checkPack(&(td->pak[tmpu]), false);
+				if (tmpu >= td.pak.size()) goto PRINT_HELP;
+				tmpb = checkPack(td.pak[tmpu], false);
 				printf("Audit for pack %u %s\n", tmpu, tmpb ? "passed" : "failed");
 			}
 			else goto PRINT_HELP;
 			break;
 		case 'b':
-			if (tmpu >= ch->blk.size()) goto PRINT_HELP;
-			blockToText(&(ch->blk[tmpu]), stdout, verbose);
+			if (tmpu >= ch.blk.size()) goto PRINT_HELP;
+			blockToText(ch.blk[tmpu], stdout, verbose);
 			break;
 		case 'm':
-			if (tmpu >= td->pak.size()) goto PRINT_HELP;
-			packToText(&(td->pak[tmpu]), stdout, verbose);
+			if (tmpu >= td.pak.size()) goto PRINT_HELP;
+			packToText(td.pak[tmpu], stdout, verbose);
 			break;
 		case 's':
 			tmpc = buf + 2;
 			kt1 = isdigit(buf[1]) ? buf[1] - '0' : 0;
 			kt2 = (kt1 && buf[2]) ? strtoul(buf + 2, &tmpc, 0) : 0;
+			start_timer();
 			search_test(td, kt1, kt2, tmpc);
+			print_elapsed_time();
 			break;
 		case 'e':
 			return;
@@ -251,59 +252,59 @@ void chain_test(int size, bool interact)
 
 	start_timer();
 
-	pstat(torDBFromTxt(&td, "extern/scrap/pirate.src"), "TorDB import from text");
+	pstat(torDBFromTxt(td, "extern/scrap/pirate.src"), "TorDB import from text");
 
 	printf("\nGenerate\n");
 	start_timer();
-	chain_gen(&ch, &td, size);
+	chain_gen(ch, td, size);
 	print_elapsed_time();
 
 #if 0
-	printTorCat(&td);
-	printTorWordMap(&td);
-	search_test(&td, "Games", "PC");
-	search_test(&td, "Games", "Mac");
-	search_test(&td, "Games", "");
+	printTorCat(td);
+	printTorWordMap(td);
+	search_test(td, "Games", "PC");
+	search_test(td, "Games", "Mac");
+	search_test(td, "Games", "");
 #endif
 
-	if (interact) interact_test(&ch, &td);
+	if (interact) interact_test(ch, td);
 
 	printf("\nWrite to file\n");
 	start_timer();
-	chainToText(&ch, blkText);
-	torDBToText(&td, torText);
+	chainToText(ch, blkText);
+	torDBToText(td, torText);
 	print_elapsed_time();
 
 	printf("\nWrite to zip 1\n");
 	start_timer();
-	chainToZip(&ch, zaaFile);
-	torDBToZip(&td, torFile);
+	chainToZip(ch, zaaFile);
+	torDBToZip(td, torFile);
 	print_elapsed_time();
 
-	pstat(auditChain(&ch), "Chain audit");
-	pstat(auditTorDB(&td), "TorDB audit");
+	pstat(auditChain(ch), "Chain audit");
+	pstat(auditTorDB(td), "TorDB audit");
 	checksum_test(zaaFile);
 	checksum_test(torFile);
 
 	start_timer();
-	pstat(chainFromZip(&cin1, zaaFile), "Chain import");
-	pstat(torDBFromZip(&tin1, torFile), "TorDB import");
+	pstat(chainFromZip(cin1, zaaFile), "Chain import");
+	pstat(torDBFromZip(tin1, torFile), "TorDB import");
 	print_elapsed_time();
 
 	printf("\nWrite to zip 2\n");
 	start_timer();
-	chainToZip(&cin1, za2File);
-	torDBToZip(&tin1, torFile);
+	chainToZip(cin1, za2File);
+	torDBToZip(tin1, torFile);
 	print_elapsed_time();
 
-	pstat(auditChain(&cin1), "Chain audit");
-	pstat(auditTorDB(&tin1), "TorDB audit");
+	pstat(auditChain(cin1), "Chain audit");
+	pstat(auditTorDB(tin1), "TorDB audit");
 
-	uint64_t ccomp = compareChain(&ch, &cin1);
+	uint64_t ccomp = compareChain(ch, cin1);
 	if (!pstat(ccomp == MAX_U64, "Chain compare"))
 		printf("[INFO] Difference at %lu\n", ccomp);
-	deleteChain(&ch);
-	deleteChain(&cin1);
+	deleteChain(ch);
+	deleteChain(cin1);
 	checksum_test(za2File);
 	checksum_test(torFile);
 

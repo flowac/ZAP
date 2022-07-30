@@ -81,27 +81,25 @@ uint32_t decompressTracker(uint8_t *tr, char ret[MAGNET_TR_LEN])
 	return retLen;
 }
 
-void printTorCat(torDB *target)
+void printTorCat(torDB &target)
 {
-	if (!target) return;
 	for (uint32_t i = 1; i < KEYWORDS_LIM[0]; ++i)
 	{
 		printf("%s: ", KEYWORDS_R[0][i]);
 		for (uint32_t j = 1; j < KEYWORDS_LIM[i]; ++j)
 		{
 			printf("\n\t%s: ", KEYWORDS_R[i][j]);
-			for (uint64_t k = 0; k < std::min((uint64_t) 10, (uint64_t) target->cat[i][j].size()); ++k)
-				printf("%u ", target->cat[i][j][k]);
+			for (uint64_t k = 0; k < std::min((uint64_t) 10, (uint64_t) target.cat[i][j].size()); ++k)
+				printf("%u ", target.cat[i][j][k]);
 		}
 		printf("\n");
 	}
 }
 
-void printTorWordMap(torDB *target)
+void printTorWordMap(torDB &target)
 {
-	if (!target) return;
 	printf("Torrent word map");
-	for (std::pair<uint32_t, std::vector<uint32_t>> i : target->wrd)
+	for (std::pair<uint32_t, std::vector<uint32_t>> i : target.wrd)
 	{
 		printf("\n%8u: ", i.first);
 		for (uint32_t j : i.second) printf("%u ", j);
@@ -109,39 +107,38 @@ void printTorWordMap(torDB *target)
 	printf("\n");
 }
 
-bool processPack(torDB *td, pack *px)
+bool processPack(torDB &td, pack &px)
 {
 	uint8_t kt1, kt2, kt[MAGNET_KT_LEN];
 	uint32_t idx, i, j, st[MAGNET_ST_LEN];
-	if (!td || !px) return false;
-	convertKeyword(px->kt, &kt1, &kt2);
+	convertKeyword(px.kt, &kt1, &kt2);
 	if (!isKeywordValid(kt1, kt2)) return false;
-	idx = td->pak.size();
+	idx = td.pak.size();
 
-	td->cat[kt1][kt2 ? kt2 : 1].push_back(idx);
-	if (!encodeMsg(px->dn, st, px->ut, kt)) return false;
+	td.cat[kt1][kt2 ? kt2 : 1].push_back(idx);
+	if (!encodeMsg(px.dn, st, px.ut, kt)) return false;
 
 	for (i = 0; i < MAGNET_ST_LEN && (j = st[i]); ++i)
 	{
-		if (td->wrd.contains(j)) td->wrd[j].push_back(idx);
+		if (td.wrd.contains(j)) td.wrd[j].push_back(idx);
 		else
 		{
 			std::vector<uint32_t> tmp;
 			tmp.push_back(idx);
-			td->wrd[j] = tmp;
+			td.wrd[j] = tmp;
 		}
 	}
 
-	for (i = 0; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i) td->num[j].push_back(idx);
+	for (i = 0; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i) td.num[j].push_back(idx);
 	return true;
 }
 
-bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt, uint8_t crc[SHAKE_LEN])
+bool newPack(torDB &td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_t *tr, uint8_t kt, uint8_t crc[SHAKE_LEN])
 {
 	uint8_t kt1, kt2;
 	uint32_t ndn = 0, ntr = 0;
 	pack px = {.crc = {0}, .xt = {0}, .xl = 0ULL, .dn = NULL, .tr = NULL, .ut = NULL, .kt = 0};
-	if (!td || !xt || !dn || !tr) goto cleanup;
+	if (!xt || !dn || !tr) goto cleanup;
 
 	if (!(ndn = strlen(dn)) || ndn > MAGNET_DN_LEN) goto cleanup;
 	if (!(ntr = u8len(tr)) || ntr > MAGNET_TR_LEN) goto cleanup;
@@ -159,13 +156,13 @@ bool newPack(torDB *td, uint8_t xt[MAGNET_XT_LEN], uint64_t xl, char *dn, uint8_
 	if (!isKeywordValid(kt1, kt2)) goto cleanup;
 	px.kt = kt;
 
-	if (!processPack(td, &px))
+	if (!processPack(td, px))
 	{
 		printf("proc pack failed %u %u\n", kt & MAX_U4, kt >> 4);
 		goto cleanup;
 	}
-	if (!checkPack(&px, !crc)) goto cleanup;
-	td->pak.push_back(px);
+	if (!checkPack(px, !crc)) goto cleanup;
+	td.pak.push_back(px);
 
 	return true;
 cleanup:
@@ -222,7 +219,7 @@ static bool freqVecCmp(std::pair<uint32_t, uint8_t> &a, std::pair<uint32_t, uint
 	return a.second < b.second;
 }
 
-std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const char *str)
+std::vector<uint32_t> searchTorDB(torDB &td, uint8_t kt1, uint8_t kt2, const char *str)
 {
 	bool checkKT = isKeywordValid(kt1, kt2);
 	char *tmpc, *ut = NULL, utv[MAGNET_UT_CNT][MAGNET_UT_LEN];
@@ -232,12 +229,32 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 	std::vector<std::pair<uint32_t, uint8_t>> freqVec;
 	// TODO: make the map atomic and do multi thread st kt ut search
 	std::map<uint32_t, uint8_t> freqMap; // result frequency map
-	if (!td) return result;
 
 	if (checkKT)
 	{
-		if (kt2) for (uint32_t k : td->cat[kt1][kt2]) freqMap[k] = 0;
-		else for (std::vector<uint32_t> x : td->cat[kt1]) for (uint32_t k : x) freqMap[k] = 0;
+		if (kt2) for (uint32_t k : td.cat[kt1][kt2]) freqMap[k] = 0;
+		else for (std::vector<uint32_t> x : td.cat[kt1]) for (uint32_t k : x) freqMap[k] = 0;
+	}
+
+	// search with dictionary words
+	for (i = 0; (j = st[i]); ++i)
+	{
+		if (!td.wrd.contains(j)) continue;
+		for (uint32_t k : td.wrd[j])
+		{
+			if (freqMap.contains(k)) freqMap[k] += 3;
+			else if (!checkKT) freqMap[k] = 3;
+		}
+	}
+
+	// search with numbers
+	for (i = 1; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i)
+	{
+		for (uint32_t k : td.num[j])
+		{
+			if (freqMap.contains(k)) freqMap[k] += 1;
+			else if (!checkKT) freqMap[k] = 1;
+		}
 	}
 
 	encodeMsg(str, st, ut, kt);
@@ -252,9 +269,9 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 		}
 		free(ut);
 
-		for (uint32_t k = 0; k < td->pak.size(); ++k)
+		for (uint32_t k = 0; k < td.pak.size(); ++k)
 		{
-			pack &px = td->pak[k];
+			pack &px = td.pak[k];
 			if (!px.ut) continue;
 
 			for (i = 0; i < MAGNET_UT_CNT && utv[i][0]; ++i)
@@ -266,38 +283,17 @@ std::vector<uint32_t> searchTorDB(torDB *td, uint8_t kt1, uint8_t kt2, const cha
 		}
 	}
 
-	// search with numbers
-	for (i = 1; i < MAGNET_KT_LEN && (j = kt[i]) < MAGNET_NUM_LEN; ++i)
-	{
-		for (uint32_t k : td->num[j])
-		{
-			if (freqMap.contains(k)) freqMap[k] += 1;
-			else if (!checkKT) freqMap[k] = 1;
-		}
-	}
-
-	// search with dictionary words
-	for (i = 0; (j = st[i]); ++i)
-	{
-		if (!td->wrd.contains(j)) continue;
-		for (uint32_t k : td->wrd[j])
-		{
-			if (freqMap.contains(k)) freqMap[k] += 3;
-			else if (!checkKT) freqMap[k] = 3;
-		}
-	}
-
 	for (std::pair<uint32_t, uint8_t> x : freqMap) freqVec.push_back(x);
 	std::sort(freqVec.begin(), freqVec.end(), freqVecCmp);
 	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second > 2) result.insert(result.begin(), x.first);
 
-//	printf("freqMap:\n");\
-	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second > 2) printf("%u %u\n", x.first, x.second);
+	log("freqMap:");
+	for (std::pair<uint32_t, uint8_t> x : freqVec) if (x.second > 2) log("%u %u\n", x.first, x.second);
 
 	return result;
 }
 
-std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, const char *str)
+std::vector<uint32_t> searchTorDB(torDB &td, const char *kt1, const char *kt2, const char *str)
 {
 	uint8_t kt1u, kt2u;
 
@@ -307,12 +303,11 @@ std::vector<uint32_t> searchTorDB(torDB *td, const char *kt1, const char *kt2, c
 	return searchTorDB(td, kt1u, kt2u, str);
 }
 
-static inline void deletePack(pack *target)
+static inline void deletePack(pack &target)
 {
-	if (!target) return;
-	if (target->dn) free(target->dn);
-	if (target->tr) free(target->tr);
-	if (target->ut) free(target->ut);
+	if (target.dn) free(target.dn);
+	if (target.tr) free(target.tr);
+	if (target.ut) free(target.ut);
 }
 
 torDB::torDB()
@@ -323,5 +318,5 @@ torDB::torDB()
 
 torDB::~torDB()
 {
-	for (uint64_t i = 0; i < pak.size(); ++i) deletePack(&(pak[i]));
+	for (uint64_t i = 0; i < pak.size(); ++i) deletePack(pak[i]);
 }

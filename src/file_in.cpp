@@ -4,7 +4,7 @@
 #include "main_lib.h"
 #include "file_io.h"
 
-bool torDBFromZip(torDB *td, const char *src)
+bool torDBFromZip(torDB &td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
@@ -20,7 +20,7 @@ bool torDBFromZip(torDB *td, const char *src)
 
 	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
 	if (buf[0] != 'C') goto cleanup;
-	u64Unpack(buf + 1, &nPacks);
+	u64Unpack(buf + 1, nPacks);
 
 	for (i = 0; i < nPacks; ++i)
 	{
@@ -29,7 +29,7 @@ bool torDBFromZip(torDB *td, const char *src)
 		if (buf[0] != 'P') goto cleanup;
 		memcpy(crc, buf + 1, SHAKE_LEN);
 		memcpy(xt, buf + 1 + SHAKE_LEN, MAGNET_XT_LEN);
-		u64Unpack(buf + 1 + SHAKE_LEN + MAGNET_XT_LEN, &xl);
+		u64Unpack(buf + 1 + SHAKE_LEN + MAGNET_XT_LEN, xl);
 
 		if (1 != fread(buf, 1, 1, fp)) goto cleanup;
 		len = buf[0];
@@ -67,9 +67,9 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 
 	if (19 != fread(buf, 1, 19, fp)) return false;
 	if (buf[0] != 'T') return false;
-	u64Unpack(buf + 1,  &id);
-	u64Unpack(buf + 9,  &deci);
-	u16Unpack(buf + 17, &frac);
+	u64Unpack(buf + 1,  id);
+	u64Unpack(buf + 9,  deci);
+	u16Unpack(buf + 17, frac);
 
 	if (ED448_LEN != fread(buf, 1, ED448_LEN, fp)) return false;
 	memcpy(src, buf, ED448_LEN);
@@ -81,7 +81,7 @@ bool tranFromZip(tran *tx, FILE *fp, uint8_t *buf)
 	return newTran(tx, id, deci, frac, src, dest, sig);
 }
 
-bool chainFromZip(chain *ch, const char *src)
+bool chainFromZip(chain &ch, const char *src)
 {
 	bool ret = false;
 	FILE *fp = fopen(src, "rb");;
@@ -91,11 +91,11 @@ bool chainFromZip(chain *ch, const char *src)
 	uint8_t key[SHA3_LEN];
 	uint32_t j, nRead;
 	uint64_t nBlocks, i, n, nTrans, time;
-	if (!ch || !fp) goto cleanup;
+	if (!fp) goto cleanup;
 
 	if (9 != fread(buf, 1, 9, fp)) goto cleanup;
 	if (buf[0] != 'C') goto cleanup;
-	u64Unpack(buf + 1, &nBlocks);
+	u64Unpack(buf + 1, nBlocks);
 
 	for (i = 0; i < nBlocks; ++i)
 	{
@@ -106,8 +106,8 @@ bool chainFromZip(chain *ch, const char *src)
 		memcpy(key, buf + 1 + SHA3_LEN, SHA3_LEN);
 
 		if (17 != fread(buf, 1, 17, fp)) goto cleanup;
-		u64Unpack(buf, &n);
-		u64Unpack(buf + 8, &time);
+		u64Unpack(buf, n);
+		u64Unpack(buf + 8, time);
 		if ((nTrans = buf[16]))
 		{
 			trans = (tran *) calloc(nTrans, sizeof(tran));
@@ -123,7 +123,7 @@ cleanup:
 	return ret;
 }
 
-bool torDBFromTxt(torDB *td, const char *src)
+bool torDBFromTxt(torDB &td, const char *src)
 {
 	bool ret = false;
 	char dn[MAGNET_DN_LEN + 1];
@@ -136,7 +136,7 @@ bool torDBFromTxt(torDB *td, const char *src)
 	uint32_t blen, slen;
 	uint64_t xl;
 
-	if (!td || !fp || !(blen = getFilesize(fp))) goto cleanup;
+	if (!fp || !(blen = getFilesize(fp))) goto cleanup;
 	if (!(fio = (char *) calloc(blen + 1, 1))) goto cleanup;
 	if (blen != fread(fio, 1, blen, fp)) goto cleanup;
 	fio[blen] = 0;

@@ -92,7 +92,7 @@ typedef struct {
 } block;
 
 typedef struct {
-	uint8_t address[SHA3_LEN]; //!< SHA3 checksum
+	uint8_t  address[SHA3_LEN]; //!< SHA3 checksum
 	uint64_t deci; //!< Integer value
 	uint16_t frac; //!< Floating point value, limit of FRAC_MAX
 } balance;
@@ -117,12 +117,19 @@ private:
 extern wordDB WORDS_EN;
 extern wordDB STOPWORDS_EN;
 
+typedef struct blist{ //!< bi-directional linked list
+	struct blist *prev, *next;
+	char *val;
+} blist;
+
 class torDB {
 public:
 	std::vector<pack> pak; //!< raw unsorted data
 	std::vector<std::vector<std::vector<uint32_t>>> cat; //!< categories
 	std::vector<uint32_t> num[MAGNET_NUM_LEN]; //!< numbers in the title
 	std::map<uint32_t, std::vector<uint32_t>> wrd; //!< dictionary words
+	std::map<const char *, blist *> ut_lru; //!< non-dictionary words LRU
+	blist *ut_head, *ut_tail; //!< lists for non-dictionary words LRU
 	torDB();
 	~torDB();
 };
