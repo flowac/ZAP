@@ -1,4 +1,6 @@
 CURRENT
+*** Make a javascript piratebay scrapper for more test data
+**  Store all magnet links on disk, use an indexing/DB system instead of operating in RAM
 **  Add mechanism to check tracker hashes and reject invalid magnets
 *   Delta generation logic?
 *   Transaction signiture
@@ -20,6 +22,9 @@ PLANS
     Generate a block index file (allocation table)
     Determine proof of work method
         If you claim to have served 1 search, everyone verifies 1 random search?
+        Result check broadcast, every node request checks from 2 other nodes?
+        Result checker also rewarded? (less reward than search results)
+    Live stream re-broadcast? Donations? Ads?
 
 FINDINGS
   For large text files (1GB+ magnet data)
