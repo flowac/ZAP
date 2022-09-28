@@ -40,22 +40,17 @@ wordDB::~wordDB()
 uint32_t wordDB::find(const char *str)
 {
 	int cmp = -1;
-	uint32_t i = len, left = 0, right;
+	uint32_t i, left = 0, right = len - 1;
 	if (len == 0) return 0UL;
 
-	do
+	while (left < right)
 	{
-		if (cmp < 0)
-		{
-			if (i > 0) right = i - 1;
-			else break;
-		}
-		else left = i + 1;
 		i = (left + right) >> 1;
 		cmp = strcasecmp(str, dict[i]);
 		if (cmp == 0) return ++i;
+		if (cmp < 0) right = i;
+		else          left = i + 1;
 	}
-	while (left < right);
 
 	return 0UL;
 }
@@ -63,23 +58,18 @@ uint32_t wordDB::find(const char *str)
 std::vector<std::string> wordDB::findN(const char *str, uint8_t n)
 {
 	int cmp = -1, slen = strlen(str);
-	uint32_t i = len, left = 0, right;
+	uint32_t i = 0, left = 0, right = len - 1;
 	std::vector<std::string> ret;
 	if (len == 0 || slen == 0) return ret;
 
-	do
+	while (left < right)
 	{
-		if (cmp < 0)
-		{
-			if (i > 0) right = i - 1;
-			else break;
-		}
-		else left = i + 1;
 		i = (left + right) >> 1;
 		cmp = strcasecmp(str, dict[i]);
 		if (cmp == 0) break;
+		if (cmp < 0) right = i;
+		else          left = i + 1;
 	}
-	while (left < right);
 	for (; i < len && strncasecmp(str, dict[i], slen) > 0; ++i);
 
     for (uint8_t j = 0; j < n && i < len; ++i, ++j)
